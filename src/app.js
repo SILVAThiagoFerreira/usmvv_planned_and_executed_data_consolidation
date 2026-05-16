@@ -14,12 +14,12 @@ function setStatus(statusBox, statusText, tone, text) {
 
 function renderSummary(summaryCards, config, summary) {
   const metrics = [
-    [config.output.labels.mvv_count, summary.mvvCount],
-    [config.output.labels.rd_raw_count, summary.rdRawCount],
-    [config.output.labels.rd_unique_count, summary.rdUniqueCount],
-    [config.output.labels.rd_matched_count, summary.rdMatchedCount],
-    [config.output.labels.rd_missing_count, summary.rdMissingCount],
-    [config.output.labels.dual_prefix_count, summary.dualPrefixCount],
+    [config.ui.metrics.mvv_count, summary.mvvCount],
+    [config.ui.metrics.rd_raw_count, summary.rdRawCount],
+    [config.ui.metrics.rd_unique_count, summary.rdUniqueCount],
+    [config.ui.metrics.rd_matched_count, summary.rdMatchedCount],
+    [config.ui.metrics.rd_missing_count, summary.rdMissingCount],
+    [config.ui.metrics.dual_prefix_count, summary.dualPrefixCount],
   ];
 
   summaryCards.innerHTML = metrics
@@ -70,23 +70,50 @@ export async function bootstrapApp() {
 
   const appTitle = qs('appTitle');
   const appSubtitle = qs('appSubtitle');
+  const appEyebrow = qs('appEyebrow');
+  const systemBadge = qs('systemBadge');
+  const filesTitle = qs('filesTitle');
+  const filesHint = qs('filesHint');
   const mvvFile = qs('mvvFile');
   const rdFile = qs('rdFile');
   const mvvDropzone = qs('mvvDropzone');
   const rdDropzone = qs('rdDropzone');
+  const mvvFileLabel = qs('mvvFileLabel');
+  const mvvFileHint = qs('mvvFileHint');
+  const rdFileLabel = qs('rdFileLabel');
+  const rdFileHint = qs('rdFileHint');
   const mvvFileName = qs('mvvFileName');
   const rdFileName = qs('rdFileName');
   const generateBtn = qs('generateBtn');
   const downloadLink = qs('downloadLink');
   const statusBox = qs('statusBox');
   const statusText = qs('statusText');
+  const summaryTitle = qs('summaryTitle');
+  const summaryHint = qs('summaryHint');
+  const detailsTitle = qs('detailsTitle');
+  const detailsBadge = qs('detailsBadge');
   const summaryCards = qs('summaryCards');
   const logOutput = qs('logOutput');
 
+  document.title = config.app.title;
   appTitle.textContent = config.app.title;
   appSubtitle.textContent = config.app.subtitle;
+  appEyebrow.textContent = config.ui.eyebrow;
+  systemBadge.textContent = config.ui.system_badge;
+  filesTitle.textContent = config.ui.files_title;
+  filesHint.textContent = config.ui.files_hint;
+  mvvFileLabel.textContent = config.ui.mvv_file_label;
+  mvvFileHint.textContent = config.ui.mvv_file_hint;
+  rdFileLabel.textContent = config.ui.rd_file_label;
+  rdFileHint.textContent = config.ui.rd_file_hint;
+  summaryTitle.textContent = config.ui.summary_title;
+  summaryHint.textContent = config.ui.summary_hint;
+  detailsTitle.textContent = config.ui.details_title;
+  detailsBadge.textContent = config.ui.details_badge;
+  mvvFileName.textContent = config.ui.no_file_selected;
+  rdFileName.textContent = config.ui.no_file_selected;
   generateBtn.textContent = config.ui.primary_action;
-  downloadLink.textContent = `Baixar ${config.output.file_name}`;
+  downloadLink.textContent = `${config.ui.download_action} ${config.output.file_name}`;
 
   const state = {
     mvv: null,
@@ -101,8 +128,8 @@ export async function bootstrapApp() {
 
   const setFile = (kind, file) => {
     state[kind] = file;
-    if (kind === 'mvv') mvvFileName.textContent = file ? file.name : 'Nenhum arquivo selecionado';
-    if (kind === 'rd') rdFileName.textContent = file ? file.name : 'Nenhum arquivo selecionado';
+    if (kind === 'mvv') mvvFileName.textContent = file ? file.name : config.ui.no_file_selected;
+    if (kind === 'rd') rdFileName.textContent = file ? file.name : config.ui.no_file_selected;
     syncGenerateButton();
     const ready = Boolean(state.mvv && state.rd);
     setStatus(statusBox, statusText, ready ? 'ready' : 'idle', ready ? config.ui.status_ready : config.ui.status_idle);
@@ -118,7 +145,7 @@ export async function bootstrapApp() {
       if (state.downloadUrl) URL.revokeObjectURL(state.downloadUrl);
       downloadLink.hidden = true;
       setStatus(statusBox, statusText, 'working', config.ui.status_working);
-      logOutput.textContent = 'Processando...';
+      logOutput.textContent = config.ui.log_processing;
       generateBtn.disabled = true;
 
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -147,7 +174,7 @@ export async function bootstrapApp() {
   });
 
   summaryCards.innerHTML = '';
-  logOutput.textContent = 'Aguardando arquivos...';
+  logOutput.textContent = config.ui.log_waiting;
   syncGenerateButton();
   setStatus(statusBox, statusText, 'idle', config.ui.status_idle);
 }

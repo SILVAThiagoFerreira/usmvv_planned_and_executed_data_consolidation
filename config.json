@@ -1,7 +1,7 @@
 {
   "app": {
-    "title": "MVV x RD Consolidado",
-    "subtitle": "Carregue os arquivos e gere o Excel final no navegador",
+    "title": "MVV/RD Data Console",
+    "subtitle": "Local validation. Controlled Excel output.",
     "description": "Processamento client-side para consolidar MVV.xlsx e RD.txt"
   },
   "files": {
@@ -178,12 +178,36 @@
     }
   },
   "ui": {
-    "primary_action": "Gerar Excel",
+    "eyebrow": "EMTS Data Console",
+    "system_badge": "Local only",
+    "files_title": "Source files",
+    "files_hint": "Drop files or browse.",
+    "mvv_file_label": "MVV.xlsx",
+    "mvv_file_hint": "Planning workbook",
+    "rd_file_label": "RD.txt",
+    "rd_file_hint": "Survey coordinate file",
+    "summary_title": "Run summary",
+    "summary_hint": "Generated after processing.",
+    "details_title": "Audit log",
+    "details_badge": "JSON",
+    "no_file_selected": "No file selected",
+    "primary_action": "Generate workbook",
+    "download_action": "Download",
     "download_prefix": "MVV_RD_CONSOLIDADO_FINAL",
-    "status_idle": "Anexe os dois arquivos para iniciar",
-    "status_ready": "Arquivos prontos para processamento",
-    "status_working": "Processando no navegador...",
-    "status_done": "Workbook gerado com sucesso",
-    "status_error": "Falha na validacao ou processamento"
+    "status_idle": "Attach MVV.xlsx and RD.txt.",
+    "status_ready": "Ready to process.",
+    "status_working": "Processing locally...",
+    "status_done": "Workbook generated.",
+    "status_error": "Validation or processing failed.",
+    "log_waiting": "Waiting for files...",
+    "log_processing": "Processing...",
+    "metrics": {
+      "mvv_count": "MVV holes",
+      "rd_raw_count": "RD records",
+      "rd_unique_count": "Unique RD",
+      "rd_matched_count": "Matched",
+      "rd_missing_count": "Missing",
+      "dual_prefix_count": "Dual prefix"
+    }
   }
 }

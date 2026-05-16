@@ -3,84 +3,90 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#071018" />
-    <title>MVV x RD Consolidado</title>
+    <meta name="theme-color" content="#2f3337" />
+    <title>MVV/RD Data Console</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
   </head>
   <body>
     <div class="page">
-      <header class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">GitHub Pages | processamento no navegador</p>
-          <h1 id="appTitle">MVV x RD Consolidado</h1>
-          <p id="appSubtitle" class="lede">Carregue MVV.xlsx e RD.txt, valide e baixe o workbook final sem backend.</p>
+      <header class="topbar" aria-label="Application header">
+        <div class="brand" aria-label="Enaex Brasil">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-word">Enaex <span>Brasil</span></span>
         </div>
-        <div class="hero-note">
-          <div class="note-card">
-            <span>Entrada</span>
-            <strong>2 arquivos</strong>
-          </div>
-          <div class="note-card">
-            <span>Saida</span>
-            <strong>.xlsx</strong>
-          </div>
-          <div class="note-card">
-            <span>Execucao</span>
-            <strong>client-side</strong>
-          </div>
+        <div class="top-meta">
+          <span id="systemBadge">LOCAL ONLY</span>
+          <span>GitHub Pages</span>
         </div>
       </header>
 
-      <main class="layout">
+      <main class="workspace">
+        <section class="intro-panel">
+          <p id="appEyebrow" class="eyebrow">EMTS Data Console</p>
+          <h1 id="appTitle">MVV/RD Data Console</h1>
+          <p id="appSubtitle" class="lede">Local validation. Controlled Excel output.</p>
+          <div class="signal-row" aria-label="Workflow">
+            <div><span>01</span><strong>Attach MVV</strong></div>
+            <div><span>02</span><strong>Attach RD</strong></div>
+            <div><span>03</span><strong>Export XLSX</strong></div>
+          </div>
+        </section>
+
         <section class="panel upload-panel">
           <div class="panel-header">
-            <h2>Arquivos de entrada</h2>
-            <p>Arraste ou selecione os arquivos abaixo.</p>
+            <div>
+              <h2 id="filesTitle">Source files</h2>
+              <p id="filesHint">Drop files or browse.</p>
+            </div>
+            <span class="section-code">Input</span>
           </div>
 
           <div class="upload-grid">
             <label class="dropzone" id="mvvDropzone" for="mvvFile">
               <input id="mvvFile" type="file" accept=".xlsx" hidden />
-              <span class="dropzone-label">MVV.xlsx</span>
-              <strong id="mvvFileName">Nenhum arquivo selecionado</strong>
-              <small id="mvvFileHint">Planilha de planejamento</small>
+              <span id="mvvFileLabel" class="dropzone-label">MVV.xlsx</span>
+              <strong id="mvvFileName">No file selected</strong>
+              <small id="mvvFileHint">Planning workbook</small>
             </label>
 
             <label class="dropzone" id="rdDropzone" for="rdFile">
               <input id="rdFile" type="file" accept=".txt" hidden />
-              <span class="dropzone-label">RD.txt</span>
-              <strong id="rdFileName">Nenhum arquivo selecionado</strong>
-              <small id="rdFileHint">Arquivo texto com coordenadas</small>
+              <span id="rdFileLabel" class="dropzone-label">RD.txt</span>
+              <strong id="rdFileName">No file selected</strong>
+              <small id="rdFileHint">Survey coordinate file</small>
             </label>
           </div>
 
           <div class="actions">
-            <button id="generateBtn" class="primary" type="button" disabled>Gerar Excel</button>
-            <a id="downloadLink" class="secondary" hidden>Baixar workbook</a>
+            <button id="generateBtn" class="primary" type="button" disabled>Generate workbook</button>
+            <a id="downloadLink" class="secondary" hidden>Download workbook</a>
           </div>
 
           <div class="status" id="statusBox" data-tone="idle">
             <span class="status-dot"></span>
-            <p id="statusText">Anexe os dois arquivos para iniciar.</p>
+            <p id="statusText">Attach MVV.xlsx and RD.txt.</p>
           </div>
         </section>
 
         <aside class="panel summary-panel">
           <div class="panel-header">
-            <h2>Resumo da validacao</h2>
-            <p>Os valores aparecem apos o processamento.</p>
+            <div>
+              <h2 id="summaryTitle">Run summary</h2>
+              <p id="summaryHint">Generated after processing.</p>
+            </div>
+            <span class="section-code">Output</span>
           </div>
           <div id="summaryCards" class="summary-grid"></div>
           <div class="log-block">
             <div class="log-head">
-              <h3>Detalhes</h3>
-              <span>JSON</span>
+              <h3 id="detailsTitle">Audit log</h3>
+              <span id="detailsBadge">JSON</span>
             </div>
-            <pre id="logOutput">Aguardando processamento...</pre>
+            <pre id="logOutput">Waiting for files...</pre>
           </div>
         </aside>
       </main>

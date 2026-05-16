@@ -28,15 +28,15 @@ def main() -> int:
         page.goto(args.base_url, wait_until="domcontentloaded")
         page.wait_for_load_state("networkidle")
         page.wait_for_selector("#statusText")
-        page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Anexe os dois arquivos')")
+        page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Attach MVV.xlsx')")
         page.set_input_files("#mvvFile", args.mvv)
         page.set_input_files("#rdFile", args.rd)
         page.locator("#generateBtn").wait_for(state="visible")
         page.wait_for_function("!document.querySelector('#generateBtn')?.disabled")
-        page.get_by_role("button", name="Gerar Excel").click()
+        page.get_by_role("button", name="Generate workbook").click()
         page.locator("#downloadLink").wait_for(state="visible")
         with page.expect_download() as download_info:
-            page.get_by_role("link", name="Baixar MVV_RD_CONSOLIDADO_FINAL.xlsx").click()
+            page.get_by_role("link", name="Download MVV_RD_CONSOLIDADO_FINAL.xlsx").click()
         download = download_info.value
         download.save_as(str(download_path))
         browser.close()
