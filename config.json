@@ -1,0 +1,189 @@
+{
+  "app": {
+    "title": "MVV x RD Consolidado",
+    "subtitle": "Carregue os arquivos e gere o Excel final no navegador",
+    "description": "Processamento client-side para consolidar MVV.xlsx e RD.txt"
+  },
+  "files": {
+    "mvv": {
+      "accept": ".xlsx"
+    },
+    "rd": {
+      "accept": ".txt"
+    }
+  },
+  "input": {
+    "mvv_sheet_name": "PROJETO PERFURAÇÃO",
+    "mvv_header_row": 1,
+    "rd_delimiter": ",",
+    "rd_expected_fields": 5
+  },
+  "columns": {
+    "mvv": [
+      "ID",
+      "Type",
+      "Descricao",
+      "Diameter",
+      "X Collar",
+      "Y Collar",
+      "X Toe",
+      "Y Toe",
+      "Z Toe",
+      "Z Collar",
+      "Depth",
+      "Sub Drill",
+      "Azimuth",
+      "Dip"
+    ],
+    "rd_treated": [
+      "ID_RD",
+      "Y_RD",
+      "X_RD",
+      "Z_RD",
+      "TIPO_RD"
+    ],
+    "consolidated": [
+      "ID",
+      "Type",
+      "Descricao",
+      "Diameter",
+      "X Collar",
+      "Y Collar",
+      "X Toe",
+      "Y Toe",
+      "Z Toe",
+      "Z Collar",
+      "Depth",
+      "Sub Drill",
+      "Azimuth",
+      "Dip",
+      "ID_RD",
+      "TIPO_RD",
+      "Y_RD",
+      "X_RD",
+      "Z_RD",
+      "ID_FINAL",
+      "Y_FINAL",
+      "X_FINAL",
+      "Z_COLLAR_FINAL",
+      "PROFUNDIDADE_FINAL"
+    ]
+  },
+  "matching": {
+    "prefix_priority": [
+      "E-",
+      "L_"
+    ],
+    "strip_prefixes": [
+      "E-",
+      "L_"
+    ],
+    "prefer_first_within_same_prefix": true
+  },
+  "validation": {
+    "allow_empty_rows": true,
+    "mvv_required_row_columns": [
+      "ID",
+      "Type",
+      "Descricao",
+      "Diameter",
+      "X Collar",
+      "Y Collar",
+      "X Toe",
+      "Y Toe",
+      "Z Toe",
+      "Z Collar",
+      "Depth",
+      "Sub Drill",
+      "Azimuth",
+      "Dip"
+    ],
+    "mvv_numeric_fields": [
+      "Diameter",
+      "X Collar",
+      "Y Collar",
+      "X Toe",
+      "Y Toe",
+      "Z Toe",
+      "Z Collar",
+      "Depth",
+      "Sub Drill",
+      "Azimuth",
+      "Dip"
+    ],
+    "rd_numeric_fields": [
+      "Y_RD",
+      "X_RD",
+      "Z_RD"
+    ],
+    "fail_on_missing_mvv_rows": true,
+    "fail_on_missing_mvv_columns": true,
+    "fail_on_bad_rd_rows": true,
+    "fail_on_unparseable_coordinates": true,
+    "fail_on_invalid_prefix": true
+  },
+  "formatting": {
+    "font_name": "Arial",
+    "header_fill": "D9EAF7",
+    "final_fill": "E2F0D9",
+    "section_fill": "FFF2CC",
+    "numeric_format": "0.000",
+    "freeze_panes": "A2",
+    "min_width": 10,
+    "max_width": 36,
+    "highlight_final_columns": [
+      "ID_FINAL",
+      "Y_FINAL",
+      "X_FINAL",
+      "Z_COLLAR_FINAL",
+      "PROFUNDIDADE_FINAL"
+    ],
+    "numeric_headers": [
+      "Diameter",
+      "X Collar",
+      "Y Collar",
+      "X Toe",
+      "Y Toe",
+      "Z Toe",
+      "Z Collar",
+      "Depth",
+      "Sub Drill",
+      "Azimuth",
+      "Dip",
+      "Y_RD",
+      "X_RD",
+      "Z_RD",
+      "Y_FINAL",
+      "X_FINAL",
+      "Z_COLLAR_FINAL",
+      "PROFUNDIDADE_FINAL"
+    ]
+  },
+  "output": {
+    "file_name": "MVV_RD_CONSOLIDADO_FINAL.xlsx",
+    "sheets": {
+      "consolidated": "CONSOLIDADO_FINAL",
+      "rd_treated": "RD_TRATADA",
+      "log": "LOG_VALIDACAO"
+    },
+    "labels": {
+      "mvv_count": "Quantidade de furos na MVV",
+      "rd_raw_count": "Quantidade de registros na RD original",
+      "rd_unique_count": "Quantidade de furos unicos na RD tratada",
+      "rd_matched_count": "Quantidade de furos com dado RD encontrado",
+      "rd_missing_count": "Quantidade de furos sem dado RD",
+      "dual_prefix_count": "Quantidade de casos com L_ e E- para o mesmo furo",
+      "missing_title": "Furos sem correspondencia na RD",
+      "rd_only_title": "Furos na RD sem correspondencia na MVV"
+    }
+  },
+  "ui": {
+    "primary_action": "Gerar Excel",
+    "download_prefix": "MVV_RD_CONSOLIDADO_FINAL",
+    "status_idle": "Anexe os dois arquivos para iniciar",
+    "status_ready": "Arquivos prontos para processamento",
+    "status_working": "Processando no navegador...",
+    "status_done": "Workbook gerado com sucesso",
+    "status_error": "Falha na validacao ou processamento"
+  }
+}

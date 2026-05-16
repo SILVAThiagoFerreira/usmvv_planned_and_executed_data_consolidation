@@ -1,0 +1,8 @@
+{
+  "name": "organiza-odedadosdefurosmvvrd",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/run-tests.mjs"
+  }
+}
