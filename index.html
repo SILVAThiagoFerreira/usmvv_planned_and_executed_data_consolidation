@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#2f3337" />
-    <title>MVV/RD Data Console</title>
+    <title>US Vale Verde PLAN/EXEC Data Console</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -13,33 +13,41 @@
   </head>
   <body>
     <div class="page">
-      <header class="topbar" aria-label="Application header">
+      <header class="topbar" aria-label="Cabecalho da aplicacao">
         <div class="brand" aria-label="Enaex Brasil">
           <span class="brand-mark" aria-hidden="true"></span>
           <span class="brand-word">Enaex <span>Brasil</span></span>
         </div>
         <div class="top-meta">
-          <span id="systemBadge">LOCAL ONLY</span>
+          <span id="systemBadge" class="top-badge">Somente local</span>
+          <label class="language-switch" for="languageSelect">
+            <span id="languageLabel" class="language-switch-label">Idioma</span>
+            <select id="languageSelect" class="language-select" aria-label="Idioma">
+              <option value="pt">Portugues</option>
+              <option value="en">Ingles</option>
+              <option value="zh">Chines</option>
+            </select>
+          </label>
         </div>
       </header>
 
       <main class="workspace">
         <section class="intro-panel">
-          <p id="appEyebrow" class="eyebrow">EMTS Data Console</p>
-          <h1 id="appTitle">MVV/RD Data Console</h1>
-          <p id="appSubtitle" class="lede">Local validation. Controlled Excel output.</p>
-          <div class="signal-row" aria-label="Workflow">
-            <div><span>01</span><strong>Attach MVV</strong></div>
-            <div><span>02</span><strong>Attach RD</strong></div>
-            <div><span>03</span><strong>Export XLSX</strong></div>
+          <p id="appEyebrow" class="eyebrow">Console de Dados US Vale Verde</p>
+          <h1 id="appTitle">US Vale Verde PLAN/EXEC Data Console</h1>
+          <p id="appSubtitle" class="lede">Validacao local. Saida Excel controlada.</p>
+          <div class="signal-row" aria-label="Fluxo de trabalho">
+            <div><span>01</span><strong id="workflowStep1">Anexar MVV</strong></div>
+            <div><span>02</span><strong id="workflowStep2">Anexar RD</strong></div>
+            <div><span>03</span><strong id="workflowStep3">Exportar XLSX</strong></div>
           </div>
         </section>
 
         <section class="panel upload-panel">
           <div class="panel-header">
             <div>
-              <h2 id="filesTitle">Source files</h2>
-              <p id="filesHint">Drop files or browse.</p>
+              <h2 id="filesTitle">Arquivos de origem</h2>
+              <p id="filesHint">Solte os arquivos ou navegue.</p>
             </div>
             <span class="section-code">Input</span>
           </div>
@@ -48,44 +56,44 @@
             <label class="dropzone" id="mvvDropzone" for="mvvFile">
               <input id="mvvFile" type="file" accept=".xlsx" hidden />
               <span id="mvvFileLabel" class="dropzone-label">MVV.xlsx</span>
-              <strong id="mvvFileName">No file selected</strong>
-              <small id="mvvFileHint">Planning workbook</small>
+              <strong id="mvvFileName">Nenhum arquivo selecionado</strong>
+              <small id="mvvFileHint">Planilha de planejamento</small>
             </label>
 
             <label class="dropzone" id="rdDropzone" for="rdFile">
               <input id="rdFile" type="file" accept=".txt" hidden />
               <span id="rdFileLabel" class="dropzone-label">RD.txt</span>
-              <strong id="rdFileName">No file selected</strong>
-              <small id="rdFileHint">Survey coordinate file</small>
+              <strong id="rdFileName">Nenhum arquivo selecionado</strong>
+              <small id="rdFileHint">Arquivo de coordenadas da sondagem</small>
             </label>
           </div>
 
           <div class="actions">
-            <button id="generateBtn" class="primary" type="button" disabled>Generate workbook</button>
-            <a id="downloadLink" class="secondary" hidden>Download workbook</a>
+            <button id="generateBtn" class="primary" type="button" disabled>Gerar planilha</button>
+            <a id="downloadLink" class="secondary" hidden>Baixar MVV_RD_CONSOLIDADO_FINAL.xlsx</a>
           </div>
 
           <div class="status" id="statusBox" data-tone="idle">
             <span class="status-dot"></span>
-            <p id="statusText">Attach MVV.xlsx and RD.txt.</p>
+            <p id="statusText">Anexe MVV.xlsx e RD.txt.</p>
           </div>
         </section>
 
         <aside class="panel summary-panel">
           <div class="panel-header">
             <div>
-              <h2 id="summaryTitle">Run summary</h2>
-              <p id="summaryHint">Generated after processing.</p>
+              <h2 id="summaryTitle">Resumo da execucao</h2>
+              <p id="summaryHint">Gerado apos o processamento.</p>
             </div>
             <span class="section-code">Output</span>
           </div>
           <div id="summaryCards" class="summary-grid"></div>
           <div class="log-block">
             <div class="log-head">
-              <h3 id="detailsTitle">Audit log</h3>
+              <h3 id="detailsTitle">Log de auditoria</h3>
               <span id="detailsBadge">JSON</span>
             </div>
-            <pre id="logOutput">Waiting for files...</pre>
+            <pre id="logOutput">Aguardando arquivos...</pre>
           </div>
         </aside>
       </main>

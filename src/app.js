@@ -12,14 +12,19 @@ function setStatus(statusBox, statusText, tone, text) {
   statusText.textContent = text;
 }
 
-function renderSummary(summaryCards, config, summary) {
+function getLanguagePack(config, languageCode) {
+  const languages = config.ui.languages || {};
+  return languages[languageCode] || languages[config.ui.default_language] || languages.pt;
+}
+
+function renderSummary(summaryCards, languagePack, summary) {
   const metrics = [
-    [config.ui.metrics.mvv_count, summary.mvvCount],
-    [config.ui.metrics.rd_raw_count, summary.rdRawCount],
-    [config.ui.metrics.rd_unique_count, summary.rdUniqueCount],
-    [config.ui.metrics.rd_matched_count, summary.rdMatchedCount],
-    [config.ui.metrics.rd_missing_count, summary.rdMissingCount],
-    [config.ui.metrics.dual_prefix_count, summary.dualPrefixCount],
+    [languagePack.metrics.mvv_count, summary.mvvCount],
+    [languagePack.metrics.rd_raw_count, summary.rdRawCount],
+    [languagePack.metrics.rd_unique_count, summary.rdUniqueCount],
+    [languagePack.metrics.rd_matched_count, summary.rdMatchedCount],
+    [languagePack.metrics.rd_missing_count, summary.rdMissingCount],
+    [languagePack.metrics.dual_prefix_count, summary.dualPrefixCount],
   ];
 
   summaryCards.innerHTML = metrics
@@ -27,8 +32,9 @@ function renderSummary(summaryCards, config, summary) {
     .join('');
 }
 
-function renderLog(logOutput, summary, config) {
+function renderLog(logOutput, summary, config, languagePack, languageCode) {
   const payload = {
+    language: languageCode,
     mvvCount: summary.mvvCount,
     rdRawCount: summary.rdRawCount,
     rdUniqueCount: summary.rdUniqueCount,
@@ -38,9 +44,22 @@ function renderLog(logOutput, summary, config) {
     missingHoles: summary.missingHoles,
     rdOnlyHoles: summary.rdOnlyHoles,
     discardedRdCount: summary.discardedRdCount,
-    labels: config.output.labels,
+    labels: languagePack.metrics,
+    workbookLabels: config.output.labels,
   };
   logOutput.textContent = JSON.stringify(payload, null, 2);
+}
+
+function renderLanguageOptions(languageSelect, languagePack, languageCode) {
+  const options = Object.entries(languagePack.language_options).map(([value, label]) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    return option;
+  });
+
+  languageSelect.replaceChildren(...options);
+  languageSelect.value = languageCode;
 }
 
 function wireDropzone(dropzone, input, onFile) {
@@ -67,11 +86,16 @@ function wireDropzone(dropzone, input, onFile) {
 
 export async function bootstrapApp() {
   const config = await loadConfig();
+  const defaultLanguage = config.ui.default_language || 'pt';
 
   const appTitle = qs('appTitle');
   const appSubtitle = qs('appSubtitle');
   const appEyebrow = qs('appEyebrow');
+  const topbar = document.querySelector('.topbar');
+  const signalRow = document.querySelector('.signal-row');
   const systemBadge = qs('systemBadge');
+  const languageLabel = qs('languageLabel');
+  const languageSelect = qs('languageSelect');
   const filesTitle = qs('filesTitle');
   const filesHint = qs('filesHint');
   const mvvFile = qs('mvvFile');
@@ -82,6 +106,9 @@ export async function bootstrapApp() {
   const mvvFileHint = qs('mvvFileHint');
   const rdFileLabel = qs('rdFileLabel');
   const rdFileHint = qs('rdFileHint');
+  const workflowStep1 = qs('workflowStep1');
+  const workflowStep2 = qs('workflowStep2');
+  const workflowStep3 = qs('workflowStep3');
   const mvvFileName = qs('mvvFileName');
   const rdFileName = qs('rdFileName');
   const generateBtn = qs('generateBtn');
@@ -96,43 +123,123 @@ export async function bootstrapApp() {
   const logOutput = qs('logOutput');
 
   document.title = config.app.title;
-  appTitle.textContent = config.app.title;
-  appSubtitle.textContent = config.app.subtitle;
-  appEyebrow.textContent = config.ui.eyebrow;
-  systemBadge.textContent = config.ui.system_badge;
-  filesTitle.textContent = config.ui.files_title;
-  filesHint.textContent = config.ui.files_hint;
-  mvvFileLabel.textContent = config.ui.mvv_file_label;
-  mvvFileHint.textContent = config.ui.mvv_file_hint;
-  rdFileLabel.textContent = config.ui.rd_file_label;
-  rdFileHint.textContent = config.ui.rd_file_hint;
-  summaryTitle.textContent = config.ui.summary_title;
-  summaryHint.textContent = config.ui.summary_hint;
-  detailsTitle.textContent = config.ui.details_title;
-  detailsBadge.textContent = config.ui.details_badge;
-  mvvFileName.textContent = config.ui.no_file_selected;
-  rdFileName.textContent = config.ui.no_file_selected;
-  generateBtn.textContent = config.ui.primary_action;
-  downloadLink.textContent = `${config.ui.download_action} ${config.output.file_name}`;
-
   const state = {
     mvv: null,
     rd: null,
     downloadUrl: null,
+    language: defaultLanguage,
+    phase: 'idle',
+    errorMessage: null,
+    summary: null,
   };
 
-  const syncGenerateButton = () => {
+  const currentUi = () => getLanguagePack(config, state.language);
+
+  const updateStatus = () => {
+    const ui = currentUi();
     const ready = Boolean(state.mvv && state.rd);
-    generateBtn.disabled = !ready;
+    const phase = state.phase === 'working' || state.phase === 'done' || state.phase === 'error'
+      ? state.phase
+      : ready
+        ? 'ready'
+        : 'idle';
+
+    let text = ui.status_idle;
+    if (phase === 'ready') text = ui.status_ready;
+    else if (phase === 'working') text = ui.status_working;
+    else if (phase === 'done') text = ui.status_done;
+    else if (phase === 'error') text = state.errorMessage || ui.status_error;
+    else text = ready ? ui.status_ready : ui.status_idle;
+
+    setStatus(statusBox, statusText, phase, text);
+    generateBtn.disabled = !ready || phase === 'working';
   };
+
+  const updateLog = () => {
+    const ui = currentUi();
+    if (state.phase === 'done' && state.summary) {
+      renderLog(logOutput, state.summary, config, ui, state.language);
+      return;
+    }
+    if (state.phase === 'working') {
+      logOutput.textContent = ui.log_processing;
+      return;
+    }
+    if (state.phase === 'error') {
+      logOutput.textContent = state.errorMessage || ui.status_error;
+      return;
+    }
+    logOutput.textContent = ui.log_waiting;
+  };
+
+  const renderLanguage = () => {
+    const ui = currentUi();
+    document.documentElement.lang = ui.document_lang;
+    document.title = config.app.title;
+
+    if (topbar) topbar.setAttribute('aria-label', ui.header_label);
+    if (signalRow) signalRow.setAttribute('aria-label', ui.workflow_label);
+
+    renderLanguageOptions(languageSelect, ui, state.language);
+
+    languageLabel.textContent = ui.language_label;
+    languageSelect.setAttribute('aria-label', ui.language_label);
+    appTitle.textContent = config.app.title;
+    appSubtitle.textContent = ui.app_subtitle;
+    appEyebrow.textContent = ui.eyebrow;
+    systemBadge.textContent = ui.system_badge;
+    filesTitle.textContent = ui.files_title;
+    filesHint.textContent = ui.files_hint;
+    mvvFileLabel.textContent = ui.mvv_file_label;
+    mvvFileHint.textContent = ui.mvv_file_hint;
+    rdFileLabel.textContent = ui.rd_file_label;
+    rdFileHint.textContent = ui.rd_file_hint;
+    workflowStep1.textContent = ui.workflow_steps[0];
+    workflowStep2.textContent = ui.workflow_steps[1];
+    workflowStep3.textContent = ui.workflow_steps[2];
+    summaryTitle.textContent = ui.summary_title;
+    summaryHint.textContent = ui.summary_hint;
+    detailsTitle.textContent = ui.details_title;
+    detailsBadge.textContent = ui.details_badge;
+    mvvFileName.textContent = state.mvv ? state.mvv.name : ui.no_file_selected;
+    rdFileName.textContent = state.rd ? state.rd.name : ui.no_file_selected;
+    generateBtn.textContent = ui.primary_action;
+    downloadLink.textContent = `${ui.download_action} ${config.output.file_name}`;
+
+    if (state.summary && state.phase === 'done') {
+      renderSummary(summaryCards, ui, state.summary);
+    } else {
+      summaryCards.innerHTML = '';
+    }
+
+    downloadLink.hidden = !state.downloadUrl;
+
+    updateStatus();
+    updateLog();
+  };
+
+  const clearGeneratedOutput = () => {
+    if (state.downloadUrl) {
+      URL.revokeObjectURL(state.downloadUrl);
+      state.downloadUrl = null;
+    }
+    state.summary = null;
+    state.errorMessage = null;
+    downloadLink.hidden = true;
+  };
+
+  renderLanguage();
+
+  languageSelect.addEventListener('change', () => {
+    state.language = languageSelect.value || defaultLanguage;
+    renderLanguage();
+  });
 
   const setFile = (kind, file) => {
     state[kind] = file;
-    if (kind === 'mvv') mvvFileName.textContent = file ? file.name : config.ui.no_file_selected;
-    if (kind === 'rd') rdFileName.textContent = file ? file.name : config.ui.no_file_selected;
-    syncGenerateButton();
-    const ready = Boolean(state.mvv && state.rd);
-    setStatus(statusBox, statusText, ready ? 'ready' : 'idle', ready ? config.ui.status_ready : config.ui.status_idle);
+    state.phase = state.mvv && state.rd ? 'ready' : 'idle';
+    clearGeneratedOutput();
+    renderLanguage();
   };
 
   wireDropzone(mvvDropzone, mvvFile, (file) => setFile('mvv', file));
@@ -142,11 +249,10 @@ export async function bootstrapApp() {
     if (!state.mvv || !state.rd) return;
 
     try {
-      if (state.downloadUrl) URL.revokeObjectURL(state.downloadUrl);
-      downloadLink.hidden = true;
-      setStatus(statusBox, statusText, 'working', config.ui.status_working);
-      logOutput.textContent = config.ui.log_processing;
-      generateBtn.disabled = true;
+      clearGeneratedOutput();
+      state.phase = 'working';
+      updateStatus();
+      updateLog();
 
       await new Promise((resolve) => setTimeout(resolve, 0));
       const result = await runPipeline({ config, mvvFile: state.mvv, rdFile: state.rd });
@@ -157,24 +263,23 @@ export async function bootstrapApp() {
       state.downloadUrl = URL.createObjectURL(blob);
       downloadLink.href = state.downloadUrl;
       downloadLink.download = config.output.file_name;
-      downloadLink.hidden = false;
-
-      renderSummary(summaryCards, config, result.summary);
-      renderLog(logOutput, result.summary, config);
-      setStatus(statusBox, statusText, 'done', config.ui.status_done);
+      state.summary = result.summary;
+      state.phase = 'done';
+      state.errorMessage = null;
+      renderLanguage();
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      setStatus(statusBox, statusText, 'error', message);
-      logOutput.textContent = message;
+      state.phase = 'error';
+      state.errorMessage = message;
+      state.summary = null;
       downloadLink.hidden = true;
+      summaryCards.innerHTML = '';
+      logOutput.textContent = message;
+      updateStatus();
       console.error(error);
     } finally {
-      syncGenerateButton();
+      updateStatus();
+      updateLog();
     }
   });
-
-  summaryCards.innerHTML = '';
-  logOutput.textContent = config.ui.log_waiting;
-  syncGenerateButton();
-  setStatus(statusBox, statusText, 'idle', config.ui.status_idle);
 }

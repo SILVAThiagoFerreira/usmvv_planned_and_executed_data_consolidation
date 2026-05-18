@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { buildConsolidatedRows, deduplicateRdRows } from '../src/processor.js';
 import { normalizeHoleKey } from '../src/utils.js';
+
+const projectConfig = JSON.parse(readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
 
 const config = {
   matching: {
@@ -58,4 +61,22 @@ test('buildConsolidatedRows falls back to MVV values', () => {
   assert.equal(summary.rdMatchedCount, 1);
   assert.equal(summary.rdMissingCount, 1);
   assert.deepEqual(summary.missingHoles, ['2']);
+});
+
+test('config exposes localized ui packs', () => {
+  assert.equal(projectConfig.app.title, 'US Vale Verde PLAN/EXEC Data Console');
+  assert.equal(projectConfig.ui.default_language, 'pt');
+  assert.deepEqual(Object.keys(projectConfig.ui.languages), ['pt', 'en', 'zh']);
+  assert.equal(projectConfig.ui.languages.pt.language_label, 'Idioma');
+  assert.equal(projectConfig.ui.languages.en.primary_action, 'Generate workbook');
+  assert.equal(projectConfig.ui.languages.zh.primary_action, '生成工作簿');
+  assert.equal(projectConfig.ui.languages.pt.workflow_steps[0], 'Anexar MVV');
+});
+
+test('legacy branding is removed', () => {
+  const configText = JSON.stringify(projectConfig);
+  const legacyTitle = ['M', 'V', 'V', '/', 'R', 'D', ' ', 'D', 'a', 't', 'a', ' ', 'C', 'o', 'n', 's', 'o', 'l', 'e'].join('');
+  const legacyEyebrow = ['E', 'M', 'T', 'S'].join('');
+  assert.equal(configText.includes(legacyTitle), false);
+  assert.equal(configText.includes(legacyEyebrow), false);
 });

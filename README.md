@@ -1,13 +1,14 @@
-# MVV RD no GitHub Pages
+# US Vale Verde PLAN/EXEC Data Console
 
-Aplicacao web estatica para carregar `MVV.xlsx` e `RD.txt` no navegador, consolidar os dados e baixar `MVV_RD_CONSOLIDADO_FINAL.xlsx`.
+Aplicacao web estatica com idioma padrao em portugues e alternancia para portugues, ingles e chines simplificado para carregar `MVV.xlsx` e `RD.txt` no navegador, consolidar os dados e baixar `MVV_RD_CONSOLIDADO_FINAL.xlsx`.
 
 ## Como usar
 
 1. Abra a pagina publicada no GitHub Pages.
-2. Anexe `MVV.xlsx` e `RD.txt`.
-3. Clique em `Gerar Excel`.
-4. Baixe o workbook gerado.
+2. Use o seletor de idioma no topo se quiser alternar a interface.
+3. Anexe `MVV.xlsx` e `RD.txt`.
+4. Clique em `Gerar planilha`.
+5. Baixe a planilha gerada.
 
 ## Caracteristicas
 
@@ -15,6 +16,7 @@ Aplicacao web estatica para carregar `MVV.xlsx` e `RD.txt` no navegador, consoli
 - Sem backend e sem envio dos arquivos para servidor.
 - Validacao antes do processamento.
 - Deduplicacao da RD com prioridade `E-` sobre `L_`.
+- Seletor de idioma para portugues, ingles e chines simplificado.
 - Workbook final com `CONSOLIDADO_FINAL`, `RD_TRATADA` e `LOG_VALIDACAO`.
 
 ## Execucao local

@@ -8,6 +8,11 @@ Consolidar MVV e RD no navegador, gerar um workbook Excel e permitir que o usuar
 
 - O processamento ocorre 100% no navegador.
 - Nenhum arquivo e enviado para servidor.
+- A interface abre em portugues por padrao.
+- O seletor de idioma permite portugues, ingles e chines simplificado.
+- A troca de idioma altera apenas a interface da pagina, nao o workbook gerado.
+- O titulo exibido e `US Vale Verde PLAN/EXEC Data Console`.
+- A marca antiga nao aparece na interface.
 - `E-` tem prioridade sobre `L_` na RD.
 - Se houver ambos para o mesmo furo, `E-` e mantido na base tratada.
 - Se nao houver RD para um furo, os campos finais usam MVV.
