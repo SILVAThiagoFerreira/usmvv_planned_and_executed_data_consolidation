@@ -1,17 +1,17 @@
 # US Vale Verde PLAN/EXEC Data Console
 
-Aplicacao web estatica com idioma padrao em portugues e alternancia para portugues, ingles e chines simplificado para carregar `MVV.xlsx` e `RD.txt` no navegador, consolidar os dados e baixar `MVV_RD_CONSOLIDADO_FINAL.xlsx`.
-Tambem permite anexar somente `MVV.xlsx` para baixar `MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx`.
+Aplicacao web estatica com idioma padrao em portugues e alternancia para portugues, ingles e chines simplificado para carregar os arquivos planejado e realizado no navegador, consolidar os dados e baixar `MVV_RD_CONSOLIDADO_FINAL.xlsx`.
+Tambem permite anexar somente o arquivo planejado para baixar `MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx`.
 
 ## Como usar
 
 1. Abra a pagina publicada no GitHub Pages.
 2. Use o seletor de idioma no topo se quiser alternar a interface.
-3. Anexe `MVV.xlsx` e `RD.txt`.
+3. Anexe `PLANEJADO.xlsx` e `REALIZADO.txt`.
 4. Clique em `Gerar Dado Consolidado Planejado vs Realizado`.
 5. Baixe a planilha gerada.
 
-Para organizar somente o plano MVV, anexe `MVV.xlsx`, clique em `Organize Somente o Dado Planejado` e baixe o workbook gerado.
+Para organizar somente o dado planejado, anexe `PLANEJADO.xlsx`, clique em `Organize Somente o Dado Planejado` e baixe o workbook gerado.
 
 ## Caracteristicas
 

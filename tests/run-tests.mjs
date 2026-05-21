@@ -70,7 +70,13 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.languages.pt.language_label, 'Idioma');
   assert.equal(projectConfig.ui.languages.en.primary_action, 'Generate workbook');
   assert.equal(projectConfig.ui.languages.zh.primary_action, '生成工作簿');
-  assert.equal(projectConfig.ui.languages.pt.workflow_steps[0], 'Anexar MVV');
+  assert.equal(projectConfig.ui.languages.pt.app_subtitle, '');
+  assert.deepEqual(projectConfig.ui.languages.pt.workflow_steps.slice(0, 2), ['Anexar Planejado', 'Anexar Realizado']);
+  assert.equal(projectConfig.ui.languages.pt.mvv_file_label, 'PLANEJADO.xlsx');
+  assert.equal(projectConfig.ui.languages.pt.rd_file_label, 'REALIZADO.txt');
+  assert.equal(projectConfig.ui.languages.pt.mvv_file_hint, 'Plano de Perfuração');
+  assert.equal(projectConfig.ui.languages.pt.rd_file_hint, 'Arquivo de Coordenadas da Topografia');
+  assert.equal(projectConfig.ui.languages.pt.status_idle, 'Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.');
   assert.equal(projectConfig.ui.languages.pt.files_title, 'ARQUIVOS DE ORIGEM');
   assert.equal(projectConfig.ui.languages.pt.summary_title, 'Resumo:');
   assert.equal(projectConfig.ui.languages.pt.details_title, 'LOG');

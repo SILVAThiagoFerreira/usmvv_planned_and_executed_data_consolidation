@@ -5,7 +5,7 @@
 1. `index.html` carrega a interface.
 2. `main.js` inicia a aplicacao.
 3. `src/config.js` carrega `config.json`.
-4. O usuario anexa `MVV.xlsx` e `RD.txt`.
+4. O usuario anexa `PLANEJADO.xlsx` e `REALIZADO.txt`.
 5. `src/reader.js` le os arquivos.
 6. `src/validator.js` valida estrutura e tipos.
 7. `src/processor.js` normaliza, deduplica e consolida.
@@ -14,7 +14,7 @@
 
 ## Sequencia MVV-only
 
-1. O usuario anexa somente `MVV.xlsx`.
+1. O usuario anexa somente `PLANEJADO.xlsx`.
 2. `src/reader.js` le a aba configurada da MVV.
 3. `src/validator.js` valida as colunas exigidas para `PLANO_MVV`.
 4. `src/processor.js` extrai somente as colunas configuradas para o plano.

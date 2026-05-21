@@ -34,10 +34,10 @@
         <section class="intro-panel">
           <p id="appEyebrow" class="eyebrow">Console de Dados US Vale Verde</p>
           <h1 id="appTitle">US Vale Verde PLAN/EXEC Data Console</h1>
-          <p id="appSubtitle" class="lede">Validacao local. Saida Excel controlada.</p>
+          <p id="appSubtitle" class="lede" hidden></p>
           <div class="signal-row" aria-label="Fluxo de trabalho">
-            <div><span>01</span><strong id="workflowStep1">Anexar MVV</strong></div>
-            <div><span>02</span><strong id="workflowStep2">Anexar RD</strong></div>
+            <div><span>01</span><strong id="workflowStep1">Anexar Planejado</strong></div>
+            <div><span>02</span><strong id="workflowStep2">Anexar Realizado</strong></div>
             <div><span>03</span><strong id="workflowStep3">Exportar XLSX</strong></div>
           </div>
         </section>
@@ -54,16 +54,16 @@
           <div class="upload-grid">
             <label class="dropzone" id="mvvDropzone" for="mvvFile">
               <input id="mvvFile" type="file" accept=".xlsx" hidden />
-              <span id="mvvFileLabel" class="dropzone-label">MVV.xlsx</span>
+              <span id="mvvFileLabel" class="dropzone-label">PLANEJADO.xlsx</span>
               <strong id="mvvFileName">Nenhum arquivo selecionado</strong>
-              <small id="mvvFileHint">Planilha de planejamento</small>
+              <small id="mvvFileHint">Plano de Perfuração</small>
             </label>
 
             <label class="dropzone" id="rdDropzone" for="rdFile">
               <input id="rdFile" type="file" accept=".txt" hidden />
-              <span id="rdFileLabel" class="dropzone-label">RD.txt</span>
+              <span id="rdFileLabel" class="dropzone-label">REALIZADO.txt</span>
               <strong id="rdFileName">Nenhum arquivo selecionado</strong>
-              <small id="rdFileHint">Arquivo de coordenadas da sondagem</small>
+              <small id="rdFileHint">Arquivo de Coordenadas da Topografia</small>
             </label>
           </div>
 
@@ -75,7 +75,7 @@
 
           <div class="status" id="statusBox" data-tone="idle">
             <span class="status-dot"></span>
-            <p id="statusText">Anexe MVV.xlsx e RD.txt.</p>
+            <p id="statusText">Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.</p>
           </div>
         </section>
 

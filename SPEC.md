@@ -17,12 +17,16 @@ Consolidar MVV e RD no navegador, gerar um workbook Excel e permitir que o usuar
 - O badge `Somente local` nao aparece na interface.
 - O botao principal em portugues exibe `Gerar Dado Consolidado Planejado vs Realizado`.
 - O botao MVV-only em portugues exibe `Organize Somente o Dado Planejado`.
+- O subtitulo `Validacao local. Saida Excel controlada.` nao aparece na interface em portugues.
+- O fluxo em portugues exibe `Anexar Planejado` e `Anexar Realizado`.
+- Os uploads em portugues exibem `PLANEJADO.xlsx`, `REALIZADO.txt`, `Plano de Perfuração` e `Arquivo de Coordenadas da Topografia`.
+- O status inicial em portugues exibe `Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.`
 - Os titulos em portugues usam `ARQUIVOS DE ORIGEM`, `Resumo:` e `LOG`.
 - `E-` tem prioridade sobre `L_` na RD.
 - Se houver ambos para o mesmo furo, `E-` e mantido na base tratada.
 - Se nao houver RD para um furo, os campos finais usam MVV.
 - O workbook final e gerado como download.
-- A interface tambem permite anexar somente `MVV.xlsx` e gerar um plano MVV organizado, sem exigir RD.
+- A interface tambem permite anexar somente o arquivo planejado e gerar um plano planejado organizado, sem exigir realizado.
 
 ## Entradas
 
@@ -48,7 +52,7 @@ Consolidar MVV e RD no navegador, gerar um workbook Excel e permitir que o usuar
 
 ### Plano MVV organizado
 
-- Entrada: somente `MVV.xlsx`.
+- Entrada: somente o arquivo planejado `.xlsx`.
 - Saida: workbook `MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx`.
 - Aba: `PLANO_MVV`.
 - A ordem e as linhas seguem a MVV.

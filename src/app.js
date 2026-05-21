@@ -196,6 +196,7 @@ export async function bootstrapApp() {
     languageSelect.setAttribute('aria-label', ui.language_label);
     appTitle.textContent = config.app.title;
     appSubtitle.textContent = ui.app_subtitle;
+    appSubtitle.hidden = !ui.app_subtitle;
     appEyebrow.textContent = ui.eyebrow;
     filesTitle.textContent = ui.files_title;
     filesHint.textContent = ui.files_hint;
