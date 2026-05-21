@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildConsolidatedRows, deduplicateRdRows } from '../src/processor.js';
+import { buildConsolidatedRows, buildMvvPlanRows, deduplicateRdRows } from '../src/processor.js';
 import { normalizeHoleKey } from '../src/utils.js';
 
 const projectConfig = JSON.parse(readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
@@ -71,6 +71,32 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.languages.en.primary_action, 'Generate workbook');
   assert.equal(projectConfig.ui.languages.zh.primary_action, '生成工作簿');
   assert.equal(projectConfig.ui.languages.pt.workflow_steps[0], 'Anexar MVV');
+  assert.equal(projectConfig.ui.languages.pt.mvv_only_action, 'Organizar somente MVV');
+});
+
+test('mvv plan extraction keeps only configured output columns', () => {
+  const rawMvv = {
+    rows: [
+      { blank: false, values: ['F1', 'P', 'ANFO', 6.5, 100, 200, 300, 12, 0.7, 45, -70, 2.1, 35, 'remove'] },
+    ],
+  };
+  const planConfig = {
+    columns: {
+      mvv_plan: ['ID', 'Type', 'Explosivo', 'Diameter', 'X Collar', 'Y Collar', 'Z Collar', 'Depth', 'Sub Drill', 'Azimuth', 'Dip', 'Tampao', 'Carga'],
+    },
+    validation: {
+      mvv_plan_numeric_fields: ['Diameter', 'X Collar', 'Y Collar', 'Z Collar', 'Depth', 'Sub Drill', 'Azimuth', 'Dip', 'Tampao', 'Carga'],
+    },
+  };
+  const validation = {
+    indexMap: new Map(planConfig.columns.mvv_plan.concat('Extra').map((header, index) => [header, index])),
+  };
+
+  const rows = buildMvvPlanRows(rawMvv, planConfig, validation);
+  assert.deepEqual(Object.keys(rows[0]), planConfig.columns.mvv_plan);
+  assert.equal(rows[0].Explosivo, 'ANFO');
+  assert.equal(rows[0].Carga, 35);
+  assert.equal(Object.hasOwn(rows[0], 'Extra'), false);
 });
 
 test('legacy branding is removed', () => {

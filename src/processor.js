@@ -34,6 +34,29 @@ export function buildMvvRows(rawMvv, config, validation) {
   return rows;
 }
 
+export function buildMvvPlanRows(rawMvv, config, validation) {
+  const indexMap = validation.indexMap;
+  const headers = config.columns.mvv_plan;
+  const numericFields = new Set(config.validation.mvv_plan_numeric_fields);
+  const rows = [];
+
+  for (const rawRow of rawMvv.rows) {
+    if (rawRow.blank) continue;
+    const item = {};
+    for (const column of headers) {
+      const value = rawRow.values[indexMap.get(column)] ?? null;
+      item[column] = numericFields.has(column) ? optionalNumber(value) : asText(value);
+    }
+    rows.push(item);
+  }
+
+  if (!rows.length) {
+    throw new Error('MVV has no usable rows after validation');
+  }
+
+  return rows;
+}
+
 export function buildRdRows(rawRd, config) {
   const stripPrefixes = config.matching.strip_prefixes;
   const rows = [];

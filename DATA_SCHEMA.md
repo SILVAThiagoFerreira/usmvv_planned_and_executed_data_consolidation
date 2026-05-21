@@ -43,3 +43,23 @@
 
 - MVV lado a lado com RD.
 - Colunas finais: `ID_FINAL`, `Y_FINAL`, `X_FINAL`, `Z_COLLAR_FINAL`, `PROFUNDIDADE_FINAL`.
+
+## Plano MVV organizado
+
+Saida gerada quando somente `MVV.xlsx` e processado.
+
+| Coluna | Tipo | Obrigatorio | Significado |
+| --- | --- | --- | --- |
+| ID | numero/texto | sim | Identificador do furo |
+| Type | texto | sim | Tipo do furo |
+| Explosivo | texto | sim | Explosivo planejado |
+| Diameter | numero | sim | Diametro |
+| X Collar | numero | sim | Coordenada X do collar |
+| Y Collar | numero | sim | Coordenada Y do collar |
+| Z Collar | numero | sim | Coordenada Z do collar |
+| Depth | numero | sim | Profundidade planejada |
+| Sub Drill | numero | sim | Sub drill |
+| Azimuth | numero | sim | Azimute |
+| Dip | numero | sim | Dip |
+| Tampao | numero | sim | Tampao planejado |
+| Carga | numero | sim | Carga planejada |

@@ -66,6 +66,21 @@
       "X_FINAL",
       "Z_COLLAR_FINAL",
       "PROFUNDIDADE_FINAL"
+    ],
+    "mvv_plan": [
+      "ID",
+      "Type",
+      "Explosivo",
+      "Diameter",
+      "X Collar",
+      "Y Collar",
+      "Z Collar",
+      "Depth",
+      "Sub Drill",
+      "Azimuth",
+      "Dip",
+      "Tampao",
+      "Carga"
     ]
   },
   "matching": {
@@ -97,6 +112,9 @@
       "Azimuth",
       "Dip"
     ],
+    "mvv_plan_required_row_columns": [
+      "ID"
+    ],
     "mvv_numeric_fields": [
       "Diameter",
       "X Collar",
@@ -109,6 +127,18 @@
       "Sub Drill",
       "Azimuth",
       "Dip"
+    ],
+    "mvv_plan_numeric_fields": [
+      "Diameter",
+      "X Collar",
+      "Y Collar",
+      "Z Collar",
+      "Depth",
+      "Sub Drill",
+      "Azimuth",
+      "Dip",
+      "Tampao",
+      "Carga"
     ],
     "rd_numeric_fields": [
       "Y_RD",
@@ -149,6 +179,8 @@
       "Sub Drill",
       "Azimuth",
       "Dip",
+      "Tampao",
+      "Carga",
       "Y_RD",
       "X_RD",
       "Z_RD",
@@ -160,10 +192,12 @@
   },
   "output": {
     "file_name": "MVV_RD_CONSOLIDADO_FINAL.xlsx",
+    "mvv_plan_file_name": "MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx",
     "sheets": {
       "consolidated": "CONSOLIDADO_FINAL",
       "rd_treated": "RD_TRATADA",
-      "log": "LOG_VALIDACAO"
+      "log": "LOG_VALIDACAO",
+      "mvv_plan": "PLANO_MVV"
     },
     "labels": {
       "mvv_count": "Quantidade de furos na MVV",
@@ -205,11 +239,13 @@
         "details_badge": "JSON",
         "no_file_selected": "Nenhum arquivo selecionado",
         "primary_action": "Gerar planilha",
+        "mvv_only_action": "Organizar somente MVV",
         "download_action": "Baixar",
-        "status_idle": "Anexe MVV.xlsx e RD.txt.",
+        "status_idle": "Anexe MVV.xlsx para organizar MVV ou anexe tambem RD.txt para consolidar.",
         "status_ready": "Pronto para processar.",
         "status_working": "Processando localmente...",
         "status_done": "Planilha gerada.",
+        "status_mvv_done": "Plano MVV organizado.",
         "status_error": "Validacao ou processamento falhou.",
         "log_waiting": "Aguardando arquivos...",
         "log_processing": "Processando...",
@@ -219,7 +255,8 @@
           "rd_unique_count": "RD unicos",
           "rd_matched_count": "Correspondencias",
           "rd_missing_count": "Ausentes",
-          "dual_prefix_count": "Prefixos duplos"
+          "dual_prefix_count": "Prefixos duplos",
+          "mvv_plan_columns_count": "Colunas"
         }
       },
       "en": {
@@ -248,11 +285,13 @@
         "details_badge": "JSON",
         "no_file_selected": "No file selected",
         "primary_action": "Generate workbook",
+        "mvv_only_action": "Organize MVV only",
         "download_action": "Download",
-        "status_idle": "Attach MVV.xlsx and RD.txt.",
+        "status_idle": "Attach MVV.xlsx to organize MVV or also attach RD.txt to consolidate.",
         "status_ready": "Ready to process.",
         "status_working": "Processing locally...",
         "status_done": "Workbook generated.",
+        "status_mvv_done": "MVV plan organized.",
         "status_error": "Validation or processing failed.",
         "log_waiting": "Waiting for files...",
         "log_processing": "Processing...",
@@ -262,7 +301,8 @@
           "rd_unique_count": "Unique RD",
           "rd_matched_count": "Matched",
           "rd_missing_count": "Missing",
-          "dual_prefix_count": "Dual prefix"
+          "dual_prefix_count": "Dual prefix",
+          "mvv_plan_columns_count": "Columns"
         }
       },
       "zh": {
@@ -291,11 +331,13 @@
         "details_badge": "JSON",
         "no_file_selected": "未选择文件",
         "primary_action": "生成工作簿",
+        "mvv_only_action": "仅整理 MVV",
         "download_action": "下载",
-        "status_idle": "请附加 MVV.xlsx 和 RD.txt。",
+        "status_idle": "请附加 MVV.xlsx 以整理 MVV，或同时附加 RD.txt 以合并。",
         "status_ready": "已准备好处理。",
         "status_working": "正在本地处理...",
         "status_done": "工作簿已生成。",
+        "status_mvv_done": "MVV计划已整理。",
         "status_error": "验证或处理失败。",
         "log_waiting": "等待文件...",
         "log_processing": "处理中...",
@@ -305,7 +347,8 @@
           "rd_unique_count": "唯一RD",
           "rd_matched_count": "已匹配",
           "rd_missing_count": "缺失",
-          "dual_prefix_count": "双前缀"
+          "dual_prefix_count": "双前缀",
+          "mvv_plan_columns_count": "列"
         }
       }
     }

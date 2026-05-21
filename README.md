@@ -1,6 +1,7 @@
 # US Vale Verde PLAN/EXEC Data Console
 
 Aplicacao web estatica com idioma padrao em portugues e alternancia para portugues, ingles e chines simplificado para carregar `MVV.xlsx` e `RD.txt` no navegador, consolidar os dados e baixar `MVV_RD_CONSOLIDADO_FINAL.xlsx`.
+Tambem permite anexar somente `MVV.xlsx` para baixar `MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx`.
 
 ## Como usar
 
@@ -10,6 +11,8 @@ Aplicacao web estatica com idioma padrao em portugues e alternancia para portugu
 4. Clique em `Gerar planilha`.
 5. Baixe a planilha gerada.
 
+Para organizar somente o plano MVV, anexe `MVV.xlsx`, clique em `Organizar somente MVV` e baixe o workbook gerado.
+
 ## Caracteristicas
 
 - Processamento 100% client-side.
@@ -18,6 +21,7 @@ Aplicacao web estatica com idioma padrao em portugues e alternancia para portugu
 - Deduplicacao da RD com prioridade `E-` sobre `L_`.
 - Seletor de idioma para portugues, ingles e chines simplificado.
 - Workbook final com `CONSOLIDADO_FINAL`, `RD_TRATADA` e `LOG_VALIDACAO`.
+- Exportacao MVV-only com a aba `PLANO_MVV` e somente as colunas configuradas.
 
 ## Execucao local
 

@@ -42,6 +42,54 @@ export function validateMvvSource(rawMvv, config) {
   return { rowCount, headerCount: headers.length, indexMap };
 }
 
+export function validateMvvPlanSource(rawMvv, config) {
+  const headers = rawMvv.headers;
+  const requiredHeaders = config.columns.mvv_plan;
+  const requiredRowColumns = config.validation.mvv_plan_required_row_columns;
+  const numericFields = new Set(config.validation.mvv_plan_numeric_fields);
+  const allowEmptyRows = Boolean(config.validation.allow_empty_rows);
+
+  const indexMap = headerIndexMap(headers);
+  const missing = requiredHeaders.filter((header) => !indexMap.has(header));
+  if (missing.length) {
+    throw new Error(`Missing MVV plan columns: ${missing.join(', ')}`);
+  }
+
+  let rowCount = 0;
+  for (const row of rawMvv.rows) {
+    if (row.blank) {
+      if (allowEmptyRows) continue;
+      throw new Error(`Empty MVV row found at line ${row.sourceRow}`);
+    }
+    rowCount += 1;
+    const context = `MVV linha ${row.sourceRow}`;
+    if (isBlank(row.values[indexMap.get('ID')])) {
+      throw new Error(`${context}: missing ID`);
+    }
+    for (const column of requiredRowColumns) {
+      const value = row.values[indexMap.get(column)];
+      if (isBlank(value)) {
+        throw new Error(`${context}: missing required field ${column}`);
+      }
+      if (numericFields.has(column)) {
+        toNumber(value, context, column);
+      }
+    }
+    for (const column of numericFields) {
+      const value = row.values[indexMap.get(column)];
+      if (!isBlank(value)) {
+        toNumber(value, context, column);
+      }
+    }
+  }
+
+  if (rowCount === 0 && config.validation.fail_on_missing_mvv_rows) {
+    throw new Error('MVV has no data rows');
+  }
+
+  return { rowCount, headerCount: headers.length, indexMap };
+}
+
 export function validateRdSource(rawRd, config) {
   const expectedFields = config.input.rd_expected_fields;
   const allowedPrefixes = config.matching.strip_prefixes;

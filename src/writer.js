@@ -218,3 +218,22 @@ export async function createWorkbookBuffer({ config, consolidatedRows, rdTreated
   addLogSheet(workbook, summary, config, metadata);
   return workbook.xlsx.writeBuffer();
 }
+
+export async function createMvvPlanWorkbookBuffer({ config, mvvPlanRows }) {
+  const ExcelJS = getExcelJS();
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'MVV RD GitHub Pages';
+  workbook.lastModifiedBy = 'MVV RD GitHub Pages';
+  workbook.created = new Date();
+  workbook.modified = new Date();
+
+  addTableSheet(
+    workbook,
+    config.output.sheets.mvv_plan,
+    config.columns.mvv_plan,
+    mvvPlanRows,
+    config,
+  );
+
+  return workbook.xlsx.writeBuffer();
+}

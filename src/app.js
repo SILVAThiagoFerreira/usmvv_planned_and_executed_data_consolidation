@@ -1,5 +1,5 @@
 import { loadConfig } from './config.js';
-import { runPipeline } from './pipeline.js';
+import { runMvvPlanPipeline, runPipeline } from './pipeline.js';
 
 function qs(id) {
   const element = document.getElementById(id);
@@ -18,7 +18,10 @@ function getLanguagePack(config, languageCode) {
 }
 
 function renderSummary(summaryCards, languagePack, summary) {
-  const metrics = [
+  const metrics = summary.outputColumns ? [
+    [languagePack.metrics.mvv_count, summary.mvvCount],
+    [languagePack.metrics.mvv_plan_columns_count, summary.outputColumns.length],
+  ] : [
     [languagePack.metrics.mvv_count, summary.mvvCount],
     [languagePack.metrics.rd_raw_count, summary.rdRawCount],
     [languagePack.metrics.rd_unique_count, summary.rdUniqueCount],
@@ -44,6 +47,8 @@ function renderLog(logOutput, summary, config, languagePack, languageCode) {
     missingHoles: summary.missingHoles,
     rdOnlyHoles: summary.rdOnlyHoles,
     discardedRdCount: summary.discardedRdCount,
+    outputColumns: summary.outputColumns,
+    sheetName: summary.sheetName,
     labels: languagePack.metrics,
     workbookLabels: config.output.labels,
   };
@@ -112,6 +117,7 @@ export async function bootstrapApp() {
   const mvvFileName = qs('mvvFileName');
   const rdFileName = qs('rdFileName');
   const generateBtn = qs('generateBtn');
+  const mvvOnlyBtn = qs('mvvOnlyBtn');
   const downloadLink = qs('downloadLink');
   const statusBox = qs('statusBox');
   const statusText = qs('statusText');
@@ -127,6 +133,7 @@ export async function bootstrapApp() {
     mvv: null,
     rd: null,
     downloadUrl: null,
+    outputFileName: config.output.file_name,
     language: defaultLanguage,
     phase: 'idle',
     errorMessage: null,
@@ -140,6 +147,8 @@ export async function bootstrapApp() {
     const ready = Boolean(state.mvv && state.rd);
     const phase = state.phase === 'working' || state.phase === 'done' || state.phase === 'error'
       ? state.phase
+      : state.phase === 'mvv_done'
+        ? 'done'
       : ready
         ? 'ready'
         : 'idle';
@@ -147,17 +156,19 @@ export async function bootstrapApp() {
     let text = ui.status_idle;
     if (phase === 'ready') text = ui.status_ready;
     else if (phase === 'working') text = ui.status_working;
+    else if (state.phase === 'mvv_done') text = ui.status_mvv_done || ui.status_done;
     else if (phase === 'done') text = ui.status_done;
     else if (phase === 'error') text = state.errorMessage || ui.status_error;
     else text = ready ? ui.status_ready : ui.status_idle;
 
     setStatus(statusBox, statusText, phase, text);
     generateBtn.disabled = !ready || phase === 'working';
+    mvvOnlyBtn.disabled = !state.mvv || phase === 'working';
   };
 
   const updateLog = () => {
     const ui = currentUi();
-    if (state.phase === 'done' && state.summary) {
+    if ((state.phase === 'done' || state.phase === 'mvv_done') && state.summary) {
       renderLog(logOutput, state.summary, config, ui, state.language);
       return;
     }
@@ -204,9 +215,10 @@ export async function bootstrapApp() {
     mvvFileName.textContent = state.mvv ? state.mvv.name : ui.no_file_selected;
     rdFileName.textContent = state.rd ? state.rd.name : ui.no_file_selected;
     generateBtn.textContent = ui.primary_action;
-    downloadLink.textContent = `${ui.download_action} ${config.output.file_name}`;
+    mvvOnlyBtn.textContent = ui.mvv_only_action;
+    downloadLink.textContent = `${ui.download_action} ${state.outputFileName}`;
 
-    if (state.summary && state.phase === 'done') {
+    if (state.summary && (state.phase === 'done' || state.phase === 'mvv_done')) {
       renderSummary(summaryCards, ui, state.summary);
     } else {
       summaryCards.innerHTML = '';
@@ -225,6 +237,7 @@ export async function bootstrapApp() {
     }
     state.summary = null;
     state.errorMessage = null;
+    state.outputFileName = config.output.file_name;
     downloadLink.hidden = true;
   };
 
@@ -261,10 +274,50 @@ export async function bootstrapApp() {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
       state.downloadUrl = URL.createObjectURL(blob);
+      state.outputFileName = config.output.file_name;
       downloadLink.href = state.downloadUrl;
-      downloadLink.download = config.output.file_name;
+      downloadLink.download = state.outputFileName;
       state.summary = result.summary;
       state.phase = 'done';
+      state.errorMessage = null;
+      renderLanguage();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      state.phase = 'error';
+      state.errorMessage = message;
+      state.summary = null;
+      downloadLink.hidden = true;
+      summaryCards.innerHTML = '';
+      logOutput.textContent = message;
+      updateStatus();
+      console.error(error);
+    } finally {
+      updateStatus();
+      updateLog();
+    }
+  });
+
+  mvvOnlyBtn.addEventListener('click', async () => {
+    if (!state.mvv) return;
+
+    try {
+      clearGeneratedOutput();
+      state.phase = 'working';
+      updateStatus();
+      updateLog();
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const result = await runMvvPlanPipeline({ config, mvvFile: state.mvv });
+
+      const blob = new Blob([result.buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      state.downloadUrl = URL.createObjectURL(blob);
+      state.outputFileName = config.output.mvv_plan_file_name;
+      downloadLink.href = state.downloadUrl;
+      downloadLink.download = state.outputFileName;
+      state.summary = result.summary;
+      state.phase = 'mvv_done';
       state.errorMessage = null;
       renderLanguage();
     } catch (error) {

@@ -17,6 +17,7 @@ Consolidar MVV e RD no navegador, gerar um workbook Excel e permitir que o usuar
 - Se houver ambos para o mesmo furo, `E-` e mantido na base tratada.
 - Se nao houver RD para um furo, os campos finais usam MVV.
 - O workbook final e gerado como download.
+- A interface tambem permite anexar somente `MVV.xlsx` e gerar um plano MVV organizado, sem exigir RD.
 
 ## Entradas
 
@@ -39,6 +40,29 @@ Consolidar MVV e RD no navegador, gerar um workbook Excel e permitir que o usuar
   - `Sub Drill`
   - `Azimuth`
   - `Dip`
+
+### Plano MVV organizado
+
+- Entrada: somente `MVV.xlsx`.
+- Saida: workbook `MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx`.
+- Aba: `PLANO_MVV`.
+- A ordem e as linhas seguem a MVV.
+- Somente `ID` e obrigatorio por linha; demais colunas podem sair em branco quando estiverem vazias na MVV.
+- Campos numericos preenchidos devem ser numericos.
+- Todas as colunas fora da lista abaixo sao removidas:
+  - `ID`
+  - `Type`
+  - `Explosivo`
+  - `Diameter`
+  - `X Collar`
+  - `Y Collar`
+  - `Z Collar`
+  - `Depth`
+  - `Sub Drill`
+  - `Azimuth`
+  - `Dip`
+  - `Tampao`
+  - `Carga`
 
 ### RD
 
@@ -63,6 +87,7 @@ Consolidar MVV e RD no navegador, gerar um workbook Excel e permitir que o usuar
 ## Validacao
 
 - MVV deve conter todas as colunas requeridas.
+- Para o plano MVV organizado, a MVV deve conter todas as colunas da saida `PLANO_MVV`.
 - MVV deve ter as colunas numericas validas para o calculo.
 - RD deve ter exatamente 5 campos.
 - O segundo campo da RD deve estar vazio.
