@@ -32,8 +32,8 @@ def main() -> int:
         page.wait_for_function("document.documentElement.lang === 'pt-BR'")
         page.wait_for_function("document.querySelector('#languageSelect')?.value === 'pt'")
         page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Anexe MVV.xlsx para organizar MVV')")
-        page.wait_for_function("document.querySelector('#generateBtn')?.textContent === 'Gerar planilha'")
-        page.wait_for_function("document.querySelector('#mvvOnlyBtn')?.textContent === 'Organizar somente MVV'")
+        page.wait_for_function("document.querySelector('#generateBtn')?.textContent === 'Gerar Dado Consolidado Planejado vs Realizado'")
+        page.wait_for_function("document.querySelector('#mvvOnlyBtn')?.textContent === 'Organize Somente o Dado Planejado'")
 
         page.locator("#languageSelect").select_option("en")
         page.wait_for_function("document.documentElement.lang === 'en'")
@@ -49,12 +49,12 @@ def main() -> int:
         page.locator("#languageSelect").select_option("pt")
         page.wait_for_function("document.documentElement.lang === 'pt-BR'")
         page.wait_for_function("document.querySelector('#languageSelect')?.value === 'pt'")
-        page.wait_for_function("document.querySelector('#generateBtn')?.textContent === 'Gerar planilha'")
+        page.wait_for_function("document.querySelector('#generateBtn')?.textContent === 'Gerar Dado Consolidado Planejado vs Realizado'")
 
         page.set_input_files("#mvvFile", args.mvv)
         page.locator("#mvvOnlyBtn").wait_for(state="visible")
         page.wait_for_function("!document.querySelector('#mvvOnlyBtn')?.disabled")
-        page.get_by_role("button", name="Organizar somente MVV").click()
+        page.get_by_role("button", name="Organize Somente o Dado Planejado").click()
         page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Plano MVV organizado.')")
         page.locator("#downloadLink").wait_for(state="visible")
         with page.expect_download() as mvv_only_download_info:
@@ -65,7 +65,7 @@ def main() -> int:
         page.set_input_files("#rdFile", args.rd)
         page.locator("#generateBtn").wait_for(state="visible")
         page.wait_for_function("!document.querySelector('#generateBtn')?.disabled")
-        page.get_by_role("button", name="Gerar planilha").click()
+        page.get_by_role("button", name="Gerar Dado Consolidado Planejado vs Realizado").click()
         page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Planilha gerada.')")
         page.locator("#downloadLink").wait_for(state="visible")
         with page.expect_download() as download_info:

@@ -98,7 +98,6 @@ export async function bootstrapApp() {
   const appEyebrow = qs('appEyebrow');
   const topbar = document.querySelector('.topbar');
   const signalRow = document.querySelector('.signal-row');
-  const systemBadge = qs('systemBadge');
   const languageLabel = qs('languageLabel');
   const languageSelect = qs('languageSelect');
   const filesTitle = qs('filesTitle');
@@ -198,7 +197,6 @@ export async function bootstrapApp() {
     appTitle.textContent = config.app.title;
     appSubtitle.textContent = ui.app_subtitle;
     appEyebrow.textContent = ui.eyebrow;
-    systemBadge.textContent = ui.system_badge;
     filesTitle.textContent = ui.files_title;
     filesHint.textContent = ui.files_hint;
     mvvFileLabel.textContent = ui.mvv_file_label;

@@ -71,7 +71,12 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.languages.en.primary_action, 'Generate workbook');
   assert.equal(projectConfig.ui.languages.zh.primary_action, '生成工作簿');
   assert.equal(projectConfig.ui.languages.pt.workflow_steps[0], 'Anexar MVV');
-  assert.equal(projectConfig.ui.languages.pt.mvv_only_action, 'Organizar somente MVV');
+  assert.equal(projectConfig.ui.languages.pt.files_title, 'ARQUIVOS DE ORIGEM');
+  assert.equal(projectConfig.ui.languages.pt.summary_title, 'Resumo:');
+  assert.equal(projectConfig.ui.languages.pt.details_title, 'LOG');
+  assert.equal(projectConfig.ui.languages.pt.primary_action, 'Gerar Dado Consolidado Planejado vs Realizado');
+  assert.equal(projectConfig.ui.languages.pt.mvv_only_action, 'Organize Somente o Dado Planejado');
+  assert.equal(Object.hasOwn(projectConfig.ui.languages.pt, 'system_badge'), false);
 });
 
 test('mvv plan extraction keeps only configured output columns', () => {

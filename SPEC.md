@@ -13,6 +13,11 @@ Consolidar MVV e RD no navegador, gerar um workbook Excel e permitir que o usuar
 - A troca de idioma altera apenas a interface da pagina, nao o workbook gerado.
 - O titulo exibido e `US Vale Verde PLAN/EXEC Data Console`.
 - A marca antiga nao aparece na interface.
+- A interface usa fundo branco, estilo minimalista e logo Enaex pequeno no topo esquerdo.
+- O badge `Somente local` nao aparece na interface.
+- O botao principal em portugues exibe `Gerar Dado Consolidado Planejado vs Realizado`.
+- O botao MVV-only em portugues exibe `Organize Somente o Dado Planejado`.
+- Os titulos em portugues usam `ARQUIVOS DE ORIGEM`, `Resumo:` e `LOG`.
 - `E-` tem prioridade sobre `L_` na RD.
 - Se houver ambos para o mesmo furo, `E-` e mantido na base tratada.
 - Se nao houver RD para um furo, os campos finais usam MVV.

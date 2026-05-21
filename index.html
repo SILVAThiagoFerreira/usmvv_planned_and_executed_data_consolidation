@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#2f3337" />
+    <meta name="theme-color" content="#ffffff" />
     <title>US Vale Verde PLAN/EXEC Data Console</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,10 +16,9 @@
       <header class="topbar" aria-label="Cabecalho da aplicacao">
         <div class="brand" aria-label="Enaex Brasil">
           <span class="brand-mark" aria-hidden="true"></span>
-          <span class="brand-word">Enaex <span>Brasil</span></span>
+          <span class="brand-word">Enaex</span>
         </div>
         <div class="top-meta">
-          <span id="systemBadge" class="top-badge">Somente local</span>
           <label class="language-switch" for="languageSelect">
             <span id="languageLabel" class="language-switch-label">Idioma</span>
             <select id="languageSelect" class="language-select" aria-label="Idioma">
@@ -46,7 +45,7 @@
         <section class="panel upload-panel">
           <div class="panel-header">
             <div>
-              <h2 id="filesTitle">Arquivos de origem</h2>
+              <h2 id="filesTitle">ARQUIVOS DE ORIGEM</h2>
               <p id="filesHint">Solte os arquivos ou navegue.</p>
             </div>
             <span class="section-code">Input</span>
@@ -69,8 +68,8 @@
           </div>
 
           <div class="actions">
-            <button id="generateBtn" class="primary" type="button" disabled>Gerar planilha</button>
-            <button id="mvvOnlyBtn" class="secondary" type="button" disabled>Organizar somente MVV</button>
+            <button id="generateBtn" class="primary" type="button" disabled>Gerar Dado Consolidado Planejado vs Realizado</button>
+            <button id="mvvOnlyBtn" class="secondary" type="button" disabled>Organize Somente o Dado Planejado</button>
             <a id="downloadLink" class="secondary" hidden>Baixar MVV_RD_CONSOLIDADO_FINAL.xlsx</a>
           </div>
 
@@ -83,7 +82,7 @@
         <aside class="panel summary-panel">
           <div class="panel-header">
             <div>
-              <h2 id="summaryTitle">Resumo da execucao</h2>
+              <h2 id="summaryTitle">Resumo:</h2>
               <p id="summaryHint">Gerado apos o processamento.</p>
             </div>
             <span class="section-code">Output</span>
@@ -91,7 +90,7 @@
           <div id="summaryCards" class="summary-grid"></div>
           <div class="log-block">
             <div class="log-head">
-              <h3 id="detailsTitle">Log de auditoria</h3>
+              <h3 id="detailsTitle">LOG</h3>
               <span id="detailsBadge">JSON</span>
             </div>
             <pre id="logOutput">Aguardando arquivos...</pre>

@@ -8,10 +8,10 @@ Tambem permite anexar somente `MVV.xlsx` para baixar `MVV_PLANO_PERFURACAO_ORGAN
 1. Abra a pagina publicada no GitHub Pages.
 2. Use o seletor de idioma no topo se quiser alternar a interface.
 3. Anexe `MVV.xlsx` e `RD.txt`.
-4. Clique em `Gerar planilha`.
+4. Clique em `Gerar Dado Consolidado Planejado vs Realizado`.
 5. Baixe a planilha gerada.
 
-Para organizar somente o plano MVV, anexe `MVV.xlsx`, clique em `Organizar somente MVV` e baixe o workbook gerado.
+Para organizar somente o plano MVV, anexe `MVV.xlsx`, clique em `Organize Somente o Dado Planejado` e baixe o workbook gerado.
 
 ## Caracteristicas
 
@@ -20,6 +20,7 @@ Para organizar somente o plano MVV, anexe `MVV.xlsx`, clique em `Organizar somen
 - Validacao antes do processamento.
 - Deduplicacao da RD com prioridade `E-` sobre `L_`.
 - Seletor de idioma para portugues, ingles e chines simplificado.
+- Interface minimalista com fundo branco e logo Enaex pequeno no topo esquerdo.
 - Workbook final com `CONSOLIDADO_FINAL`, `RD_TRATADA` e `LOG_VALIDACAO`.
 - Exportacao MVV-only com a aba `PLANO_MVV` e somente as colunas configuradas.
 
