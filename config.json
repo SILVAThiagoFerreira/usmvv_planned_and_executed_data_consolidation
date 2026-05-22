@@ -86,10 +86,12 @@
   "matching": {
     "prefix_priority": [
       "E-",
+      "L-",
       "L_"
     ],
     "strip_prefixes": [
       "E-",
+      "L-",
       "L_"
     ],
     "prefer_first_within_same_prefix": true

@@ -120,9 +120,7 @@ export function validateRdSource(rawRd, config) {
       throw new Error(`${context}: expected empty second field`);
     }
     if (!allowedPrefixes.some((prefix) => id.startsWith(prefix))) {
-      if (config.validation.fail_on_invalid_prefix) {
-        throw new Error(`${context}: invalid prefix in ID_RD -> ${id}`);
-      }
+      throw new Error(`${context}: invalid prefix in ID_RD -> ${id}`);
     }
     if (config.validation.fail_on_unparseable_coordinates) {
       for (const [index, fieldName] of [[2, numericFields[0]], [3, numericFields[1]], [4, numericFields[2]]]) {

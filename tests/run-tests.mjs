@@ -7,8 +7,8 @@ const projectConfig = JSON.parse(readFileSync(new URL('../config.json', import.m
 
 const config = {
   matching: {
-    prefix_priority: ['E-', 'L_'],
-    strip_prefixes: ['E-', 'L_'],
+    prefix_priority: ['E-', 'L-', 'L_'],
+    strip_prefixes: ['E-', 'L-', 'L_'],
     prefer_first_within_same_prefix: true,
   },
   columns: {
@@ -27,13 +27,14 @@ function test(name, fn) {
 }
 
 test('normalizeHoleKey strips prefixes', () => {
-  assert.equal(normalizeHoleKey('L_001', ['E-', 'L_']), '1');
-  assert.equal(normalizeHoleKey('E-157', ['E-', 'L_']), '157');
+  assert.equal(normalizeHoleKey('L_001', ['E-', 'L-', 'L_']), '1');
+  assert.equal(normalizeHoleKey('L-001', ['E-', 'L-', 'L_']), '1');
+  assert.equal(normalizeHoleKey('E-157', ['E-', 'L-', 'L_']), '157');
 });
 
 test('deduplicateRdRows prefers E-', () => {
   const rdRows = [
-    { holeKey: '1', TIPO_RD: 'L_', ID_RD: 'L_1', Y_RD: 1, X_RD: 2, Z_RD: 3 },
+    { holeKey: '1', TIPO_RD: 'L-', ID_RD: 'L-1', Y_RD: 1, X_RD: 2, Z_RD: 3 },
     { holeKey: '1', TIPO_RD: 'E-', ID_RD: 'E-1', Y_RD: 4, X_RD: 5, Z_RD: 6 },
     { holeKey: '2', TIPO_RD: 'L_', ID_RD: 'L_2', Y_RD: 7, X_RD: 8, Z_RD: 9 },
   ];
