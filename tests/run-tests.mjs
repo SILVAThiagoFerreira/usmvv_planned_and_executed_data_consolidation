@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildConsolidatedRows, buildMvvPlanRows, deduplicateRdRows } from '../src/processor.js';
+import { buildConsolidatedRows, buildMvvPlanRows, buildRdOnlyRows, calculateExecutedDepth, deduplicateRdRows } from '../src/processor.js';
 import { normalizeHoleKey } from '../src/utils.js';
 
 const projectConfig = JSON.parse(readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
@@ -45,6 +45,29 @@ test('deduplicateRdRows prefers E-', () => {
   assert.deepEqual(treatedRows.map((row) => row.ID_RD), ['E-1', 'L_2']);
 });
 
+test('calculateExecutedDepth applies project depth to Z', () => {
+  assert.equal(calculateExecutedDepth(292, 10), 12);
+  assert.equal(calculateExecutedDepth(280, 10), 10);
+});
+
+test('buildRdOnlyRows maps treated RD rows to configured output columns', () => {
+  const treatedRows = [
+    { ID_RD: 'E-1', Y_RD: 11, X_RD: 21, Z_RD: 292 },
+    { ID_RD: 'L_2', Y_RD: 12, X_RD: 22, Z_RD: 280 },
+  ];
+  const rdOnlyConfig = {
+    columns: {
+      rd_only: ['ID', 'Y', 'X', 'Z', 'Profundidade'],
+    },
+  };
+
+  const rows = buildRdOnlyRows(treatedRows, rdOnlyConfig, 10);
+  assert.deepEqual(rows, [
+    { ID: 'E-1', Y: 11, X: 21, Z: 292, Profundidade: 12 },
+    { ID: 'L_2', Y: 12, X: 22, Z: 280, Profundidade: 10 },
+  ]);
+});
+
 test('buildConsolidatedRows falls back to MVV values', () => {
   const mvvRows = [
     { ID: 1, Type: 'TypeA', Descricao: 'A', Diameter: 4, 'X Collar': 100, 'Y Collar': 200, 'X Toe': 110, 'Y Toe': 210, 'Z Toe': 50, 'Z Collar': 60, Depth: 12, 'Sub Drill': 1, Azimuth: 90, Dip: 15, holeKey: '1' },
@@ -83,6 +106,16 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.languages.pt.details_title, 'LOG');
   assert.equal(projectConfig.ui.languages.pt.primary_action, 'Gerar Dado Consolidado Planejado vs Realizado');
   assert.equal(projectConfig.ui.languages.pt.mvv_only_action, 'Organize Somente o Dado Planejado');
+  assert.equal(projectConfig.ui.languages.pt.rd_only_action, 'Organize Somente o Executado');
+  assert.equal(projectConfig.ui.languages.pt.status_ready_mvv, 'Pronto para organizar somente o planejado.');
+  assert.equal(projectConfig.ui.languages.pt.status_ready_rd, 'Pronto para organizar somente o executado.');
+  assert.equal(projectConfig.ui.languages.pt.status_rd_done, 'Executado organizado.');
+  assert.equal(projectConfig.ui.languages.pt.executed_depth_prompt, 'Informe a profundidade de projeto em metros (ex: 10).');
+  assert.equal(projectConfig.ui.languages.pt.executed_depth_invalid, 'Informe uma profundidade de projeto valida maior que zero.');
+  assert.equal(projectConfig.ui.languages.pt.metrics.project_depth, 'Profundidade de projeto');
+  assert.deepEqual(projectConfig.columns.rd_only, ['ID', 'Y', 'X', 'Z', 'Profundidade']);
+  assert.equal(projectConfig.output.rd_only_file_name, 'RD_EXECUTADO_ORGANIZADO.xlsx');
+  assert.equal(projectConfig.output.sheets.executed, 'RD_EXECUTADO');
   assert.equal(Object.hasOwn(projectConfig.ui.languages.pt, 'system_badge'), false);
 });
 

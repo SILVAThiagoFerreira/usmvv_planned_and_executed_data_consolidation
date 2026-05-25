@@ -9,4 +9,7 @@
 - [ ] O workbook final e baixado no navegador.
 - [ ] As abas finais existem.
 - [ ] As colunas finais estao destacadas.
+- [ ] O usuario consegue gerar somente o executado com profundidade informada.
+- [ ] O workbook RD-only possui apenas a aba `RD_EXECUTADO`.
+- [ ] As colunas `ID`, `Y`, `X`, `Z` e `Profundidade` existem no RD-only.
 - [ ] Os testes locais passam.

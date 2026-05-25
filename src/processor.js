@@ -112,6 +112,31 @@ export function deduplicateRdRows(rdRows, config) {
   return { treatedRows, selected, dualPrefixCount };
 }
 
+export function calculateExecutedDepth(zValue, projectDepth) {
+  if (!Number.isFinite(projectDepth) || projectDepth <= 0) {
+    throw new Error('Invalid project depth');
+  }
+
+  const depth = (zValue % projectDepth) + projectDepth;
+  return Number(depth.toFixed(3));
+}
+
+export function buildRdOnlyRows(rdTreatedRows, config, projectDepth) {
+  if (!rdTreatedRows.length) {
+    throw new Error('RD has no usable rows after validation');
+  }
+
+  const [idColumn, yColumn, xColumn, zColumn, depthColumn] = config.columns.rd_only;
+
+  return rdTreatedRows.map((row) => ({
+    [idColumn]: row.ID_RD,
+    [yColumn]: row.Y_RD,
+    [xColumn]: row.X_RD,
+    [zColumn]: row.Z_RD,
+    [depthColumn]: calculateExecutedDepth(row.Z_RD, projectDepth),
+  }));
+}
+
 export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefixCount) {
   const mvvKeys = new Set(mvvRows.map((row) => row.holeKey));
   const missingHoles = [];

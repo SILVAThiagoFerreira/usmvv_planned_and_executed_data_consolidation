@@ -39,6 +39,18 @@
 | X_RD | numero | sim | X selecionado |
 | Z_RD | numero | sim | Z selecionado |
 
+## RD executado organizado
+
+Saida gerada quando somente o executado e processado.
+
+| Coluna | Tipo | Obrigatorio | Significado |
+| --- | --- | --- | --- |
+| ID | texto | sim | ID selecionado da RD |
+| Y | numero | sim | Coordenada Y |
+| X | numero | sim | Coordenada X |
+| Z | numero | sim | Coordenada Z |
+| Profundidade | numero | sim | Profundidade calculada a partir do Z e da profundidade de projeto |
+
 ## Consolidado final
 
 - MVV lado a lado com RD.

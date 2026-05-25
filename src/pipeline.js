@@ -1,7 +1,7 @@
 import { readMvvFile, readRdFile } from './reader.js';
 import { validateMvvPlanSource, validateMvvSource, validateRdSource } from './validator.js';
-import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildRdRows, deduplicateRdRows } from './processor.js';
-import { createMvvPlanWorkbookBuffer, createWorkbookBuffer } from './writer.js';
+import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows } from './processor.js';
+import { createMvvPlanWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js';
 
 export async function runPipeline({ config, mvvFile, rdFile }) {
   const rawMvv = await readMvvFile(mvvFile, config);
@@ -14,6 +14,12 @@ export async function runPipeline({ config, mvvFile, rdFile }) {
   const rdRows = buildRdRows(rawRd, config);
   const { treatedRows, selected, dualPrefixCount } = deduplicateRdRows(rdRows, config);
   const { consolidatedRows, summary } = buildConsolidatedRows(mvvRows, selected, rdValidation.rowCount, dualPrefixCount);
+  const enrichedSummary = {
+    ...summary,
+    mode: 'consolidated',
+    outputColumns: config.columns.consolidated,
+    sheetName: config.output.sheets.consolidated,
+  };
 
   const metadata = {
     runId: new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '_'),
@@ -22,8 +28,8 @@ export async function runPipeline({ config, mvvFile, rdFile }) {
     outputPath: config.output.file_name,
   };
 
-  const buffer = await createWorkbookBuffer({ config, consolidatedRows, rdTreatedRows: treatedRows, summary, metadata });
-  return { buffer, summary, metadata };
+  const buffer = await createWorkbookBuffer({ config, consolidatedRows, rdTreatedRows: treatedRows, summary: enrichedSummary, metadata });
+  return { buffer, summary: enrichedSummary, metadata };
 }
 
 export async function runMvvPlanPipeline({ config, mvvFile }) {
@@ -35,9 +41,37 @@ export async function runMvvPlanPipeline({ config, mvvFile }) {
   return {
     buffer,
     summary: {
+      mode: 'mvv_only',
       mvvCount: mvvPlanRows.length,
       outputColumns: config.columns.mvv_plan,
       sheetName: config.output.sheets.mvv_plan,
     },
   };
+}
+
+export async function runRdOnlyPipeline({ config, rdFile, projectDepth }) {
+  const depth = Number(projectDepth);
+  if (!Number.isFinite(depth) || depth <= 0) {
+    throw new Error('Invalid project depth');
+  }
+
+  const rawRd = await readRdFile(rdFile, config);
+  const rdValidation = validateRdSource(rawRd, config);
+  const rdRows = buildRdRows(rawRd, config);
+  const { treatedRows, dualPrefixCount } = deduplicateRdRows(rdRows, config);
+  const rdOnlyRows = buildRdOnlyRows(treatedRows, config, depth);
+  const summary = {
+    mode: 'rd_only',
+    rdRawCount: rdValidation.rowCount,
+    rdUniqueCount: treatedRows.length,
+    dualPrefixCount,
+    discardedRdCount: rdRows.length - treatedRows.length,
+    projectDepth: depth,
+    outputColumns: config.columns.rd_only,
+    sheetName: config.output.sheets.executed,
+  };
+
+  const buffer = await createRdOnlyWorkbookBuffer({ config, rdOnlyRows });
+
+  return { buffer, summary };
 }

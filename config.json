@@ -34,6 +34,13 @@
       "Azimuth",
       "Dip"
     ],
+    "rd_only": [
+      "ID",
+      "Y",
+      "X",
+      "Z",
+      "Profundidade"
+    ],
     "rd_treated": [
       "ID_RD",
       "Y_RD",
@@ -181,6 +188,10 @@
       "Sub Drill",
       "Azimuth",
       "Dip",
+      "Y",
+      "X",
+      "Z",
+      "Profundidade",
       "Tampao",
       "Carga",
       "Y_RD",
@@ -195,11 +206,13 @@
   "output": {
     "file_name": "MVV_RD_CONSOLIDADO_FINAL.xlsx",
     "mvv_plan_file_name": "MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx",
+    "rd_only_file_name": "RD_EXECUTADO_ORGANIZADO.xlsx",
     "sheets": {
       "consolidated": "CONSOLIDADO_FINAL",
       "rd_treated": "RD_TRATADA",
       "log": "LOG_VALIDACAO",
-      "mvv_plan": "PLANO_MVV"
+      "mvv_plan": "PLANO_MVV",
+      "executed": "RD_EXECUTADO"
     },
     "labels": {
       "mvv_count": "Quantidade de furos na MVV",
@@ -241,12 +254,18 @@
         "no_file_selected": "Nenhum arquivo selecionado",
         "primary_action": "Gerar Dado Consolidado Planejado vs Realizado",
         "mvv_only_action": "Organize Somente o Dado Planejado",
+        "rd_only_action": "Organize Somente o Executado",
+        "executed_depth_prompt": "Informe a profundidade de projeto em metros (ex: 10).",
+        "executed_depth_invalid": "Informe uma profundidade de projeto valida maior que zero.",
         "download_action": "Baixar",
         "status_idle": "Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.",
         "status_ready": "Pronto para processar.",
+        "status_ready_mvv": "Pronto para organizar somente o planejado.",
+        "status_ready_rd": "Pronto para organizar somente o executado.",
         "status_working": "Processando localmente...",
         "status_done": "Planilha gerada.",
         "status_mvv_done": "Plano MVV organizado.",
+        "status_rd_done": "Executado organizado.",
         "status_error": "Validacao ou processamento falhou.",
         "log_waiting": "Aguardando arquivos...",
         "log_processing": "Processando...",
@@ -257,7 +276,8 @@
           "rd_matched_count": "Correspondencias",
           "rd_missing_count": "Ausentes",
           "dual_prefix_count": "Prefixos duplos",
-          "mvv_plan_columns_count": "Colunas"
+          "mvv_plan_columns_count": "Colunas",
+          "project_depth": "Profundidade de projeto"
         }
       },
       "en": {
@@ -286,12 +306,18 @@
         "no_file_selected": "No file selected",
         "primary_action": "Generate workbook",
         "mvv_only_action": "Organize MVV only",
+        "rd_only_action": "Organize executed only",
+        "executed_depth_prompt": "Enter the project depth in meters (e.g. 10).",
+        "executed_depth_invalid": "Enter a valid project depth greater than zero.",
         "download_action": "Download",
         "status_idle": "Attach MVV.xlsx to organize MVV or also attach RD.txt to consolidate.",
         "status_ready": "Ready to process.",
+        "status_ready_mvv": "Ready to organize planning only.",
+        "status_ready_rd": "Ready to organize executed only.",
         "status_working": "Processing locally...",
         "status_done": "Workbook generated.",
         "status_mvv_done": "MVV plan organized.",
+        "status_rd_done": "Executed workbook generated.",
         "status_error": "Validation or processing failed.",
         "log_waiting": "Waiting for files...",
         "log_processing": "Processing...",
@@ -302,7 +328,8 @@
           "rd_matched_count": "Matched",
           "rd_missing_count": "Missing",
           "dual_prefix_count": "Dual prefix",
-          "mvv_plan_columns_count": "Columns"
+          "mvv_plan_columns_count": "Columns",
+          "project_depth": "Project depth"
         }
       },
       "zh": {
@@ -331,12 +358,18 @@
         "no_file_selected": "未选择文件",
         "primary_action": "生成工作簿",
         "mvv_only_action": "仅整理 MVV",
+        "rd_only_action": "仅整理已执行",
+        "executed_depth_prompt": "请输入项目深度（米，例如 10）。",
+        "executed_depth_invalid": "请输入大于 0 的有效项目深度。",
         "download_action": "下载",
         "status_idle": "请附加 MVV.xlsx 以整理 MVV，或同时附加 RD.txt 以合并。",
         "status_ready": "已准备好处理。",
+        "status_ready_mvv": "已准备好仅整理计划。",
+        "status_ready_rd": "已准备好仅整理已执行。",
         "status_working": "正在本地处理...",
         "status_done": "工作簿已生成。",
         "status_mvv_done": "MVV计划已整理。",
+        "status_rd_done": "已生成已执行表。",
         "status_error": "验证或处理失败。",
         "log_waiting": "等待文件...",
         "log_processing": "处理中...",
@@ -347,7 +380,8 @@
           "rd_matched_count": "已匹配",
           "rd_missing_count": "缺失",
           "dual_prefix_count": "双前缀",
-          "mvv_plan_columns_count": "列"
+          "mvv_plan_columns_count": "列",
+          "project_depth": "项目深度"
         }
       }
     }

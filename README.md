@@ -2,6 +2,7 @@
 
 Aplicacao web estatica com idioma padrao em portugues e alternancia para portugues, ingles e chines simplificado para carregar os arquivos planejado e realizado no navegador, consolidar os dados e baixar `MVV_RD_CONSOLIDADO_FINAL.xlsx`.
 Tambem permite anexar somente o arquivo planejado para baixar `MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx`.
+Tambem permite anexar somente o arquivo executado para baixar `RD_EXECUTADO_ORGANIZADO.xlsx`.
 
 ## Como usar
 
@@ -12,6 +13,7 @@ Tambem permite anexar somente o arquivo planejado para baixar `MVV_PLANO_PERFURA
 5. Baixe a planilha gerada.
 
 Para organizar somente o dado planejado, anexe `PLANEJADO.xlsx`, clique em `Organize Somente o Dado Planejado` e baixe o workbook gerado.
+Para organizar somente o executado, anexe `REALIZADO.txt`, informe a profundidade de projeto quando solicitado e baixe o workbook gerado.
 
 ## Caracteristicas
 

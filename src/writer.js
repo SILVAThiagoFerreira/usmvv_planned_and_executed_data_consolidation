@@ -237,3 +237,22 @@ export async function createMvvPlanWorkbookBuffer({ config, mvvPlanRows }) {
 
   return workbook.xlsx.writeBuffer();
 }
+
+export async function createRdOnlyWorkbookBuffer({ config, rdOnlyRows }) {
+  const ExcelJS = getExcelJS();
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'MVV RD GitHub Pages';
+  workbook.lastModifiedBy = 'MVV RD GitHub Pages';
+  workbook.created = new Date();
+  workbook.modified = new Date();
+
+  addTableSheet(
+    workbook,
+    config.output.sheets.executed,
+    config.columns.rd_only,
+    rdOnlyRows,
+    config,
+  );
+
+  return workbook.xlsx.writeBuffer();
+}

@@ -3,6 +3,7 @@
 ## Objetivo
 
 Consolidar MVV e RD no navegador, gerar um workbook Excel e permitir que o usuario apenas anexe os arquivos de entrada.
+Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook separado.
 
 ## Decisoes obrigatorias
 
@@ -17,16 +18,19 @@ Consolidar MVV e RD no navegador, gerar um workbook Excel e permitir que o usuar
 - O badge `Somente local` nao aparece na interface.
 - O botao principal em portugues exibe `Gerar Dado Consolidado Planejado vs Realizado`.
 - O botao MVV-only em portugues exibe `Organize Somente o Dado Planejado`.
+- O botao RD-only em portugues exibe `Organize Somente o Executado`.
 - O subtitulo `Validacao local. Saida Excel controlada.` nao aparece na interface em portugues.
 - O fluxo em portugues exibe `Anexar Planejado` e `Anexar Realizado`.
 - Os uploads em portugues exibem `PLANEJADO.xlsx`, `REALIZADO.txt`, `Plano de Perfuração` e `Arquivo de Coordenadas da Topografia`.
 - O status inicial em portugues exibe `Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.`
+- Quando apenas o arquivo executado estiver carregado, o status deve indicar que o usuario pode organizar somente o executado.
 - Os titulos em portugues usam `ARQUIVOS DE ORIGEM`, `Resumo:` e `LOG`.
 - `E-` tem prioridade sobre `L_` na RD.
 - Se houver ambos para o mesmo furo, `E-` e mantido na base tratada.
 - Se nao houver RD para um furo, os campos finais usam MVV.
 - O workbook final e gerado como download.
 - A interface tambem permite anexar somente o arquivo planejado e gerar um plano planejado organizado, sem exigir realizado.
+- A interface tambem permite anexar somente o arquivo executado e gerar um workbook com `ID`, `Y`, `X`, `Z` e `Profundidade`.
 
 ## Entradas
 
@@ -83,6 +87,14 @@ Consolidar MVV e RD no navegador, gerar um workbook Excel e permitir que o usuar
   - `X`
   - `Z`
 
+### RD-only
+
+- Entrada: somente o arquivo executado `.txt`.
+- O usuario informa a profundidade de projeto em metros ao acionar o fluxo.
+- Saida: workbook `RD_EXECUTADO_ORGANIZADO.xlsx`.
+- Aba: `RD_EXECUTADO`.
+- Colunas: `ID`, `Y`, `X`, `Z`, `Profundidade`.
+
 ## Regras de processamento
 
 - O identificador de comparacao e o numero do furo sem prefixo.
@@ -92,6 +104,8 @@ Consolidar MVV e RD no navegador, gerar um workbook Excel e permitir que o usuar
 - A ordem final segue a MVV.
 - `PROFUNDIDADE_FINAL` usa `(Z_RD + Sub Drill) - Z Toe` quando RD existir.
 - Sem RD, `PROFUNDIDADE_FINAL` usa `Depth` da MVV.
+- No fluxo RD-only, `Profundidade` e calculada como `((Z_RD % profundidade_projeto) + profundidade_projeto)` e arredondada para 3 casas decimais.
+- No exemplo com `Z_RD = 292` e `profundidade_projeto = 10`, o valor final e `12`.
 
 ## Validacao
 
@@ -103,9 +117,11 @@ Consolidar MVV e RD no navegador, gerar um workbook Excel e permitir que o usuar
 - IDs da RD devem iniciar com `L_` ou `E-`.
 - Coordenadas da RD devem ser numericas.
 - Arquivos invalidos bloqueiam o processamento.
+- A profundidade de projeto informada para o fluxo RD-only deve ser numerica e maior que zero.
 
 ## Saidas
 
 - Aba `CONSOLIDADO_FINAL`.
 - Aba `RD_TRATADA`.
 - Aba `LOG_VALIDACAO`.
+- Fluxo RD-only: uma unica aba `RD_EXECUTADO` com `ID`, `Y`, `X`, `Z`, `Profundidade` e sem log adicional.

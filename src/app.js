@@ -1,5 +1,5 @@
 import { loadConfig } from './config.js';
-import { runMvvPlanPipeline, runPipeline } from './pipeline.js';
+import { runMvvPlanPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js';
 
 function qs(id) {
   const element = document.getElementById(id);
@@ -18,17 +18,30 @@ function getLanguagePack(config, languageCode) {
 }
 
 function renderSummary(summaryCards, languagePack, summary) {
-  const metrics = summary.outputColumns ? [
-    [languagePack.metrics.mvv_count, summary.mvvCount],
-    [languagePack.metrics.mvv_plan_columns_count, summary.outputColumns.length],
-  ] : [
-    [languagePack.metrics.mvv_count, summary.mvvCount],
-    [languagePack.metrics.rd_raw_count, summary.rdRawCount],
-    [languagePack.metrics.rd_unique_count, summary.rdUniqueCount],
-    [languagePack.metrics.rd_matched_count, summary.rdMatchedCount],
-    [languagePack.metrics.rd_missing_count, summary.rdMissingCount],
-    [languagePack.metrics.dual_prefix_count, summary.dualPrefixCount],
-  ];
+  let metrics;
+
+  if (summary.mode === 'mvv_only') {
+    metrics = [
+      [languagePack.metrics.mvv_count, summary.mvvCount],
+      [languagePack.metrics.mvv_plan_columns_count, summary.outputColumns.length],
+    ];
+  } else if (summary.mode === 'rd_only') {
+    metrics = [
+      [languagePack.metrics.rd_raw_count, summary.rdRawCount],
+      [languagePack.metrics.rd_unique_count, summary.rdUniqueCount],
+      [languagePack.metrics.dual_prefix_count, summary.dualPrefixCount],
+      [languagePack.metrics.project_depth, `${summary.projectDepth.toFixed(3)} m`],
+    ];
+  } else {
+    metrics = [
+      [languagePack.metrics.mvv_count, summary.mvvCount],
+      [languagePack.metrics.rd_raw_count, summary.rdRawCount],
+      [languagePack.metrics.rd_unique_count, summary.rdUniqueCount],
+      [languagePack.metrics.rd_matched_count, summary.rdMatchedCount],
+      [languagePack.metrics.rd_missing_count, summary.rdMissingCount],
+      [languagePack.metrics.dual_prefix_count, summary.dualPrefixCount],
+    ];
+  }
 
   summaryCards.innerHTML = metrics
     .map(([label, value]) => `<article class="metric"><span>${label}</span><strong>${value}</strong></article>`)
@@ -38,17 +51,7 @@ function renderSummary(summaryCards, languagePack, summary) {
 function renderLog(logOutput, summary, config, languagePack, languageCode) {
   const payload = {
     language: languageCode,
-    mvvCount: summary.mvvCount,
-    rdRawCount: summary.rdRawCount,
-    rdUniqueCount: summary.rdUniqueCount,
-    rdMatchedCount: summary.rdMatchedCount,
-    rdMissingCount: summary.rdMissingCount,
-    dualPrefixCount: summary.dualPrefixCount,
-    missingHoles: summary.missingHoles,
-    rdOnlyHoles: summary.rdOnlyHoles,
-    discardedRdCount: summary.discardedRdCount,
-    outputColumns: summary.outputColumns,
-    sheetName: summary.sheetName,
+    ...summary,
     labels: languagePack.metrics,
     workbookLabels: config.output.labels,
   };
@@ -117,6 +120,7 @@ export async function bootstrapApp() {
   const rdFileName = qs('rdFileName');
   const generateBtn = qs('generateBtn');
   const mvvOnlyBtn = qs('mvvOnlyBtn');
+  const rdOnlyBtn = qs('rdOnlyBtn');
   const downloadLink = qs('downloadLink');
   const statusBox = qs('statusBox');
   const statusText = qs('statusText');
@@ -141,33 +145,60 @@ export async function bootstrapApp() {
 
   const currentUi = () => getLanguagePack(config, state.language);
 
+  const parseProjectDepthInput = (value) => {
+    if (value === null || value === undefined) return null;
+    const normalized = String(value).trim().replace(',', '.');
+    if (!normalized) return null;
+    const match = normalized.match(/-?\d+(?:\.\d+)?/);
+    if (!match) return null;
+    const depth = Number(match[0]);
+    if (!Number.isFinite(depth) || depth <= 0) return null;
+    return depth;
+  };
+
   const updateStatus = () => {
     const ui = currentUi();
-    const ready = Boolean(state.mvv && state.rd);
-    const phase = state.phase === 'working' || state.phase === 'done' || state.phase === 'error'
-      ? state.phase
-      : state.phase === 'mvv_done'
-        ? 'done'
-      : ready
-        ? 'ready'
-        : 'idle';
+    const hasMvv = Boolean(state.mvv);
+    const hasRd = Boolean(state.rd);
 
+    let tone = 'idle';
     let text = ui.status_idle;
-    if (phase === 'ready') text = ui.status_ready;
-    else if (phase === 'working') text = ui.status_working;
-    else if (state.phase === 'mvv_done') text = ui.status_mvv_done || ui.status_done;
-    else if (phase === 'done') text = ui.status_done;
-    else if (phase === 'error') text = state.errorMessage || ui.status_error;
-    else text = ready ? ui.status_ready : ui.status_idle;
 
-    setStatus(statusBox, statusText, phase, text);
-    generateBtn.disabled = !ready || phase === 'working';
-    mvvOnlyBtn.disabled = !state.mvv || phase === 'working';
+    if (state.phase === 'working') {
+      tone = 'working';
+      text = ui.status_working;
+    } else if (state.phase === 'error') {
+      tone = 'error';
+      text = state.errorMessage || ui.status_error;
+    } else if (state.phase === 'mvv_done') {
+      tone = 'done';
+      text = ui.status_mvv_done || ui.status_done;
+    } else if (state.phase === 'rd_done') {
+      tone = 'done';
+      text = ui.status_rd_done || ui.status_done;
+    } else if (state.phase === 'done') {
+      tone = 'done';
+      text = ui.status_done;
+    } else if (hasMvv && hasRd) {
+      tone = 'ready';
+      text = ui.status_ready;
+    } else if (hasMvv) {
+      tone = 'ready';
+      text = ui.status_ready_mvv || ui.status_ready;
+    } else if (hasRd) {
+      tone = 'ready';
+      text = ui.status_ready_rd || ui.status_ready;
+    }
+
+    setStatus(statusBox, statusText, tone, text);
+    generateBtn.disabled = !(hasMvv && hasRd) || state.phase === 'working';
+    mvvOnlyBtn.disabled = !hasMvv || state.phase === 'working';
+    rdOnlyBtn.disabled = !hasRd || state.phase === 'working';
   };
 
   const updateLog = () => {
     const ui = currentUi();
-    if ((state.phase === 'done' || state.phase === 'mvv_done') && state.summary) {
+    if ((state.phase === 'done' || state.phase === 'mvv_done' || state.phase === 'rd_done') && state.summary) {
       renderLog(logOutput, state.summary, config, ui, state.language);
       return;
     }
@@ -214,10 +245,11 @@ export async function bootstrapApp() {
     mvvFileName.textContent = state.mvv ? state.mvv.name : ui.no_file_selected;
     rdFileName.textContent = state.rd ? state.rd.name : ui.no_file_selected;
     generateBtn.textContent = ui.primary_action;
+    rdOnlyBtn.textContent = ui.rd_only_action;
     mvvOnlyBtn.textContent = ui.mvv_only_action;
     downloadLink.textContent = `${ui.download_action} ${state.outputFileName}`;
 
-    if (state.summary && (state.phase === 'done' || state.phase === 'mvv_done')) {
+    if (state.summary && (state.phase === 'done' || state.phase === 'mvv_done' || state.phase === 'rd_done')) {
       renderSummary(summaryCards, ui, state.summary);
     } else {
       summaryCards.innerHTML = '';
@@ -317,6 +349,55 @@ export async function bootstrapApp() {
       downloadLink.download = state.outputFileName;
       state.summary = result.summary;
       state.phase = 'mvv_done';
+      state.errorMessage = null;
+      renderLanguage();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      state.phase = 'error';
+      state.errorMessage = message;
+      state.summary = null;
+      downloadLink.hidden = true;
+      summaryCards.innerHTML = '';
+      logOutput.textContent = message;
+      updateStatus();
+      console.error(error);
+    } finally {
+      updateStatus();
+      updateLog();
+    }
+  });
+
+  rdOnlyBtn.addEventListener('click', async () => {
+    if (!state.rd) return;
+
+    const ui = currentUi();
+    const response = window.prompt(ui.executed_depth_prompt, '');
+    if (response === null) return;
+
+    const projectDepth = parseProjectDepthInput(response);
+    if (projectDepth === null) {
+      window.alert(ui.executed_depth_invalid);
+      return;
+    }
+
+    try {
+      clearGeneratedOutput();
+      state.phase = 'working';
+      updateStatus();
+      updateLog();
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const result = await runRdOnlyPipeline({ config, rdFile: state.rd, projectDepth });
+
+      const blob = new Blob([result.buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      state.downloadUrl = URL.createObjectURL(blob);
+      state.outputFileName = config.output.rd_only_file_name;
+      downloadLink.href = state.downloadUrl;
+      downloadLink.download = state.outputFileName;
+      state.summary = result.summary;
+      state.phase = 'rd_done';
       state.errorMessage = null;
       renderLanguage();
     } catch (error) {
