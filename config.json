@@ -255,8 +255,8 @@
         "primary_action": "Gerar Dado Consolidado Planejado vs Realizado",
         "mvv_only_action": "Organize Somente o Dado Planejado",
         "rd_only_action": "Organize Somente o Executado",
-        "executed_depth_prompt": "Informe a profundidade de projeto em metros (ex: 10).",
-        "executed_depth_invalid": "Informe uma profundidade de projeto valida maior que zero.",
+        "executed_depth_prompt": "Informe a profundidade a ser aplicada a todos os furos (ex: 10).",
+        "executed_depth_invalid": "Informe uma profundidade valida maior que zero.",
         "download_action": "Baixar",
         "status_idle": "Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.",
         "status_ready": "Pronto para processar.",
@@ -277,7 +277,7 @@
           "rd_missing_count": "Ausentes",
           "dual_prefix_count": "Prefixos duplos",
           "mvv_plan_columns_count": "Colunas",
-          "project_depth": "Profundidade de projeto"
+          "project_depth": "Profundidade aplicada"
         }
       },
       "en": {
@@ -307,8 +307,8 @@
         "primary_action": "Generate workbook",
         "mvv_only_action": "Organize MVV only",
         "rd_only_action": "Organize executed only",
-        "executed_depth_prompt": "Enter the project depth in meters (e.g. 10).",
-        "executed_depth_invalid": "Enter a valid project depth greater than zero.",
+        "executed_depth_prompt": "Enter the depth to apply to all holes (e.g. 10).",
+        "executed_depth_invalid": "Enter a valid depth greater than zero.",
         "download_action": "Download",
         "status_idle": "Attach MVV.xlsx to organize MVV or also attach RD.txt to consolidate.",
         "status_ready": "Ready to process.",
@@ -329,7 +329,7 @@
           "rd_missing_count": "Missing",
           "dual_prefix_count": "Dual prefix",
           "mvv_plan_columns_count": "Columns",
-          "project_depth": "Project depth"
+          "project_depth": "Applied depth"
         }
       },
       "zh": {
@@ -359,8 +359,8 @@
         "primary_action": "生成工作簿",
         "mvv_only_action": "仅整理 MVV",
         "rd_only_action": "仅整理已执行",
-        "executed_depth_prompt": "请输入项目深度（米，例如 10）。",
-        "executed_depth_invalid": "请输入大于 0 的有效项目深度。",
+        "executed_depth_prompt": "请输入要应用到所有孔的深度（米，例如 10）。",
+        "executed_depth_invalid": "请输入大于 0 的有效深度。",
         "download_action": "下载",
         "status_idle": "请附加 MVV.xlsx 以整理 MVV，或同时附加 RD.txt 以合并。",
         "status_ready": "已准备好处理。",
@@ -381,7 +381,7 @@
           "rd_missing_count": "缺失",
           "dual_prefix_count": "双前缀",
           "mvv_plan_columns_count": "列",
-          "project_depth": "项目深度"
+          "project_depth": "应用深度"
         }
       }
     }

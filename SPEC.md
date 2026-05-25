@@ -90,10 +90,11 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 ### RD-only
 
 - Entrada: somente o arquivo executado `.txt`.
-- O usuario informa a profundidade de projeto em metros ao acionar o fluxo.
+- O usuario informa a profundidade em metros ao acionar o fluxo, e o valor e aplicado igualmente a todos os furos.
 - Saida: workbook `RD_EXECUTADO_ORGANIZADO.xlsx`.
 - Aba: `RD_EXECUTADO`.
 - Colunas: `ID`, `Y`, `X`, `Z`, `Profundidade`.
+- `ID` no RD-only usa somente o numero do furo, sem letras nem tracos.
 
 ## Regras de processamento
 
@@ -104,8 +105,8 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - A ordem final segue a MVV.
 - `PROFUNDIDADE_FINAL` usa `(Z_RD + Sub Drill) - Z Toe` quando RD existir.
 - Sem RD, `PROFUNDIDADE_FINAL` usa `Depth` da MVV.
-- No fluxo RD-only, `Profundidade` e calculada como `((Z_RD % profundidade_projeto) + profundidade_projeto)` e arredondada para 3 casas decimais.
-- No exemplo com `Z_RD = 292` e `profundidade_projeto = 10`, o valor final e `12`.
+- No fluxo RD-only, `Profundidade` e igual ao valor informado pelo usuario para todas as linhas.
+- No fluxo RD-only, `ID` usa o numero do furo sem prefixo e sem caracteres nao numericos.
 
 ## Validacao
 
@@ -117,7 +118,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - IDs da RD devem iniciar com `L_` ou `E-`.
 - Coordenadas da RD devem ser numericas.
 - Arquivos invalidos bloqueiam o processamento.
-- A profundidade de projeto informada para o fluxo RD-only deve ser numerica e maior que zero.
+- A profundidade informada para o fluxo RD-only deve ser numerica e maior que zero.
 
 ## Saidas
 

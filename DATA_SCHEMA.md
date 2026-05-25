@@ -45,11 +45,11 @@ Saida gerada quando somente o executado e processado.
 
 | Coluna | Tipo | Obrigatorio | Significado |
 | --- | --- | --- | --- |
-| ID | texto | sim | ID selecionado da RD |
+| ID | numero | sim | ID numerico do furo sem prefixo |
 | Y | numero | sim | Coordenada Y |
 | X | numero | sim | Coordenada X |
 | Z | numero | sim | Coordenada Z |
-| Profundidade | numero | sim | Profundidade calculada a partir do Z e da profundidade de projeto |
+| Profundidade | numero | sim | Profundidade informada pelo usuario, aplicada a todos os furos |
 
 ## Consolidado final
 

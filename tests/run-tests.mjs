@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildConsolidatedRows, buildMvvPlanRows, buildRdOnlyRows, calculateExecutedDepth, deduplicateRdRows } from '../src/processor.js';
+import { buildConsolidatedRows, buildMvvPlanRows, buildRdOnlyRows, deduplicateRdRows } from '../src/processor.js';
 import { normalizeHoleKey } from '../src/utils.js';
 
 const projectConfig = JSON.parse(readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
@@ -45,15 +45,10 @@ test('deduplicateRdRows prefers E-', () => {
   assert.deepEqual(treatedRows.map((row) => row.ID_RD), ['E-1', 'L_2']);
 });
 
-test('calculateExecutedDepth applies project depth to Z', () => {
-  assert.equal(calculateExecutedDepth(292, 10), 12);
-  assert.equal(calculateExecutedDepth(280, 10), 10);
-});
-
 test('buildRdOnlyRows maps treated RD rows to configured output columns', () => {
   const treatedRows = [
-    { ID_RD: 'E-1', Y_RD: 11, X_RD: 21, Z_RD: 292 },
-    { ID_RD: 'L_2', Y_RD: 12, X_RD: 22, Z_RD: 280 },
+    { ID_RD: 'E-1', Y_RD: 11, X_RD: 21, Z_RD: 292, holeKey: '1', sourceLine: 1 },
+    { ID_RD: 'L_2', Y_RD: 12, X_RD: 22, Z_RD: 280, holeKey: '2', sourceLine: 2 },
   ];
   const rdOnlyConfig = {
     columns: {
@@ -63,8 +58,8 @@ test('buildRdOnlyRows maps treated RD rows to configured output columns', () => 
 
   const rows = buildRdOnlyRows(treatedRows, rdOnlyConfig, 10);
   assert.deepEqual(rows, [
-    { ID: 'E-1', Y: 11, X: 21, Z: 292, Profundidade: 12 },
-    { ID: 'L_2', Y: 12, X: 22, Z: 280, Profundidade: 10 },
+    { ID: 1, Y: 11, X: 21, Z: 292, Profundidade: 10 },
+    { ID: 2, Y: 12, X: 22, Z: 280, Profundidade: 10 },
   ]);
 });
 
@@ -110,9 +105,15 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.languages.pt.status_ready_mvv, 'Pronto para organizar somente o planejado.');
   assert.equal(projectConfig.ui.languages.pt.status_ready_rd, 'Pronto para organizar somente o executado.');
   assert.equal(projectConfig.ui.languages.pt.status_rd_done, 'Executado organizado.');
-  assert.equal(projectConfig.ui.languages.pt.executed_depth_prompt, 'Informe a profundidade de projeto em metros (ex: 10).');
-  assert.equal(projectConfig.ui.languages.pt.executed_depth_invalid, 'Informe uma profundidade de projeto valida maior que zero.');
-  assert.equal(projectConfig.ui.languages.pt.metrics.project_depth, 'Profundidade de projeto');
+  assert.equal(projectConfig.ui.languages.pt.executed_depth_prompt, 'Informe a profundidade a ser aplicada a todos os furos (ex: 10).');
+  assert.equal(projectConfig.ui.languages.pt.executed_depth_invalid, 'Informe uma profundidade valida maior que zero.');
+  assert.equal(projectConfig.ui.languages.pt.metrics.project_depth, 'Profundidade aplicada');
+  assert.equal(projectConfig.ui.languages.en.executed_depth_prompt, 'Enter the depth to apply to all holes (e.g. 10).');
+  assert.equal(projectConfig.ui.languages.en.executed_depth_invalid, 'Enter a valid depth greater than zero.');
+  assert.equal(projectConfig.ui.languages.en.metrics.project_depth, 'Applied depth');
+  assert.equal(projectConfig.ui.languages.zh.executed_depth_prompt, '请输入要应用到所有孔的深度（米，例如 10）。');
+  assert.equal(projectConfig.ui.languages.zh.executed_depth_invalid, '请输入大于 0 的有效深度。');
+  assert.equal(projectConfig.ui.languages.zh.metrics.project_depth, '应用深度');
   assert.deepEqual(projectConfig.columns.rd_only, ['ID', 'Y', 'X', 'Z', 'Profundidade']);
   assert.equal(projectConfig.output.rd_only_file_name, 'RD_EXECUTADO_ORGANIZADO.xlsx');
   assert.equal(projectConfig.output.sheets.executed, 'RD_EXECUTADO');

@@ -111,11 +111,13 @@ def main() -> int:
     assert rd_only_wb.sheetnames == ["RD_EXECUTADO"]
     rd_headers = [cell.value for cell in rd_only_wb["RD_EXECUTADO"][1]]
     assert rd_headers == ["ID", "Y", "X", "Z", "Profundidade"]
-    assert rd_only_wb["RD_EXECUTADO"][2][0].value == "E-1"
+    assert rd_only_wb["RD_EXECUTADO"][2][0].value == 1
     assert rd_only_wb["RD_EXECUTADO"][2][1].value == 11
     assert rd_only_wb["RD_EXECUTADO"][2][2].value == 21
     assert rd_only_wb["RD_EXECUTADO"][2][3].value == 292
-    assert rd_only_wb["RD_EXECUTADO"][2][4].value == 12
+    assert rd_only_wb["RD_EXECUTADO"][2][4].value == 10
+    assert rd_only_wb["RD_EXECUTADO"][3][0].value == 2
+    assert rd_only_wb["RD_EXECUTADO"][3][4].value == 10
     rd_only_download_path.unlink(missing_ok=True)
     rd_only_input_path.unlink(missing_ok=True)
     return 0
