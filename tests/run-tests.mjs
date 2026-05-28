@@ -75,7 +75,7 @@ test('buildConsolidatedRows falls back to MVV values', () => {
   const { consolidatedRows, summary } = buildConsolidatedRows(mvvRows, selected, 2, 1);
   assert.equal(consolidatedRows[0].ID_FINAL, 'L-1');
   assert.equal(consolidatedRows[1].ID_FINAL, 2);
-  assert.equal(consolidatedRows[0].PROFUNDIDADE_FINAL, 12);
+  assert.equal(consolidatedRows[0].PROFUNDIDADE_FINAL, 11);
   assert.equal(consolidatedRows[1].PROFUNDIDADE_FINAL, 13);
   assert.equal(summary.rdMatchedCount, 1);
   assert.equal(summary.rdMissingCount, 1);

@@ -103,7 +103,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - `E-` so e usado quando nao houver `L-` para o mesmo furo.
 - Em duplicidade com o mesmo prefixo, o primeiro registro valido e mantido.
 - A ordem final segue a MVV.
-- `PROFUNDIDADE_FINAL` usa `(Z_RD + Sub Drill) - Z Toe` quando RD existir.
+- `PROFUNDIDADE_FINAL` usa `Z_RD - Z Toe` quando RD existir.
 - Sem RD, `PROFUNDIDADE_FINAL` usa `Depth` da MVV.
 - No fluxo RD-only, `Profundidade` e igual ao valor informado pelo usuario para todas as linhas.
 - No fluxo RD-only, `ID` usa o numero do furo sem prefixo e sem caracteres nao numericos.

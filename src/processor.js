@@ -155,7 +155,7 @@ export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefi
     const yFinal = firstNonBlank(rdRow ? rdRow.Y_RD : null, row['Y Collar']);
     const xFinal = firstNonBlank(rdRow ? rdRow.X_RD : null, row['X Collar']);
     const zCollarFinal = firstNonBlank(rdRow ? rdRow.Z_RD : null, row['Z Collar']);
-    const profundidadeFinal = rdRow ? (rdRow.Z_RD + row['Sub Drill']) - row['Z Toe'] : row.Depth;
+    const profundidadeFinal = rdRow ? rdRow.Z_RD - row['Z Toe'] : row.Depth;
 
     consolidatedRows.push({
       ID: row.ID,
