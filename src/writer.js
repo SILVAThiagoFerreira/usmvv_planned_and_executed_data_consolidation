@@ -68,7 +68,7 @@ function applyDataStyle(sheet, headers, config, finalColumns) {
       };
 
       if (numericHeaders.has(header) && cell.value !== null && cell.value !== undefined && cell.value !== '') {
-        cell.numFmt = config.formatting.numeric_format;
+        cell.numFmt = getNumericFormatForHeader(header, config);
         cell.alignment = { vertical: 'middle', horizontal: 'right' };
       }
 
@@ -91,7 +91,7 @@ function autoFitColumns(sheet, headers, config) {
       if (cell.value === null || cell.value === undefined) {
         text = '';
       } else if (numericHeaders.has(header) && typeof cell.value === 'number') {
-        text = cell.value.toFixed(3);
+        text = cell.value.toFixed(header === 'PROFUNDIDADE_FINAL' ? 2 : 3);
       } else {
         text = String(cell.value);
       }
@@ -99,6 +99,12 @@ function autoFitColumns(sheet, headers, config) {
     });
     sheet.getColumn(idx + 1).width = Math.max(minWidth, Math.min(maxWidth, maxLength + 2));
   });
+}
+
+export function getNumericFormatForHeader(header, config) {
+  return header === 'PROFUNDIDADE_FINAL'
+    ? config.formatting.profundidade_final_format
+    : config.formatting.numeric_format;
 }
 
 function addTableSheet(workbook, sheetName, headers, rows, config, options = {}) {

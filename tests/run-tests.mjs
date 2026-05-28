@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buildConsolidatedRows, buildMvvPlanRows, buildRdOnlyRows, deduplicateRdRows } from '../src/processor.js';
+import { getNumericFormatForHeader } from '../src/writer.js';
 import { normalizeHoleKey } from '../src/utils.js';
 
 const projectConfig = JSON.parse(readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
@@ -80,6 +81,12 @@ test('buildConsolidatedRows falls back to MVV values', () => {
   assert.equal(summary.rdMatchedCount, 1);
   assert.equal(summary.rdMissingCount, 1);
   assert.deepEqual(summary.missingHoles, ['2']);
+});
+
+test('profundidade final uses a dedicated 2-decimal format', () => {
+  const workbookConfig = JSON.parse(readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
+  assert.equal(getNumericFormatForHeader('PROFUNDIDADE_FINAL', workbookConfig), '0.00');
+  assert.equal(getNumericFormatForHeader('Z_RD', workbookConfig), '0.000');
 });
 
 test('config exposes localized ui packs', () => {

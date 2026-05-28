@@ -166,6 +166,7 @@
     "final_fill": "E2F0D9",
     "section_fill": "FFF2CC",
     "numeric_format": "0.000",
+    "profundidade_final_format": "0.00",
     "freeze_panes": "A2",
     "min_width": 10,
     "max_width": 36,

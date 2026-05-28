@@ -105,6 +105,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - A ordem final segue a MVV.
 - `PROFUNDIDADE_FINAL` usa `Z_RD - Z Toe` quando RD existir.
 - Sem RD, `PROFUNDIDADE_FINAL` usa `Depth` da MVV.
+- `PROFUNDIDADE_FINAL` e formatada com 2 casas decimais no workbook final.
 - No fluxo RD-only, `Profundidade` e igual ao valor informado pelo usuario para todas as linhas.
 - No fluxo RD-only, `ID` usa o numero do furo sem prefixo e sem caracteres nao numericos.
 
