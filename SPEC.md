@@ -25,8 +25,8 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - O status inicial em portugues exibe `Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.`
 - Quando apenas o arquivo executado estiver carregado, o status deve indicar que o usuario pode organizar somente o executado.
 - Os titulos em portugues usam `ARQUIVOS DE ORIGEM`, `Resumo:` e `LOG`.
-- `E-` tem prioridade sobre `L_` na RD.
-- Se houver ambos para o mesmo furo, `E-` e mantido na base tratada.
+- `L-` tem prioridade sobre `E-` e `L_` na RD.
+- Se houver ambos para o mesmo furo, `L-` e mantido na base tratada.
 - Se nao houver RD para um furo, os campos finais usam MVV.
 - O workbook final e gerado como download.
 - A interface tambem permite anexar somente o arquivo planejado e gerar um plano planejado organizado, sem exigir realizado.
@@ -99,8 +99,8 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 ## Regras de processamento
 
 - O identificador de comparacao e o numero do furo sem prefixo.
-- `L_157` e `E-157` mapeiam para `157`.
-- `E-` sempre substitui `L_` para o mesmo furo.
+- `L_157`, `L-157` e `E-157` mapeiam para `157`.
+- `E-` so e usado quando nao houver `L-` para o mesmo furo.
 - Em duplicidade com o mesmo prefixo, o primeiro registro valido e mantido.
 - A ordem final segue a MVV.
 - `PROFUNDIDADE_FINAL` usa `(Z_RD + Sub Drill) - Z Toe` quando RD existir.
@@ -115,7 +115,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - MVV deve ter as colunas numericas validas para o calculo.
 - RD deve ter exatamente 5 campos.
 - O segundo campo da RD deve estar vazio.
-- IDs da RD devem iniciar com `L_` ou `E-`.
+- IDs da RD devem iniciar com `L-`, `L_` ou `E-`.
 - Coordenadas da RD devem ser numericas.
 - Arquivos invalidos bloqueiam o processamento.
 - A profundidade informada para o fluxo RD-only deve ser numerica e maior que zero.

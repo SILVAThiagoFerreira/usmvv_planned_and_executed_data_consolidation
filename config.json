@@ -92,13 +92,13 @@
   },
   "matching": {
     "prefix_priority": [
-      "E-",
       "L-",
+      "E-",
       "L_"
     ],
     "strip_prefixes": [
-      "E-",
       "L-",
+      "E-",
       "L_"
     ],
     "prefer_first_within_same_prefix": true

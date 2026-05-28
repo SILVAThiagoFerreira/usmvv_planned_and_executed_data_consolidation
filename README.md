@@ -20,7 +20,7 @@ Para organizar somente o executado, anexe `REALIZADO.txt`, informe a profundidad
 - Processamento 100% client-side.
 - Sem backend e sem envio dos arquivos para servidor.
 - Validacao antes do processamento.
-- Deduplicacao da RD com prioridade `E-` sobre `L_`.
+- Deduplicacao da RD com prioridade `L-` sobre `E-` e `L_`.
 - Seletor de idioma para portugues, ingles e chines simplificado.
 - Interface minimalista com fundo branco e logo Enaex pequeno no topo esquerdo.
 - Workbook final com `CONSOLIDADO_FINAL`, `RD_TRATADA` e `LOG_VALIDACAO`.
