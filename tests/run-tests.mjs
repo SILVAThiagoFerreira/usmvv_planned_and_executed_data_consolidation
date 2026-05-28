@@ -152,3 +152,10 @@ test('legacy branding is removed', () => {
   assert.equal(configText.includes(legacyTitle), false);
   assert.equal(configText.includes(legacyEyebrow), false);
 });
+
+test('brand uses the enaex brasil asset', async () => {
+  const { readFileSync } = await import('node:fs');
+  const indexHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(indexHtml, /src="\.\/assets\/enaex-brasil\.png"/);
+  assert.match(indexHtml, /alt="Enaex Brasil"/);
+});

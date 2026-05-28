@@ -51,41 +51,12 @@ body {
   min-width: 0;
 }
 
-.brand-mark {
-  position: relative;
-  flex: 0 0 auto;
-  width: 34px;
-  height: 24px;
-}
-
-.brand-mark::before,
-.brand-mark::after {
-  content: "";
-  position: absolute;
-  background: var(--enaex-red);
-}
-
-.brand-mark::before {
-  left: 0;
-  top: 8px;
-  width: 14px;
-  height: 10px;
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-}
-
-.brand-mark::after {
-  right: 0;
-  top: 0;
-  width: 24px;
-  height: 24px;
-  clip-path: polygon(50% 0, 64% 31%, 100% 31%, 72% 52%, 83% 100%, 50% 74%, 17% 100%, 28% 52%, 0 31%, 36% 31%);
-}
-
-.brand-word {
-  color: var(--ink);
-  font-weight: 700;
-  font-size: 1.02rem;
-  line-height: 1;
+.brand-logo {
+  display: block;
+  width: auto;
+  height: 34px;
+  max-width: min(240px, 52vw);
+  object-fit: contain;
 }
 
 .top-meta {
