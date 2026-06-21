@@ -14,7 +14,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - A troca de idioma altera apenas a interface da pagina, nao o workbook gerado.
 - O titulo exibido e `US Vale Verde PLAN/EXEC Data Console`.
 - A marca antiga nao aparece na interface.
-- A interface usa fundo branco, estilo minimalista e logo Enaex pequeno no topo esquerdo.
+- A interface usa fundo branco, estilo minimalista e logo OpenBlast pequeno no topo esquerdo.
 - O badge `Somente local` nao aparece na interface.
 - O botao principal em portugues exibe `Gerar Dado Consolidado Planejado vs Realizado`.
 - O botao MVV-only em portugues exibe `Organize Somente o Dado Planejado`.

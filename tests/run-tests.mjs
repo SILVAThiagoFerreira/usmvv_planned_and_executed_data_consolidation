@@ -160,9 +160,9 @@ test('legacy branding is removed', () => {
   assert.equal(configText.includes(legacyEyebrow), false);
 });
 
-test('brand uses the enaex brasil asset', async () => {
+test('brand uses the OpenBlast asset', async () => {
   const { readFileSync } = await import('node:fs');
   const indexHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-  assert.match(indexHtml, /src="\.\/assets\/enaex-brasil\.png"/);
-  assert.match(indexHtml, /alt="Enaex Brasil"/);
+  assert.match(indexHtml, /src="\.\/assets\/openblast-logo\.png"/);
+  assert.match(indexHtml, /alt="OpenBlast"/);
 });

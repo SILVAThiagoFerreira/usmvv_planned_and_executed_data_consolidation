@@ -1,5 +1,5 @@
 :root {
-  --enaex-red: #e30613;
+  --openblast-red: #e30613;
   --ink: #171717;
   --muted: #6c7177;
   --line: #e6e8eb;
@@ -135,7 +135,7 @@ p {
 
 .eyebrow {
   margin-bottom: 12px;
-  color: var(--enaex-red);
+  color: var(--openblast-red);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -177,7 +177,7 @@ h1 {
 .signal-row span {
   display: block;
   margin-bottom: 8px;
-  color: var(--enaex-red);
+  color: var(--openblast-red);
   font-family: "IBM Plex Mono", Consolas, monospace;
   font-size: 0.72rem;
   font-weight: 700;
@@ -235,12 +235,12 @@ h1 {
 
 .dropzone:hover,
 .dropzone.is-active {
-  border-color: var(--enaex-red);
+  border-color: var(--openblast-red);
   background: #fff7f7;
 }
 
 .dropzone-label {
-  color: var(--enaex-red);
+  color: var(--openblast-red);
   font-size: 0.76rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -286,7 +286,7 @@ h1 {
 
 .primary {
   color: var(--white);
-  background: var(--enaex-red);
+  background: var(--openblast-red);
 }
 
 .primary:disabled {

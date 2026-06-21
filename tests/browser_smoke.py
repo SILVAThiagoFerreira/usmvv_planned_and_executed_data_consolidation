@@ -33,7 +33,7 @@ def main() -> int:
         page = browser.new_page(accept_downloads=True)
         page.goto(args.base_url, wait_until="domcontentloaded")
         page.wait_for_selector("#statusText")
-        page.wait_for_function("document.querySelector('.brand-logo')?.getAttribute('src') === './assets/enaex-brasil.png'")
+        page.wait_for_function("document.querySelector('.brand-logo')?.getAttribute('src') === './assets/openblast-logo.png'")
         page.wait_for_function("document.documentElement.lang === 'pt-BR'")
         page.wait_for_function("document.querySelector('#languageSelect')?.value === 'pt'")
         page.wait_for_function("document.querySelector('#appSubtitle')?.hidden === true")

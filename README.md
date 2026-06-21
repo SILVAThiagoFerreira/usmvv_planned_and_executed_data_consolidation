@@ -22,7 +22,7 @@ Para organizar somente o executado, anexe `REALIZADO.txt`, informe a profundidad
 - Validacao antes do processamento.
 - Deduplicacao da RD com prioridade `L-` sobre `E-` e `L_`.
 - Seletor de idioma para portugues, ingles e chines simplificado.
-- Interface minimalista com fundo branco e logo Enaex pequeno no topo esquerdo.
+- Interface minimalista com fundo branco e logo OpenBlast pequeno no topo esquerdo.
 - Workbook final com `CONSOLIDADO_FINAL`, `RD_TRATADA` e `LOG_VALIDACAO`.
 - Exportacao MVV-only com a aba `PLANO_MVV` e somente as colunas configuradas.
 
