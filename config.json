@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "US Vale Verde PLAN/EXEC Data Console",
+    "title": "Consolidação Plan./Exec. | Console de Dados",
     "description": "Processamento client-side para consolidar MVV.xlsx e RD.txt"
   },
   "files": {
@@ -237,7 +237,7 @@
           "en": "Ingles",
           "zh": "Chines"
         },
-        "eyebrow": "Console de Dados US Vale Verde",
+        "eyebrow": "Console de Dados",
         "app_subtitle": "",
         "header_label": "Cabecalho da aplicacao",
         "workflow_label": "Fluxo de trabalho",
@@ -289,7 +289,7 @@
           "en": "English",
           "zh": "Chinese"
         },
-        "eyebrow": "US Vale Verde Data Console",
+        "eyebrow": "Data Console",
         "app_subtitle": "Local validation. Controlled Excel output.",
         "header_label": "Application header",
         "workflow_label": "Workflow",
@@ -341,7 +341,7 @@
           "en": "英语",
           "zh": "中文"
         },
-        "eyebrow": "US Vale Verde 数据控制台",
+        "eyebrow": "数据控制台",
         "app_subtitle": "本地校验。受控 Excel 输出。",
         "header_label": "应用程序标题",
         "workflow_label": "工作流程",

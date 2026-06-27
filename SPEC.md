@@ -12,7 +12,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - A interface abre em portugues por padrao.
 - O seletor de idioma permite portugues, ingles e chines simplificado.
 - A troca de idioma altera apenas a interface da pagina, nao o workbook gerado.
-- O titulo exibido e `US Vale Verde PLAN/EXEC Data Console`.
+- O titulo exibido e `Consolidação Plan./Exec. | Console de Dados`.
 - A marca antiga nao aparece na interface.
 - A interface usa fundo branco, estilo minimalista e logo OpenBlast pequeno no topo esquerdo.
 - O badge `Somente local` nao aparece na interface.
