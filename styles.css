@@ -94,7 +94,7 @@ body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
   grid-template-areas:
-    "intro results"
+    "intro intro"
     "upload results";
   gap: 18px;
   align-items: start;
@@ -102,7 +102,7 @@ body {
 
 .intro-panel {
   grid-area: intro;
-  padding: 22px 0 10px;
+  padding: 10px 0 2px;
 }
 
 .panel {
@@ -146,7 +146,8 @@ p {
 h1 {
   max-width: none;
   color: var(--enaex-gray);
-  font-size: clamp(1.15rem, 2vw, 1.8rem);
+  font-size: clamp(1.15rem, 1.7vw, 1.55rem);
+  letter-spacing: -0.02em;
   font-weight: 700;
   line-height: 1.1;
   white-space: nowrap;
@@ -246,6 +247,15 @@ h1 {
   gap: 10px;
   margin-top: 12px;
   flex-wrap: wrap;
+}
+
+.actions .primary {
+  flex: 1 1 310px;
+}
+
+.actions .secondary,
+.actions a {
+  flex: 0 1 auto;
 }
 
 .executed-options {
@@ -519,6 +529,10 @@ h1 {
       "intro"
       "upload"
       "results";
+  }
+
+  h1 {
+    font-size: clamp(1.1rem, 3vw, 1.55rem);
   }
 }
 
