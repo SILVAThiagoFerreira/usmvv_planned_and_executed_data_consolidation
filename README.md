@@ -13,7 +13,7 @@ Tambem permite anexar somente o arquivo executado para baixar `RD_EXECUTADO_ORGA
 5. Baixe a planilha gerada.
 
 Para organizar somente o dado planejado, anexe `PLANEJADO.xlsx`, clique em `Organize Somente o Dado Planejado` e baixe o workbook gerado.
-Para organizar somente o executado, anexe `REALIZADO.txt`, informe a profundidade que sera aplicada a todos os furos quando solicitado e baixe o workbook gerado.
+Para organizar somente o executado, anexe `REALIZADO.txt`. Informe a cota do pé; a profundidade será calculada pela diferença entre a cota de topo do arquivo e a cota do pé. Se houver subfuração, informe também o valor, que será somado ao resultado.
 
 ## Caracteristicas
 

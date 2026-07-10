@@ -57,10 +57,10 @@ test('buildRdOnlyRows maps treated RD rows to configured output columns', () => 
     },
   };
 
-  const rows = buildRdOnlyRows(treatedRows, rdOnlyConfig, 10);
+  const rows = buildRdOnlyRows(treatedRows, rdOnlyConfig, 270, 1.5);
   assert.deepEqual(rows, [
-    { ID: 1, Y: 11, X: 21, Z: 292, Profundidade: 10 },
-    { ID: 2, Y: 12, X: 22, Z: 280, Profundidade: 10 },
+    { ID: 1, Y: 11, X: 21, Z: 292, Profundidade: 23.5 },
+    { ID: 2, Y: 12, X: 22, Z: 280, Profundidade: 11.5 },
   ]);
 });
 
@@ -112,15 +112,14 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.languages.pt.status_ready_mvv, 'Pronto para organizar somente o planejado.');
   assert.equal(projectConfig.ui.languages.pt.status_ready_rd, 'Pronto para organizar somente o executado.');
   assert.equal(projectConfig.ui.languages.pt.status_rd_done, 'Executado organizado.');
-  assert.equal(projectConfig.ui.languages.pt.executed_depth_prompt, 'Informe a profundidade a ser aplicada a todos os furos (ex: 10).');
-  assert.equal(projectConfig.ui.languages.pt.executed_depth_invalid, 'Informe uma profundidade valida maior que zero.');
-  assert.equal(projectConfig.ui.languages.pt.metrics.project_depth, 'Profundidade aplicada');
-  assert.equal(projectConfig.ui.languages.en.executed_depth_prompt, 'Enter the depth to apply to all holes (e.g. 10).');
-  assert.equal(projectConfig.ui.languages.en.executed_depth_invalid, 'Enter a valid depth greater than zero.');
-  assert.equal(projectConfig.ui.languages.en.metrics.project_depth, 'Applied depth');
-  assert.equal(projectConfig.ui.languages.zh.executed_depth_prompt, '请输入要应用到所有孔的深度（米，例如 10）。');
-  assert.equal(projectConfig.ui.languages.zh.executed_depth_invalid, '请输入大于 0 的有效深度。');
-  assert.equal(projectConfig.ui.languages.zh.metrics.project_depth, '应用深度');
+  assert.equal(projectConfig.ui.languages.pt.toe_elevation_label, 'Cota do pé (m)');
+  assert.equal(projectConfig.ui.languages.pt.subdrilling_question, 'Terá subfuração?');
+  assert.equal(projectConfig.ui.languages.pt.metrics.toe_elevation, 'Cota do pé');
+  assert.equal(projectConfig.ui.languages.pt.metrics.subdrilling, 'Subfuração');
+  assert.equal(projectConfig.ui.languages.en.toe_elevation_label, 'Toe elevation (m)');
+  assert.equal(projectConfig.ui.languages.en.metrics.toe_elevation, 'Toe elevation');
+  assert.equal(projectConfig.ui.languages.en.metrics.subdrilling, 'Subdrilling');
+  assert.equal(projectConfig.ui.languages.zh.toe_elevation_label, '孔底标高（米）');
   assert.deepEqual(projectConfig.columns.rd_only, ['ID', 'Y', 'X', 'Z', 'Profundidade']);
   assert.equal(projectConfig.output.rd_only_file_name, 'RD_EXECUTADO_ORGANIZADO.xlsx');
   assert.equal(projectConfig.output.sheets.executed, 'RD_EXECUTADO');

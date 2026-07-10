@@ -30,7 +30,8 @@ function renderSummary(summaryCards, languagePack, summary) {
       [languagePack.metrics.rd_raw_count, summary.rdRawCount],
       [languagePack.metrics.rd_unique_count, summary.rdUniqueCount],
       [languagePack.metrics.dual_prefix_count, summary.dualPrefixCount],
-      [languagePack.metrics.project_depth, `${summary.projectDepth.toFixed(3)} m`],
+      [languagePack.metrics.toe_elevation, `${summary.toeElevation.toFixed(3)} m`],
+      [languagePack.metrics.subdrilling, `${summary.subdrilling.toFixed(3)} m`],
     ];
   } else {
     metrics = [
@@ -130,6 +131,22 @@ export async function bootstrapApp() {
   const detailsBadge = qs('detailsBadge');
   const summaryCards = qs('summaryCards');
   const logOutput = qs('logOutput');
+  const executedOptions = qs('executedOptions');
+  const executedOptionsTitle = qs('executedOptionsTitle');
+  const executedOptionsHint = qs('executedOptionsHint');
+  const toeElevationLabel = qs('toeElevationLabel');
+  const subdrillingLegend = qs('subdrillingLegend');
+  const subdrillingNoLabel = qs('subdrillingNoLabel');
+  const subdrillingYesLabel = qs('subdrillingYesLabel');
+  const subdrillingValueField = qs('subdrillingValueField');
+  const subdrillingValueLabel = qs('subdrillingValueLabel');
+  const depthFormula = qs('depthFormula');
+  const cancelExecutedOptions = qs('cancelExecutedOptions');
+  const cancelExecutedOptionsSecondary = qs('cancelExecutedOptionsSecondary');
+  const confirmExecutedOptions = qs('confirmExecutedOptions');
+  const toeElevationInput = qs('toeElevationInput');
+  const subdrillingValueInput = qs('subdrillingValueInput');
+  const executedOptionsError = qs('executedOptionsError');
 
   document.title = config.app.title;
   const state = {
@@ -145,15 +162,20 @@ export async function bootstrapApp() {
 
   const currentUi = () => getLanguagePack(config, state.language);
 
-  const parseProjectDepthInput = (value) => {
+  const parseNumberInput = (value) => {
     if (value === null || value === undefined) return null;
     const normalized = String(value).trim().replace(',', '.');
     if (!normalized) return null;
     const match = normalized.match(/-?\d+(?:\.\d+)?/);
     if (!match) return null;
-    const depth = Number(match[0]);
-    if (!Number.isFinite(depth) || depth <= 0) return null;
-    return depth;
+    const number = Number(match[0]);
+    return Number.isFinite(number) ? number : null;
+  };
+
+  const closeExecutedOptions = () => {
+    executedOptions.hidden = true;
+    executedOptionsError.hidden = true;
+    executedOptions.reset();
   };
 
   const updateStatus = () => {
@@ -247,6 +269,17 @@ export async function bootstrapApp() {
     generateBtn.textContent = ui.primary_action;
     rdOnlyBtn.textContent = ui.rd_only_action;
     mvvOnlyBtn.textContent = ui.mvv_only_action;
+    executedOptionsTitle.textContent = ui.executed_options_title;
+    executedOptionsHint.textContent = ui.executed_options_hint;
+    toeElevationLabel.textContent = ui.toe_elevation_label;
+    subdrillingLegend.textContent = ui.subdrilling_question;
+    subdrillingNoLabel.textContent = ui.no_label;
+    subdrillingYesLabel.textContent = ui.yes_label;
+    subdrillingValueLabel.textContent = ui.subdrilling_value_label;
+    depthFormula.textContent = ui.depth_formula;
+    cancelExecutedOptions.textContent = '×';
+    cancelExecutedOptionsSecondary.textContent = ui.cancel_action;
+    confirmExecutedOptions.textContent = ui.confirm_executed_action;
     downloadLink.textContent = `${ui.download_action} ${state.outputFileName}`;
 
     if (state.summary && (state.phase === 'done' || state.phase === 'mvv_done' || state.phase === 'rd_done')) {
@@ -370,24 +403,44 @@ export async function bootstrapApp() {
   rdOnlyBtn.addEventListener('click', async () => {
     if (!state.rd) return;
 
-    const ui = currentUi();
-    const response = window.prompt(ui.executed_depth_prompt, '');
-    if (response === null) return;
+    executedOptions.hidden = false;
+    toeElevationInput.focus();
+  });
 
-    const projectDepth = parseProjectDepthInput(response);
-    if (projectDepth === null) {
-      window.alert(ui.executed_depth_invalid);
+  document.querySelectorAll('input[name="subdrilling"]').forEach((input) => {
+    input.addEventListener('change', () => {
+      subdrillingValueField.hidden = input.value !== 'yes' || !input.checked;
+      if (input.value === 'no' && input.checked) subdrillingValueInput.value = '';
+    });
+  });
+
+  [cancelExecutedOptions, cancelExecutedOptionsSecondary].forEach((button) => {
+    button.addEventListener('click', closeExecutedOptions);
+  });
+
+  executedOptions.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!state.rd) return;
+
+    const ui = currentUi();
+    const toeElevation = parseNumberInput(toeElevationInput.value);
+    const hasSubdrilling = document.querySelector('input[name="subdrilling"]:checked')?.value === 'yes';
+    const subdrilling = hasSubdrilling ? parseNumberInput(subdrillingValueInput.value) : 0;
+    if (toeElevation === null || (hasSubdrilling && (subdrilling === null || subdrilling < 0))) {
+      executedOptionsError.textContent = ui.executed_options_invalid;
+      executedOptionsError.hidden = false;
       return;
     }
 
     try {
+      closeExecutedOptions();
       clearGeneratedOutput();
       state.phase = 'working';
       updateStatus();
       updateLog();
 
       await new Promise((resolve) => setTimeout(resolve, 0));
-      const result = await runRdOnlyPipeline({ config, rdFile: state.rd, projectDepth });
+      const result = await runRdOnlyPipeline({ config, rdFile: state.rd, toeElevation, subdrilling });
 
       const blob = new Blob([result.buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

@@ -256,8 +256,17 @@
         "primary_action": "Gerar Dado Consolidado Planejado vs Realizado",
         "mvv_only_action": "Organize Somente o Dado Planejado",
         "rd_only_action": "Organize Somente o Executado",
-        "executed_depth_prompt": "Informe a profundidade a ser aplicada a todos os furos (ex: 10).",
-        "executed_depth_invalid": "Informe uma profundidade valida maior que zero.",
+        "executed_options_title": "Dados para calcular a profundidade",
+        "executed_options_hint": "A cota de topo vem do arquivo REALIZADO.txt.",
+        "toe_elevation_label": "Cota do pé (m)",
+        "subdrilling_question": "Terá subfuração?",
+        "subdrilling_value_label": "Subfuração (m)",
+        "yes_label": "Sim",
+        "no_label": "Não",
+        "depth_formula": "Profundidade = cota de topo − cota do pé + subfuração",
+        "executed_options_invalid": "Informe uma cota do pé válida e, se aplicável, uma subfuração igual ou maior que zero. A profundidade calculada também deve ser maior que zero.",
+        "cancel_action": "Cancelar",
+        "confirm_executed_action": "Calcular e organizar",
         "download_action": "Baixar",
         "status_idle": "Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.",
         "status_ready": "Pronto para processar.",
@@ -278,7 +287,8 @@
           "rd_missing_count": "Ausentes",
           "dual_prefix_count": "Prefixos duplos",
           "mvv_plan_columns_count": "Colunas",
-          "project_depth": "Profundidade aplicada"
+          "toe_elevation": "Cota do pé",
+          "subdrilling": "Subfuração"
         }
       },
       "en": {
@@ -308,8 +318,17 @@
         "primary_action": "Generate workbook",
         "mvv_only_action": "Organize MVV only",
         "rd_only_action": "Organize executed only",
-        "executed_depth_prompt": "Enter the depth to apply to all holes (e.g. 10).",
-        "executed_depth_invalid": "Enter a valid depth greater than zero.",
+        "executed_options_title": "Depth calculation data",
+        "executed_options_hint": "The top elevation comes from REALIZADO.txt.",
+        "toe_elevation_label": "Toe elevation (m)",
+        "subdrilling_question": "Will there be subdrilling?",
+        "subdrilling_value_label": "Subdrilling (m)",
+        "yes_label": "Yes",
+        "no_label": "No",
+        "depth_formula": "Depth = top elevation − toe elevation + subdrilling",
+        "executed_options_invalid": "Enter a valid toe elevation and, when applicable, a subdrilling value of zero or more. The calculated depth must also be greater than zero.",
+        "cancel_action": "Cancel",
+        "confirm_executed_action": "Calculate and organize",
         "download_action": "Download",
         "status_idle": "Attach MVV.xlsx to organize MVV or also attach RD.txt to consolidate.",
         "status_ready": "Ready to process.",
@@ -330,7 +349,8 @@
           "rd_missing_count": "Missing",
           "dual_prefix_count": "Dual prefix",
           "mvv_plan_columns_count": "Columns",
-          "project_depth": "Applied depth"
+          "toe_elevation": "Toe elevation",
+          "subdrilling": "Subdrilling"
         }
       },
       "zh": {
@@ -360,8 +380,17 @@
         "primary_action": "生成工作簿",
         "mvv_only_action": "仅整理 MVV",
         "rd_only_action": "仅整理已执行",
-        "executed_depth_prompt": "请输入要应用到所有孔的深度（米，例如 10）。",
-        "executed_depth_invalid": "请输入大于 0 的有效深度。",
+        "executed_options_title": "深度计算数据",
+        "executed_options_hint": "顶部标高来自 REALIZADO.txt。",
+        "toe_elevation_label": "孔底标高（米）",
+        "subdrilling_question": "是否有超深？",
+        "subdrilling_value_label": "超深（米）",
+        "yes_label": "是",
+        "no_label": "否",
+        "depth_formula": "深度 = 顶部标高 − 孔底标高 + 超深",
+        "executed_options_invalid": "请输入有效的孔底标高，以及必要时大于或等于零的超深值。计算出的深度也必须大于零。",
+        "cancel_action": "取消",
+        "confirm_executed_action": "计算并整理",
         "download_action": "下载",
         "status_idle": "请附加 MVV.xlsx 以整理 MVV，或同时附加 RD.txt 以合并。",
         "status_ready": "已准备好处理。",
@@ -382,7 +411,8 @@
           "rd_missing_count": "缺失",
           "dual_prefix_count": "双前缀",
           "mvv_plan_columns_count": "列",
-          "project_depth": "应用深度"
+          "toe_elevation": "孔底标高",
+          "subdrilling": "超深"
         }
       }
     }

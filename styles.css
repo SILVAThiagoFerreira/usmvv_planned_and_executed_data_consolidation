@@ -97,6 +97,7 @@ body {
     "intro results"
     "upload results";
   gap: 18px;
+  align-items: start;
 }
 
 .intro-panel {
@@ -144,9 +145,9 @@ p {
 }
 
 h1 {
-  max-width: 18ch;
+  max-width: 22ch;
   color: var(--enaex-gray);
-  font-size: clamp(2.15rem, 5vw, 4.45rem);
+  font-size: clamp(2rem, 4vw, 3.65rem);
   font-weight: 700;
   line-height: 0.98;
 }
@@ -268,6 +269,110 @@ h1 {
   gap: 10px;
   margin-top: 18px;
   flex-wrap: wrap;
+}
+
+.executed-options {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #fbfbfc;
+}
+
+.options-heading,
+.options-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.options-kicker {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--enaex-red);
+  font: 600 0.7rem "IBM Plex Mono", Consolas, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.options-heading h3 {
+  font-size: 1rem;
+}
+
+.options-close {
+  border: 0;
+  padding: 2px 6px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.executed-options > p:not(.formula):not(.form-error) {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  color: var(--enaex-gray);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.field input[type="number"] {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--enaex-gray);
+  background: var(--white);
+  font: inherit;
+}
+
+.choice-field {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.choice-field label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 12px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.formula {
+  margin-top: 14px;
+  color: var(--muted);
+  font: 0.78rem "IBM Plex Mono", Consolas, monospace;
+}
+
+.options-actions {
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.form-error {
+  margin-top: 10px;
+  color: var(--danger) !important;
+  font-size: 0.85rem;
 }
 
 .primary,
@@ -462,7 +567,8 @@ h1 {
 
   .signal-row,
   .upload-grid,
-  .summary-grid {
+  .summary-grid,
+  .options-grid {
     grid-template-columns: 1fr;
   }
 

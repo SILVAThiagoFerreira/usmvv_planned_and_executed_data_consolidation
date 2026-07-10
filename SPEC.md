@@ -90,7 +90,8 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 ### RD-only
 
 - Entrada: somente o arquivo executado `.txt`.
-- O usuario informa a profundidade em metros ao acionar o fluxo, e o valor e aplicado igualmente a todos os furos.
+- O usuario informa a cota do pé em metros ao acionar o fluxo.
+- O usuario informa se haverá subfuração; quando sim, informa seu valor em metros.
 - Saida: workbook `RD_EXECUTADO_ORGANIZADO.xlsx`.
 - Aba: `RD_EXECUTADO`.
 - Colunas: `ID`, `Y`, `X`, `Z`, `Profundidade`.
@@ -106,7 +107,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - `PROFUNDIDADE_FINAL` usa `Z_RD - Z Toe` quando RD existir.
 - Sem RD, `PROFUNDIDADE_FINAL` usa `Depth` da MVV.
 - `PROFUNDIDADE_FINAL` e formatada com 2 casas decimais no workbook final.
-- No fluxo RD-only, `Profundidade` e igual ao valor informado pelo usuario para todas as linhas.
+- No fluxo RD-only, `Profundidade` e calculada por `Z (cota de topo) - cota do pé + subfuração` para cada linha.
 - No fluxo RD-only, `ID` usa o numero do furo sem prefixo e sem caracteres nao numericos.
 
 ## Validacao

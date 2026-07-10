@@ -24,10 +24,10 @@
 ## Sequencia RD-only
 
 1. O usuario anexa somente `REALIZADO.txt`.
-2. `src/app.js` solicita a profundidade a aplicar a todos os furos.
+2. `src/app.js` solicita a cota do pé e pergunta se haverá subfuração.
 3. `src/reader.js` le a RD.
 4. `src/validator.js` valida a estrutura da RD.
-5. `src/processor.js` deduplica a RD, normaliza `ID` para numero e aplica a profundidade informada em todas as linhas.
+5. `src/processor.js` deduplica a RD, normaliza `ID` para numero e calcula `Z - cota do pé + subfuração` em cada linha.
 6. `src/writer.js` gera `RD_EXECUTADO_ORGANIZADO.xlsx` com uma unica aba.
 7. `src/app.js` libera o download e mostra o resumo.
 

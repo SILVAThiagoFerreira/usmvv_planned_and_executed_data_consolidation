@@ -73,6 +73,38 @@
             <a id="downloadLink" class="secondary" hidden>Baixar MVV_RD_CONSOLIDADO_FINAL.xlsx</a>
           </div>
 
+          <form id="executedOptions" class="executed-options" hidden>
+            <div class="options-heading">
+              <div>
+                <span class="options-kicker">Executado</span>
+                <h3 id="executedOptionsTitle">Dados para calcular a profundidade</h3>
+              </div>
+              <button id="cancelExecutedOptions" class="options-close" type="button" aria-label="Fechar">×</button>
+            </div>
+            <p id="executedOptionsHint">A cota de topo vem do arquivo REALIZADO.txt.</p>
+            <div class="options-grid">
+              <label class="field">
+                <span id="toeElevationLabel">Cota do pé (m)</span>
+                <input id="toeElevationInput" type="number" step="any" required />
+              </label>
+              <fieldset class="field choice-field">
+                <legend id="subdrillingLegend">Terá subfuração?</legend>
+                <label><input type="radio" name="subdrilling" value="no" checked /> <span id="subdrillingNoLabel">Não</span></label>
+                <label><input type="radio" name="subdrilling" value="yes" /> <span id="subdrillingYesLabel">Sim</span></label>
+              </fieldset>
+              <label id="subdrillingValueField" class="field" hidden>
+                <span id="subdrillingValueLabel">Subfuração (m)</span>
+                <input id="subdrillingValueInput" type="number" min="0" step="any" />
+              </label>
+            </div>
+            <p id="depthFormula" class="formula">Profundidade = cota de topo − cota do pé + subfuração</p>
+            <div class="options-actions">
+              <button id="cancelExecutedOptionsSecondary" class="secondary" type="button">Cancelar</button>
+              <button id="confirmExecutedOptions" class="primary" type="submit">Calcular e organizar</button>
+            </div>
+            <p id="executedOptionsError" class="form-error" role="alert" hidden></p>
+          </form>
+
           <div class="status" id="statusBox" data-tone="idle">
             <span class="status-dot"></span>
             <p id="statusText">Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.</p>

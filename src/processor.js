@@ -112,17 +112,16 @@ export function deduplicateRdRows(rdRows, config) {
   return { treatedRows, selected, dualPrefixCount };
 }
 
-export function buildRdOnlyRows(rdTreatedRows, config, projectDepth) {
+export function buildRdOnlyRows(rdTreatedRows, config, toeElevation, subdrilling = 0) {
   if (!rdTreatedRows.length) {
     throw new Error('RD has no usable rows after validation');
   }
 
-  const depth = Number(projectDepth);
-  if (!Number.isFinite(depth) || depth <= 0) {
-    throw new Error('Invalid project depth');
+  const toe = Number(toeElevation);
+  const sub = Number(subdrilling);
+  if (!Number.isFinite(toe) || !Number.isFinite(sub) || sub < 0) {
+    throw new Error('Invalid toe elevation or subdrilling');
   }
-
-  const fixedDepth = Number(depth.toFixed(3));
 
   const [idColumn, yColumn, xColumn, zColumn, depthColumn] = config.columns.rd_only;
 
@@ -132,12 +131,17 @@ export function buildRdOnlyRows(rdTreatedRows, config, projectDepth) {
       throw new Error(`RD line ${row.sourceLine ?? '?'}: invalid numeric hole ID`);
     }
 
+    const calculatedDepth = Number((row.Z_RD - toe + sub).toFixed(3));
+    if (calculatedDepth <= 0) {
+      throw new Error(`RD line ${row.sourceLine ?? '?'}: calculated depth must be greater than zero`);
+    }
+
     return {
       [idColumn]: holeId,
       [yColumn]: row.Y_RD,
       [xColumn]: row.X_RD,
       [zColumn]: row.Z_RD,
-      [depthColumn]: fixedDepth,
+      [depthColumn]: calculatedDepth,
     };
   });
 }
