@@ -31,23 +31,14 @@
 
       <main class="workspace">
         <section class="intro-panel">
-          <p id="appEyebrow" class="eyebrow">Console de Dados</p>
           <h1 id="appTitle">Consolidação Plan./Exec. | Console de Dados</h1>
-          <p id="appSubtitle" class="lede" hidden></p>
-          <div class="signal-row" aria-label="Fluxo de trabalho">
-            <div><span>01</span><strong id="workflowStep1">Anexar Planejado</strong></div>
-            <div><span>02</span><strong id="workflowStep2">Anexar Realizado</strong></div>
-            <div><span>03</span><strong id="workflowStep3">Exportar XLSX</strong></div>
-          </div>
         </section>
 
         <section class="panel upload-panel">
           <div class="panel-header">
             <div>
               <h2 id="filesTitle">ARQUIVOS DE ORIGEM</h2>
-              <p id="filesHint">Solte os arquivos ou navegue.</p>
             </div>
-            <span class="section-code">Input</span>
           </div>
 
           <div class="upload-grid">
@@ -55,14 +46,12 @@
               <input id="mvvFile" type="file" accept=".xlsx" hidden />
               <span id="mvvFileLabel" class="dropzone-label">PLANEJADO.xlsx</span>
               <strong id="mvvFileName">Nenhum arquivo selecionado</strong>
-              <small id="mvvFileHint">Plano de Perfuração</small>
             </label>
 
             <label class="dropzone" id="rdDropzone" for="rdFile">
               <input id="rdFile" type="file" accept=".txt" hidden />
               <span id="rdFileLabel" class="dropzone-label">REALIZADO.txt</span>
               <strong id="rdFileName">Nenhum arquivo selecionado</strong>
-              <small id="rdFileHint">Arquivo de Coordenadas da Topografia</small>
             </label>
           </div>
 
@@ -115,15 +104,12 @@
           <div class="panel-header">
             <div>
               <h2 id="summaryTitle">Resumo:</h2>
-              <p id="summaryHint">Gerado apos o processamento.</p>
             </div>
-            <span class="section-code">Output</span>
           </div>
           <div id="summaryCards" class="summary-grid"></div>
           <div class="log-block">
             <div class="log-head">
               <h3 id="detailsTitle">LOG</h3>
-              <span id="detailsBadge">JSON</span>
             </div>
             <pre id="logOutput">Aguardando arquivos...</pre>
           </div>

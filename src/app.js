@@ -98,25 +98,16 @@ export async function bootstrapApp() {
   const defaultLanguage = config.ui.default_language || 'pt';
 
   const appTitle = qs('appTitle');
-  const appSubtitle = qs('appSubtitle');
-  const appEyebrow = qs('appEyebrow');
   const topbar = document.querySelector('.topbar');
-  const signalRow = document.querySelector('.signal-row');
   const languageLabel = qs('languageLabel');
   const languageSelect = qs('languageSelect');
   const filesTitle = qs('filesTitle');
-  const filesHint = qs('filesHint');
   const mvvFile = qs('mvvFile');
   const rdFile = qs('rdFile');
   const mvvDropzone = qs('mvvDropzone');
   const rdDropzone = qs('rdDropzone');
   const mvvFileLabel = qs('mvvFileLabel');
-  const mvvFileHint = qs('mvvFileHint');
   const rdFileLabel = qs('rdFileLabel');
-  const rdFileHint = qs('rdFileHint');
-  const workflowStep1 = qs('workflowStep1');
-  const workflowStep2 = qs('workflowStep2');
-  const workflowStep3 = qs('workflowStep3');
   const mvvFileName = qs('mvvFileName');
   const rdFileName = qs('rdFileName');
   const generateBtn = qs('generateBtn');
@@ -126,9 +117,7 @@ export async function bootstrapApp() {
   const statusBox = qs('statusBox');
   const statusText = qs('statusText');
   const summaryTitle = qs('summaryTitle');
-  const summaryHint = qs('summaryHint');
   const detailsTitle = qs('detailsTitle');
-  const detailsBadge = qs('detailsBadge');
   const summaryCards = qs('summaryCards');
   const logOutput = qs('logOutput');
   const executedOptions = qs('executedOptions');
@@ -241,29 +230,17 @@ export async function bootstrapApp() {
     document.title = config.app.title;
 
     if (topbar) topbar.setAttribute('aria-label', ui.header_label);
-    if (signalRow) signalRow.setAttribute('aria-label', ui.workflow_label);
 
     renderLanguageOptions(languageSelect, ui, state.language);
 
     languageLabel.textContent = ui.language_label;
     languageSelect.setAttribute('aria-label', ui.language_label);
     appTitle.textContent = config.app.title;
-    appSubtitle.textContent = ui.app_subtitle;
-    appSubtitle.hidden = !ui.app_subtitle;
-    appEyebrow.textContent = ui.eyebrow;
     filesTitle.textContent = ui.files_title;
-    filesHint.textContent = ui.files_hint;
     mvvFileLabel.textContent = ui.mvv_file_label;
-    mvvFileHint.textContent = ui.mvv_file_hint;
     rdFileLabel.textContent = ui.rd_file_label;
-    rdFileHint.textContent = ui.rd_file_hint;
-    workflowStep1.textContent = ui.workflow_steps[0];
-    workflowStep2.textContent = ui.workflow_steps[1];
-    workflowStep3.textContent = ui.workflow_steps[2];
     summaryTitle.textContent = ui.summary_title;
-    summaryHint.textContent = ui.summary_hint;
     detailsTitle.textContent = ui.details_title;
-    detailsBadge.textContent = ui.details_badge;
     mvvFileName.textContent = state.mvv ? state.mvv.name : ui.no_file_selected;
     rdFileName.textContent = state.rd ? state.rd.name : ui.no_file_selected;
     generateBtn.textContent = ui.primary_action;
