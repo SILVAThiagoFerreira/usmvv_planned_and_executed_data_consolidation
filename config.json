@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Consolidação Plan./Exec. | Console de Dados",
+    "title": "Consolidação de dados de Perfuração para Desmonte - Planejado/Executado",
     "description": "Processamento client-side para consolidar MVV.xlsx e RD.txt"
   },
   "files": {

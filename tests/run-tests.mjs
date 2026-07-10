@@ -90,7 +90,7 @@ test('profundidade final uses a dedicated 2-decimal format', () => {
 });
 
 test('config exposes localized ui packs', () => {
-  assert.equal(projectConfig.app.title, 'Consolidação Plan./Exec. | Console de Dados');
+  assert.equal(projectConfig.app.title, 'Consolidação de dados de Perfuração para Desmonte - Planejado/Executado');
   assert.equal(projectConfig.ui.default_language, 'pt');
   assert.deepEqual(Object.keys(projectConfig.ui.languages), ['pt', 'en', 'zh']);
   assert.equal(projectConfig.ui.languages.pt.language_label, 'Idioma');

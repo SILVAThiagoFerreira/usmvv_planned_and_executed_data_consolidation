@@ -144,11 +144,12 @@ p {
 }
 
 h1 {
-  max-width: 28ch;
+  max-width: none;
   color: var(--enaex-gray);
-  font-size: clamp(1.7rem, 3vw, 2.8rem);
+  font-size: clamp(1.15rem, 2vw, 1.8rem);
   font-weight: 700;
-  line-height: 0.98;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .lede {
@@ -540,6 +541,7 @@ h1 {
 
   h1 {
     font-size: 2rem;
+    white-space: normal;
   }
 
   .upload-grid,
