@@ -15,7 +15,7 @@ Tambem permite anexar somente o arquivo executado para baixar `RD_EXECUTADO_ORGA
 Para organizar somente o dado planejado, anexe `PLANEJADO.xlsx`, clique em `Organize Somente o Dado Planejado` e baixe o workbook gerado.
 Para organizar somente o executado, anexe `REALIZADO.txt`. Informe a cota do pé; a profundidade será calculada pela diferença entre a cota de topo do arquivo e a cota do pé. Se houver subfuração, informe também o valor, que será somado ao resultado.
 
-Para consolidar um projeto para O-PìtDev, use o quadro abaixo do fluxo principal. Anexe o `Levantamento de Campo Enaex` em `.csv` ou `.txt` e o `Plano de Perfuração Planejado` em `.xlsx`. O levantamento fornece `ID`, `Y`, `X` e `Z`; o plano fornece `Diâmetro`, `Azimute` e `Ângulo planejado` (a coluna `Dip` do arquivo atual). A coluna `Ângulo do talude` é calculada por `90 - Ângulo planejado`. O download gera `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx` com a tabela consolidada e o log de correspondências.
+Para consolidar um projeto para O-PìtDev, use o quadro abaixo do fluxo principal. Anexe o `Levantamento de Campo Enaex` em `.csv` ou `.txt` e o `Plano de Perfuração Planejado` em `.xlsx`. O levantamento fornece `ID`, `Y`, `X` e `Z`; o plano fornece `Diâmetro`, `Azimute`, `Ângulo planejado` (a coluna `Dip` do arquivo atual) e `Profundidade` (a coluna `Depth`). A coluna `Ângulo do talude` é calculada por `90 - Ângulo planejado`. O download gera `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx` com a tabela consolidada e o log de correspondências.
 
 ## Caracteristicas
 

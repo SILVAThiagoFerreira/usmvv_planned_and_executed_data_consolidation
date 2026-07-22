@@ -124,7 +124,7 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.output.rd_only_file_name, 'RD_EXECUTADO_ORGANIZADO.xlsx');
   assert.equal(projectConfig.output.sheets.executed, 'RD_EXECUTADO');
   assert.equal(projectConfig.output.pitdev_file_name, 'CONSOLIDACAO_PROJETO_O-PITDEV.xlsx');
-  assert.deepEqual(projectConfig.columns.pitdev_consolidated, ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude']);
+  assert.deepEqual(projectConfig.columns.pitdev_consolidated, ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude', 'Profundidade']);
   assert.equal(projectConfig.ui.languages.pt.pitdev_field_label, 'Levantamento de Campo Enaex');
   assert.equal(projectConfig.ui.languages.pt.pitdev_title, 'Consolidação de Projeto para O-PìtDev');
   assert.equal(Object.hasOwn(projectConfig.ui.languages.pt, 'system_badge'), false);
@@ -158,7 +158,7 @@ test('mvv plan extraction keeps only configured output columns', () => {
 test('O-PitDev joins field coordinates and calculates slope angle', () => {
   const pitdevConfig = {
     columns: {
-      pitdev_consolidated: ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude'],
+      pitdev_consolidated: ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude', 'Profundidade'],
     },
     pitdev: { angle_reference_degrees: 90 },
     output: { sheets: { pitdev_consolidated: 'CONSOLIDACAO_O-PITDEV' } },
@@ -171,15 +171,15 @@ test('O-PitDev joins field coordinates and calculates slope angle', () => {
   };
   const plan = {
     rows: [
-      { sourceRow: 4, values: [97, 5, 10, 25] },
-      { sourceRow: 5, values: [133, 4, 20, 35] },
-      { sourceRow: 6, values: [144, 5, 30, 45] },
+      { sourceRow: 4, values: [97, 5, 10, 25, 12] },
+      { sourceRow: 5, values: [133, 4, 20, 35, 13] },
+      { sourceRow: 6, values: [144, 5, 30, 45, 14] },
     ],
   };
   const validation = { rowCount: 2, seenHoleKeys: new Set(['97', '133']) };
   const planValidation = {
     rowCount: 3,
-    columns: { id: 0, diameter: 1, azimuth: 2, angle: 3 },
+    columns: { id: 0, diameter: 1, azimuth: 2, angle: 3, depth: 4 },
   };
   const { rows, summary } = buildPitdevRows(field, plan, validation, planValidation, pitdevConfig);
   assert.deepEqual(rows[0], {
@@ -191,6 +191,7 @@ test('O-PitDev joins field coordinates and calculates slope angle', () => {
     Azimute: 10,
     'Ângulo planejado': 25,
     'Ângulo do talude': 65,
+    Profundidade: 12,
   });
   assert.equal(rows[1]['Ângulo do talude'], 55);
   assert.equal(summary.matchedCount, 2);

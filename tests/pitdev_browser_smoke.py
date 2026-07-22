@@ -48,7 +48,7 @@ def main() -> int:
     assert workbook.sheetnames == ["CONSOLIDACAO_O-PITDEV", "LOG_O-PITDEV"]
     sheet = workbook["CONSOLIDACAO_O-PITDEV"]
     assert [cell.value for cell in sheet[1]] == [
-        "ID", "Y", "X", "Z", "Diâmetro", "Azimute", "Ângulo planejado", "Ângulo do talude"
+        "ID", "Y", "X", "Z", "Diâmetro", "Azimute", "Ângulo planejado", "Ângulo do talude", "Profundidade"
     ]
     assert sheet.max_row == 25
     assert sheet[2][0].value == 97
@@ -56,6 +56,7 @@ def main() -> int:
     assert sheet[2][4].value == 5
     assert sheet[2][6].value == 0
     assert sheet[2][7].value == 90
+    assert sheet[2][8].value == 14.24
     print(f"ok - O-PitDev browser flow | rows={sheet.max_row - 1} | screenshot={screenshot_path}")
     download_path.unlink(missing_ok=True)
     return 0

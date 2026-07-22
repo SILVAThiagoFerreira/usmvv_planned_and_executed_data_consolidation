@@ -87,7 +87,8 @@
       "Diâmetro",
       "Azimute",
       "Ângulo planejado",
-      "Ângulo do talude"
+      "Ângulo do talude",
+      "Profundidade"
     ],
     "mvv_plan": [
       "ID",
@@ -112,7 +113,8 @@
       "Diâmetro",
       "Azimute",
       "Ângulo planejado",
-      "Ângulo do talude"
+      "Ângulo do talude",
+      "Profundidade"
     ]
   },
   "pitdev": {
@@ -120,7 +122,8 @@
       "id": ["ID"],
       "diameter": ["Diameter", "Diâmetro"],
       "azimuth": ["Azimuth", "Azimute"],
-      "angle": ["Angulo", "Ângulo", "Dip", "Inclination", "Inclinação"]
+      "angle": ["Angulo", "Ângulo", "Dip", "Inclination", "Inclinação"],
+      "depth": ["Depth", "Profundidade"]
     },
     "angle_reference_degrees": 90
   },
@@ -189,7 +192,7 @@
       "Z_RD"
     ],
     "pitdev_field_numeric_fields": ["Y", "X", "Z"],
-    "pitdev_plan_numeric_fields": ["diameter", "azimuth", "angle"],
+    "pitdev_plan_numeric_fields": ["diameter", "azimuth", "angle", "depth"],
     "fail_on_missing_mvv_rows": true,
     "fail_on_missing_mvv_columns": true,
     "fail_on_bad_rd_rows": true,
@@ -301,7 +304,7 @@
         "pitdev_field_label": "Levantamento de Campo Enaex",
         "pitdev_field_hint": "Arquivo .csv ou .txt com ID, Y, X e Z",
         "pitdev_plan_label": "Plano de Perfuração Planejado",
-        "pitdev_plan_hint": "Arquivo Excel com Diameter, Azimuth e Dip",
+        "pitdev_plan_hint": "Arquivo Excel com Diameter, Azimuth, Dip e Depth",
         "pitdev_action": "Consolidar Projeto para O-PìtDev",
         "pitdev_status_idle": "Anexe o levantamento de campo e o plano de perfuração planejado.",
         "pitdev_status_ready": "Pronto para consolidar o projeto.",
@@ -383,7 +386,7 @@
         "pitdev_field_label": "Enaex Field Survey",
         "pitdev_field_hint": ".csv or .txt with ID, Y, X and Z",
         "pitdev_plan_label": "Planned Drilling Layout",
-        "pitdev_plan_hint": "Excel file with Diameter, Azimuth and Dip",
+        "pitdev_plan_hint": "Excel file with Diameter, Azimuth, Dip and Depth",
         "pitdev_action": "Consolidate Project for O-PitDev",
         "pitdev_status_idle": "Attach the field survey and the planned drilling layout.",
         "pitdev_status_ready": "Ready to consolidate the project.",
@@ -465,7 +468,7 @@
         "pitdev_field_label": "Enaex 现场测量",
         "pitdev_field_hint": "包含 ID、Y、X 和 Z 的 .csv 或 .txt",
         "pitdev_plan_label": "计划钻孔方案",
-        "pitdev_plan_hint": "包含 Diameter、Azimuth 和 Dip 的 Excel 文件",
+        "pitdev_plan_hint": "包含 Diameter、Azimuth、Dip 和 Depth 的 Excel 文件",
         "pitdev_action": "整合 O-PitDev 项目",
         "pitdev_status_idle": "请附加现场测量和计划钻孔方案。",
         "pitdev_status_ready": "可以整合项目。",

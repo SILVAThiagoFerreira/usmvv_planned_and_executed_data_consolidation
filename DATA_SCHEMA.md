@@ -98,6 +98,7 @@ Fonte: `.xlsx`, aba configurada em `config.json`.
 | Diâmetro | `Diameter` ou `Diâmetro` | Diâmetro planejado |
 | Azimute | `Azimuth` ou `Azimute` | Azimute planejado |
 | Ângulo planejado | `Angulo`, `Ângulo`, `Dip`, `Inclination` ou `Inclinação` | Inclinação da lança no plano |
+| Profundidade | `Depth` ou `Profundidade` | Profundidade planejada |
 
 ## Saída O-PìtDev
 
@@ -105,5 +106,5 @@ Fonte: `.xlsx`, aba configurada em `config.json`.
 | --- | --- |
 | `ID` | Levantamento de Campo Enaex |
 | `Y`, `X`, `Z` | Levantamento de Campo Enaex |
-| `Diâmetro`, `Azimute`, `Ângulo planejado` | Plano de Perfuração Planejado |
+| `Diâmetro`, `Azimute`, `Ângulo planejado`, `Profundidade` | Plano de Perfuração Planejado |
 | `Ângulo do talude` | `90 - Ângulo planejado` |

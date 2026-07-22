@@ -205,7 +205,7 @@ export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefi
 }
 
 export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidation, config) {
-  const [idColumn, yColumn, xColumn, zColumn, diameterColumn, azimuthColumn, plannedAngleColumn, slopeAngleColumn] = config.columns.pitdev_consolidated;
+  const [idColumn, yColumn, xColumn, zColumn, diameterColumn, azimuthColumn, plannedAngleColumn, slopeAngleColumn, depthColumn] = config.columns.pitdev_consolidated;
   const planByHole = new Map();
   const planColumns = planValidation.columns;
 
@@ -217,6 +217,7 @@ export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidati
       diameter: toNumber(row.values[planColumns.diameter], `Plano linha ${row.sourceRow}`, 'diameter'),
       azimuth: toNumber(row.values[planColumns.azimuth], `Plano linha ${row.sourceRow}`, 'azimuth'),
       angle: toNumber(row.values[planColumns.angle], `Plano linha ${row.sourceRow}`, 'angle'),
+      depth: toNumber(row.values[planColumns.depth], `Plano linha ${row.sourceRow}`, 'depth'),
       sourceRow: row.sourceRow,
     });
   }
@@ -251,6 +252,7 @@ export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidati
       [azimuthColumn]: plan.azimuth,
       [plannedAngleColumn]: plannedAngle,
       [slopeAngleColumn]: Number((referenceAngle - plannedAngle).toFixed(3)),
+      [depthColumn]: plan.depth,
     });
   }
 

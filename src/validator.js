@@ -183,6 +183,7 @@ export function validatePitdevPlanSource(rawPlan, config) {
     diameter: resolveConfiguredHeader(indexMap, configured.diameter, 'Diâmetro'),
     azimuth: resolveConfiguredHeader(indexMap, configured.azimuth, 'Azimute'),
     angle: resolveConfiguredHeader(indexMap, configured.angle, 'Ângulo planejado'),
+    depth: resolveConfiguredHeader(indexMap, configured.depth, 'Profundidade'),
   };
   const seen = new Set();
   let rowCount = 0;

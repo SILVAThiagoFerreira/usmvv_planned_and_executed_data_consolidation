@@ -135,13 +135,14 @@ def main() -> int:
     assert pitdev_wb.sheetnames == ["CONSOLIDACAO_O-PITDEV", "LOG_O-PITDEV"]
     pitdev_ws = pitdev_wb["CONSOLIDACAO_O-PITDEV"]
     pitdev_headers = [cell.value for cell in pitdev_ws[1]]
-    assert pitdev_headers == ["ID", "Y", "X", "Z", "Diâmetro", "Azimute", "Ângulo planejado", "Ângulo do talude"]
+    assert pitdev_headers == ["ID", "Y", "X", "Z", "Diâmetro", "Azimute", "Ângulo planejado", "Ângulo do talude", "Profundidade"]
     assert pitdev_ws.max_row == 25
     assert pitdev_ws[2][0].value == 97
     assert pitdev_ws[2][1].value == 8929912.804
     assert pitdev_ws[2][4].value == 5
     assert pitdev_ws[2][6].value == 0
     assert pitdev_ws[2][7].value == 90
+    assert pitdev_ws[2][8].value == 14.24
     pitdev_download_path.unlink(missing_ok=True)
     rd_only_input_path.unlink(missing_ok=True)
     return 0

@@ -44,6 +44,6 @@
 1. O usuario anexa o `Levantamento de Campo Enaex` (`.csv` ou `.txt`) e o `Plano de Perfuração Planejado` (`.xlsx`).
 2. `src/reader.js` le o texto delimitado e a aba configurada do Excel.
 3. `src/validator.js` valida quantidades de campos, IDs unicos, colunas do plano e valores numericos.
-4. `src/processor.js` normaliza os IDs, cruza os arquivos na ordem do levantamento e calcula `90 - angulo planejado`.
+4. `src/processor.js` normaliza os IDs, cruza os arquivos na ordem do levantamento, traz a `Depth` do plano como `Profundidade` e calcula `90 - angulo planejado`.
 5. `src/writer.js` gera `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx` com a tabela e o log de diferencas.
 6. `src/app.js` habilita o download, exibe os indicadores e registra o resultado na interface.
