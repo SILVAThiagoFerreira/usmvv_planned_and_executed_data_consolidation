@@ -128,3 +128,14 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - Aba `RD_TRATADA`.
 - Aba `LOG_VALIDACAO`.
 - Fluxo RD-only: uma unica aba `RD_EXECUTADO` com `ID`, `Y`, `X`, `Z`, `Profundidade` e sem log adicional.
+
+## Consolidação de Projeto para O-PìtDev
+
+- O novo quadro funciona separadamente dos fluxos MVV/RD e processa tudo localmente no navegador.
+- O `Levantamento de Campo Enaex` aceita `.csv` ou `.txt` delimitado por vírgula, com as colunas posicionais `ID`, `Y`, `X`, `Z` e, opcionalmente, uma quinta coluna vazia após a última vírgula.
+- O `Plano de Perfuração Planejado` aceita `.xlsx`, usa a aba configurada em `config.json` e localiza `ID`, `Diameter`/`Diâmetro`, `Azimuth`/`Azimute` e `Angulo`/`Ângulo`/`Dip` por aliases configurados.
+- O vínculo é feito pelo `ID` normalizado. IDs duplicados, campos ausentes ou valores não numéricos interrompem a consolidação com erro explícito.
+- A ordem da tabela exportada segue a ordem do levantamento de campo. Somente IDs presentes nos dois arquivos entram na tabela; diferenças ficam documentadas no log do workbook e na interface.
+- A saída tem as colunas `ID`, `Y`, `X`, `Z`, `Diâmetro`, `Azimute`, `Ângulo planejado` e `Ângulo do talude`.
+- `Ângulo do talude = 90 - Ângulo planejado`, usando o valor configurado `pitdev.angle_reference_degrees`.
+- O arquivo gerado é `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx`, com as abas `CONSOLIDACAO_O-PITDEV` e `LOG_O-PITDEV`.

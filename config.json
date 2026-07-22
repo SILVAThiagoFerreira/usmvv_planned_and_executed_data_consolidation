@@ -9,13 +9,24 @@
     },
     "rd": {
       "accept": ".txt"
+    },
+    "pitdev_field": {
+      "accept": ".csv,.txt"
+    },
+    "pitdev_plan": {
+      "accept": ".xlsx"
     }
   },
   "input": {
     "mvv_sheet_name": "PROJETO PERFURAÇÃO",
     "mvv_header_row": 1,
     "rd_delimiter": ",",
-    "rd_expected_fields": 5
+    "rd_expected_fields": 5,
+    "pitdev_field_delimiter": ",",
+    "pitdev_field_allowed_field_counts": [4, 5],
+    "pitdev_field_trailing_empty_fields": 1,
+    "pitdev_plan_sheet_name": "PROJETO PERFURAÇÃO",
+    "pitdev_plan_header_row": 1
   },
   "columns": {
     "mvv": [
@@ -72,7 +83,11 @@
       "Y_FINAL",
       "X_FINAL",
       "Z_COLLAR_FINAL",
-      "PROFUNDIDADE_FINAL"
+      "PROFUNDIDADE_FINAL",
+      "Diâmetro",
+      "Azimute",
+      "Ângulo planejado",
+      "Ângulo do talude"
     ],
     "mvv_plan": [
       "ID",
@@ -88,7 +103,26 @@
       "Dip",
       "Tampao",
       "Carga"
+    ],
+    "pitdev_consolidated": [
+      "ID",
+      "Y",
+      "X",
+      "Z",
+      "Diâmetro",
+      "Azimute",
+      "Ângulo planejado",
+      "Ângulo do talude"
     ]
+  },
+  "pitdev": {
+    "plan_columns": {
+      "id": ["ID"],
+      "diameter": ["Diameter", "Diâmetro"],
+      "azimuth": ["Azimuth", "Azimute"],
+      "angle": ["Angulo", "Ângulo", "Dip", "Inclination", "Inclinação"]
+    },
+    "angle_reference_degrees": 90
   },
   "matching": {
     "prefix_priority": [
@@ -154,6 +188,8 @@
       "X_RD",
       "Z_RD"
     ],
+    "pitdev_field_numeric_fields": ["Y", "X", "Z"],
+    "pitdev_plan_numeric_fields": ["diameter", "azimuth", "angle"],
     "fail_on_missing_mvv_rows": true,
     "fail_on_missing_mvv_columns": true,
     "fail_on_bad_rd_rows": true,
@@ -201,19 +237,26 @@
       "Y_FINAL",
       "X_FINAL",
       "Z_COLLAR_FINAL",
-      "PROFUNDIDADE_FINAL"
+      "PROFUNDIDADE_FINAL",
+      "Diâmetro",
+      "Azimute",
+      "Ângulo planejado",
+      "Ângulo do talude"
     ]
   },
   "output": {
     "file_name": "MVV_RD_CONSOLIDADO_FINAL.xlsx",
     "mvv_plan_file_name": "MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx",
     "rd_only_file_name": "RD_EXECUTADO_ORGANIZADO.xlsx",
+    "pitdev_file_name": "CONSOLIDACAO_PROJETO_O-PITDEV.xlsx",
     "sheets": {
       "consolidated": "CONSOLIDADO_FINAL",
       "rd_treated": "RD_TRATADA",
       "log": "LOG_VALIDACAO",
       "mvv_plan": "PLANO_MVV",
-      "executed": "RD_EXECUTADO"
+      "executed": "RD_EXECUTADO",
+      "pitdev_consolidated": "CONSOLIDACAO_O-PITDEV",
+      "pitdev_log": "LOG_O-PITDEV"
     },
     "labels": {
       "mvv_count": "Quantidade de furos na MVV",
@@ -223,7 +266,13 @@
       "rd_missing_count": "Quantidade de furos sem dado RD",
       "dual_prefix_count": "Quantidade de casos com L_ e E- para o mesmo furo",
       "missing_title": "Furos sem correspondencia na RD",
-      "rd_only_title": "Furos na RD sem correspondencia na MVV"
+      "rd_only_title": "Furos na RD sem correspondencia na MVV",
+      "pitdev_field_count": "Linhas do levantamento de campo",
+      "pitdev_matched_count": "Linhas consolidadas",
+      "pitdev_field_without_plan_count": "IDs do campo sem plano",
+      "pitdev_plan_without_field_count": "Furos do plano sem levantamento",
+      "pitdev_field_without_plan_title": "IDs do campo sem correspondencia no plano",
+      "pitdev_plan_without_field_title": "Furos do plano sem correspondencia no campo"
     }
   },
   "ui": {
@@ -247,6 +296,26 @@
         "mvv_file_hint": "Plano de Perfuração",
         "rd_file_label": "REALIZADO.txt",
         "rd_file_hint": "Arquivo de Coordenadas da Topografia",
+        "pitdev_title": "Consolidação de Projeto para O-PìtDev",
+        "pitdev_hint": "Cruze o levantamento de campo Enaex com o plano de perfuração planejado.",
+        "pitdev_field_label": "Levantamento de Campo Enaex",
+        "pitdev_field_hint": "Arquivo .csv ou .txt com ID, Y, X e Z",
+        "pitdev_plan_label": "Plano de Perfuração Planejado",
+        "pitdev_plan_hint": "Arquivo Excel com Diameter, Azimuth e Dip",
+        "pitdev_action": "Consolidar Projeto para O-PìtDev",
+        "pitdev_status_idle": "Anexe o levantamento de campo e o plano de perfuração planejado.",
+        "pitdev_status_ready": "Pronto para consolidar o projeto.",
+        "pitdev_status_working": "Consolidando localmente...",
+        "pitdev_status_done": "Consolidação gerada.",
+        "pitdev_status_error": "Validação ou consolidação falhou.",
+        "pitdev_log_waiting": "Aguardando os dois arquivos...",
+        "pitdev_metrics": {
+          "field_count": "Levantamento",
+          "matched_count": "Consolidadas",
+          "field_without_plan_count": "Campo sem plano",
+          "plan_without_field_count": "Plano sem campo"
+        },
+        "pitdev_download_prefix": "Baixar",
         "workflow_steps": ["Anexar Planejado", "Anexar Realizado", "Exportar XLSX"],
         "summary_title": "Resumo:",
         "summary_hint": "Gerado apos o processamento.",
@@ -309,6 +378,26 @@
         "mvv_file_hint": "Planning workbook",
         "rd_file_label": "RD.txt",
         "rd_file_hint": "Survey coordinate file",
+        "pitdev_title": "Project Consolidation for O-PitDev",
+        "pitdev_hint": "Join the Enaex field survey with the planned drilling layout.",
+        "pitdev_field_label": "Enaex Field Survey",
+        "pitdev_field_hint": ".csv or .txt with ID, Y, X and Z",
+        "pitdev_plan_label": "Planned Drilling Layout",
+        "pitdev_plan_hint": "Excel file with Diameter, Azimuth and Dip",
+        "pitdev_action": "Consolidate Project for O-PitDev",
+        "pitdev_status_idle": "Attach the field survey and the planned drilling layout.",
+        "pitdev_status_ready": "Ready to consolidate the project.",
+        "pitdev_status_working": "Consolidating locally...",
+        "pitdev_status_done": "Consolidation generated.",
+        "pitdev_status_error": "Validation or consolidation failed.",
+        "pitdev_log_waiting": "Waiting for both files...",
+        "pitdev_metrics": {
+          "field_count": "Survey rows",
+          "matched_count": "Consolidated",
+          "field_without_plan_count": "Survey without plan",
+          "plan_without_field_count": "Plan without survey"
+        },
+        "pitdev_download_prefix": "Download",
         "workflow_steps": ["Attach MVV", "Attach RD", "Export XLSX"],
         "summary_title": "Run summary",
         "summary_hint": "Generated after processing.",
@@ -371,6 +460,26 @@
         "mvv_file_hint": "计划工作簿",
         "rd_file_label": "RD.txt",
         "rd_file_hint": "测量坐标文件",
+        "pitdev_title": "O-PitDev 项目整合",
+        "pitdev_hint": "将 Enaex 现场测量与钻孔计划合并。",
+        "pitdev_field_label": "Enaex 现场测量",
+        "pitdev_field_hint": "包含 ID、Y、X 和 Z 的 .csv 或 .txt",
+        "pitdev_plan_label": "计划钻孔方案",
+        "pitdev_plan_hint": "包含 Diameter、Azimuth 和 Dip 的 Excel 文件",
+        "pitdev_action": "整合 O-PitDev 项目",
+        "pitdev_status_idle": "请附加现场测量和计划钻孔方案。",
+        "pitdev_status_ready": "可以整合项目。",
+        "pitdev_status_working": "正在本地整合...",
+        "pitdev_status_done": "整合已生成。",
+        "pitdev_status_error": "校验或整合失败。",
+        "pitdev_log_waiting": "等待两个文件...",
+        "pitdev_metrics": {
+          "field_count": "测量行",
+          "matched_count": "已整合",
+          "field_without_plan_count": "测量无计划",
+          "plan_without_field_count": "计划无测量"
+        },
+        "pitdev_download_prefix": "下载",
         "workflow_steps": ["附加 MVV", "附加 RD", "导出 XLSX"],
         "summary_title": "运行摘要",
         "summary_hint": "处理后生成。",

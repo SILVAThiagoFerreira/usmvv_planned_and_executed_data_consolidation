@@ -13,6 +13,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--base-url", required=True)
     parser.add_argument("--mvv", default=str(Path(__file__).resolve().parents[2] / "input" / "MVV.xlsx"))
     parser.add_argument("--rd", default=str(Path(__file__).resolve().parents[2] / "input" / "RD.txt"))
+    parser.add_argument("--pitdev-field", required=True)
+    parser.add_argument("--pitdev-plan", required=True)
     return parser.parse_args()
 
 
@@ -21,10 +23,11 @@ def main() -> int:
     download_path = Path(tempfile.gettempdir()) / "browser-smoke.xlsx"
     mvv_only_download_path = Path(tempfile.gettempdir()) / "browser-smoke-mvv-only.xlsx"
     rd_only_download_path = Path(tempfile.gettempdir()) / "browser-smoke-rd-only.xlsx"
+    pitdev_download_path = Path(tempfile.gettempdir()) / "browser-smoke-pitdev.xlsx"
     rd_only_input_path = Path(tempfile.gettempdir()) / "browser-smoke-rd-only.txt"
     rd_only_input_path.write_text("L_1,,10,20,292\nE-1,,11,21,292\nL_2,,12,22,280\n", encoding="utf-8")
 
-    for path in [download_path, mvv_only_download_path, rd_only_download_path]:
+    for path in [download_path, mvv_only_download_path, rd_only_download_path, pitdev_download_path]:
         if path.exists():
             path.unlink()
 
@@ -36,13 +39,9 @@ def main() -> int:
         page.wait_for_function("document.querySelector('.brand-logo')?.getAttribute('src') === './assets/openblast-logo.png'")
         page.wait_for_function("document.documentElement.lang === 'pt-BR'")
         page.wait_for_function("document.querySelector('#languageSelect')?.value === 'pt'")
-        page.wait_for_function("document.querySelector('#appSubtitle')?.hidden === true")
-        page.wait_for_function("document.querySelector('#workflowStep1')?.textContent === 'Anexar Planejado'")
-        page.wait_for_function("document.querySelector('#workflowStep2')?.textContent === 'Anexar Realizado'")
+        page.wait_for_function("!document.querySelector('#appSubtitle')")
         page.wait_for_function("document.querySelector('#mvvFileLabel')?.textContent === 'PLANEJADO.xlsx'")
         page.wait_for_function("document.querySelector('#rdFileLabel')?.textContent === 'REALIZADO.txt'")
-        page.wait_for_function("document.querySelector('#mvvFileHint')?.textContent === 'Plano de Perfuração'")
-        page.wait_for_function("document.querySelector('#rdFileHint')?.textContent === 'Arquivo de Coordenadas da Topografia'")
         page.wait_for_function("document.querySelector('#statusText')?.textContent === 'Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.'")
         page.wait_for_function("document.querySelector('#generateBtn')?.textContent === 'Gerar Dado Consolidado Planejado vs Realizado'")
         page.wait_for_function("document.querySelector('#rdOnlyBtn')?.textContent === 'Organize Somente o Executado'")
@@ -88,14 +87,26 @@ def main() -> int:
 
         page.set_input_files("#rdFile", str(rd_only_input_path))
         page.wait_for_function("!document.querySelector('#rdOnlyBtn')?.disabled")
-        page.once("dialog", lambda dialog: dialog.accept("10"))
         page.get_by_role("button", name="Organize Somente o Executado").click()
+        page.locator("#toeElevationInput").fill("10")
+        page.locator("#confirmExecutedOptions").click()
         page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Executado organizado.')")
         page.locator("#downloadLink").wait_for(state="visible")
         with page.expect_download() as rd_only_download_info:
             page.get_by_role("link", name="Baixar RD_EXECUTADO_ORGANIZADO.xlsx").click()
         rd_only_download = rd_only_download_info.value
         rd_only_download.save_as(str(rd_only_download_path))
+
+        page.set_input_files("#pitdevFieldFile", args.pitdev_field)
+        page.set_input_files("#pitdevPlanFile", args.pitdev_plan)
+        page.wait_for_function("!document.querySelector('#pitdevGenerateBtn')?.disabled")
+        page.get_by_role("button", name="Consolidar Projeto para O-PìtDev").click()
+        page.wait_for_function("document.querySelector('#pitdevStatusText')?.textContent?.includes('Consolidação gerada.')")
+        page.locator("#pitdevDownloadLink").wait_for(state="visible")
+        with page.expect_download() as pitdev_download_info:
+            page.get_by_role("link", name="Baixar CONSOLIDACAO_PROJETO_O-PITDEV.xlsx").click()
+        pitdev_download = pitdev_download_info.value
+        pitdev_download.save_as(str(pitdev_download_path))
         browser.close()
 
     wb = load_workbook(download_path, data_only=True)
@@ -116,10 +127,22 @@ def main() -> int:
     assert rd_only_wb["RD_EXECUTADO"][2][1].value == 11
     assert rd_only_wb["RD_EXECUTADO"][2][2].value == 21
     assert rd_only_wb["RD_EXECUTADO"][2][3].value == 292
-    assert rd_only_wb["RD_EXECUTADO"][2][4].value == 10
+    assert rd_only_wb["RD_EXECUTADO"][2][4].value == 282
     assert rd_only_wb["RD_EXECUTADO"][3][0].value == 2
-    assert rd_only_wb["RD_EXECUTADO"][3][4].value == 10
+    assert rd_only_wb["RD_EXECUTADO"][3][4].value == 270
     rd_only_download_path.unlink(missing_ok=True)
+    pitdev_wb = load_workbook(pitdev_download_path, data_only=True)
+    assert pitdev_wb.sheetnames == ["CONSOLIDACAO_O-PITDEV", "LOG_O-PITDEV"]
+    pitdev_ws = pitdev_wb["CONSOLIDACAO_O-PITDEV"]
+    pitdev_headers = [cell.value for cell in pitdev_ws[1]]
+    assert pitdev_headers == ["ID", "Y", "X", "Z", "Diâmetro", "Azimute", "Ângulo planejado", "Ângulo do talude"]
+    assert pitdev_ws.max_row == 25
+    assert pitdev_ws[2][0].value == 97
+    assert pitdev_ws[2][1].value == 8929912.804
+    assert pitdev_ws[2][4].value == 5
+    assert pitdev_ws[2][6].value == 0
+    assert pitdev_ws[2][7].value == 90
+    pitdev_download_path.unlink(missing_ok=True)
     rd_only_input_path.unlink(missing_ok=True)
     return 0
 

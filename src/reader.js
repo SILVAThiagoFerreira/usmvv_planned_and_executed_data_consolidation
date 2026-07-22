@@ -56,3 +56,70 @@ export async function readRdFile(file, config) {
     rows,
   };
 }
+
+function parseDelimitedLine(line, delimiter) {
+  const values = [];
+  let value = '';
+  let quoted = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    if (character === '"') {
+      if (quoted && line[index + 1] === '"') {
+        value += '"';
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (character === delimiter && !quoted) {
+      values.push(value.trim());
+      value = '';
+    } else {
+      value += character;
+    }
+  }
+
+  values.push(value.trim());
+  return values;
+}
+
+export async function readPitdevFieldFile(file, config) {
+  const text = await file.text();
+  const delimiter = config.input.pitdev_field_delimiter;
+  const rows = [];
+
+  text.split(/\r?\n/).forEach((line, index) => {
+    if (!line.trim()) return;
+    rows.push({
+      sourceLine: index + 1,
+      values: parseDelimitedLine(line, delimiter),
+      blank: false,
+    });
+  });
+
+  return { fileName: file.name, rows };
+}
+
+export async function readPitdevPlanFile(file, config) {
+  const ExcelJS = getExcelJS();
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(await file.arrayBuffer());
+
+  const sheet = workbook.getWorksheet(config.input.pitdev_plan_sheet_name);
+  if (!sheet) {
+    throw new Error(`Aba do plano nao encontrada: ${config.input.pitdev_plan_sheet_name}`);
+  }
+
+  const headerRowNumber = config.input.pitdev_plan_header_row;
+  const headerRow = sheet.getRow(headerRowNumber);
+  const headers = Array.from({ length: headerRow.cellCount }, (_, index) => asText(headerRow.getCell(index + 1).value));
+  const rows = [];
+
+  for (let rowNumber = headerRowNumber + 1; rowNumber <= sheet.rowCount; rowNumber += 1) {
+    const row = sheet.getRow(rowNumber);
+    const values = Array.from({ length: headers.length }, (_, index) => row.getCell(index + 1).value ?? null);
+    rows.push({ sourceRow: rowNumber, values, blank: values.every(isBlank) });
+  }
+
+  return { fileName: file.name, sheetName: sheet.name, headers, rows };
+}

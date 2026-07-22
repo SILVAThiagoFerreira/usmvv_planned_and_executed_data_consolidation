@@ -8,3 +8,12 @@ Portar a consolidacao MVV x RD para uma aplicacao estaticamente hospedavel no Gi
 - Processamento client-side.
 - Download do workbook final.
 - Validacao e log visiveis ao usuario.
+
+## Entrega O-PìtDev
+
+- Quadro separado abaixo do fluxo principal, chamado `Consolidação de Projeto para O-PìtDev`.
+- Upload do `Levantamento de Campo Enaex` em `.csv` ou `.txt`.
+- Upload do `Plano de Perfuração Planejado` em `.xlsx`.
+- Consolidação de `ID`, `Y`, `X`, `Z`, `Diâmetro`, `Azimute`, `Ângulo planejado` e `Ângulo do talude`.
+- Cálculo documentado: `Ângulo do talude = 90 - Ângulo planejado`.
+- Exportação para `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx` com log auditável.

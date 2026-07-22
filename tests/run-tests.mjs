@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildConsolidatedRows, buildMvvPlanRows, buildRdOnlyRows, deduplicateRdRows } from '../src/processor.js';
+import { buildConsolidatedRows, buildMvvPlanRows, buildPitdevRows, buildRdOnlyRows, deduplicateRdRows } from '../src/processor.js';
 import { getNumericFormatForHeader } from '../src/writer.js';
 import { normalizeHoleKey } from '../src/utils.js';
 
@@ -123,6 +123,10 @@ test('config exposes localized ui packs', () => {
   assert.deepEqual(projectConfig.columns.rd_only, ['ID', 'Y', 'X', 'Z', 'Profundidade']);
   assert.equal(projectConfig.output.rd_only_file_name, 'RD_EXECUTADO_ORGANIZADO.xlsx');
   assert.equal(projectConfig.output.sheets.executed, 'RD_EXECUTADO');
+  assert.equal(projectConfig.output.pitdev_file_name, 'CONSOLIDACAO_PROJETO_O-PITDEV.xlsx');
+  assert.deepEqual(projectConfig.columns.pitdev_consolidated, ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude']);
+  assert.equal(projectConfig.ui.languages.pt.pitdev_field_label, 'Levantamento de Campo Enaex');
+  assert.equal(projectConfig.ui.languages.pt.pitdev_title, 'Consolidação de Projeto para O-PìtDev');
   assert.equal(Object.hasOwn(projectConfig.ui.languages.pt, 'system_badge'), false);
 });
 
@@ -149,6 +153,48 @@ test('mvv plan extraction keeps only configured output columns', () => {
   assert.equal(rows[0].Explosivo, 'ANFO');
   assert.equal(rows[0].Carga, 35);
   assert.equal(Object.hasOwn(rows[0], 'Extra'), false);
+});
+
+test('O-PitDev joins field coordinates and calculates slope angle', () => {
+  const pitdevConfig = {
+    columns: {
+      pitdev_consolidated: ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude'],
+    },
+    pitdev: { angle_reference_degrees: 90 },
+    output: { sheets: { pitdev_consolidated: 'CONSOLIDACAO_O-PITDEV' } },
+  };
+  const field = {
+    rows: [
+      { sourceLine: 1, values: ['097', '8929912.804', '748875.907', '293.087', ''] },
+      { sourceLine: 2, values: ['133', '8929908.985', '748879.221', '293.088', ''] },
+    ],
+  };
+  const plan = {
+    rows: [
+      { sourceRow: 4, values: [97, 5, 10, 25] },
+      { sourceRow: 5, values: [133, 4, 20, 35] },
+      { sourceRow: 6, values: [144, 5, 30, 45] },
+    ],
+  };
+  const validation = { rowCount: 2, seenHoleKeys: new Set(['97', '133']) };
+  const planValidation = {
+    rowCount: 3,
+    columns: { id: 0, diameter: 1, azimuth: 2, angle: 3 },
+  };
+  const { rows, summary } = buildPitdevRows(field, plan, validation, planValidation, pitdevConfig);
+  assert.deepEqual(rows[0], {
+    ID: 97,
+    Y: 8929912.804,
+    X: 748875.907,
+    Z: 293.087,
+    'Diâmetro': 5,
+    Azimute: 10,
+    'Ângulo planejado': 25,
+    'Ângulo do talude': 65,
+  });
+  assert.equal(rows[1]['Ângulo do talude'], 55);
+  assert.equal(summary.matchedCount, 2);
+  assert.equal(summary.planWithoutFieldCount, 1);
 });
 
 test('legacy branding is removed', () => {

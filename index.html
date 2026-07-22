@@ -120,6 +120,52 @@
           </div>
         </aside>
       </main>
+
+      <section class="panel pitdev-panel" aria-labelledby="pitdevTitle">
+        <div class="panel-header">
+          <div>
+            <h2 id="pitdevTitle">Consolidação de Projeto para O-PìtDev</h2>
+            <p id="pitdevHint">Cruze o levantamento de campo Enaex com o plano de perfuração planejado.</p>
+          </div>
+          <span class="section-code">O-PITDEV</span>
+        </div>
+
+        <div class="upload-grid">
+          <label class="dropzone" id="pitdevFieldDropzone" for="pitdevFieldFile">
+            <input id="pitdevFieldFile" type="file" accept=".csv,.txt" hidden />
+            <span id="pitdevFieldFileLabel" class="dropzone-label">Levantamento de Campo Enaex</span>
+            <strong id="pitdevFieldFileName">Nenhum arquivo selecionado</strong>
+            <small id="pitdevFieldFileHint">Arquivo .csv ou .txt com ID, Y, X e Z</small>
+          </label>
+
+          <label class="dropzone" id="pitdevPlanDropzone" for="pitdevPlanFile">
+            <input id="pitdevPlanFile" type="file" accept=".xlsx" hidden />
+            <span id="pitdevPlanFileLabel" class="dropzone-label">Plano de Perfuração Planejado</span>
+            <strong id="pitdevPlanFileName">Nenhum arquivo selecionado</strong>
+            <small id="pitdevPlanFileHint">Arquivo Excel com Diameter, Azimuth e Dip</small>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="pitdevGenerateBtn" class="primary" type="button" disabled>Consolidar Projeto para O-PìtDev</button>
+          <a id="pitdevDownloadLink" class="secondary" hidden>Baixar CONSOLIDACAO_PROJETO_O-PITDEV.xlsx</a>
+        </div>
+
+        <div class="status" id="pitdevStatusBox" data-tone="idle">
+          <span class="status-dot"></span>
+          <p id="pitdevStatusText">Anexe o levantamento de campo e o plano de perfuração planejado.</p>
+        </div>
+
+        <div class="pitdev-result-grid">
+          <div id="pitdevSummaryCards" class="summary-grid"></div>
+          <div class="log-block">
+            <div class="log-head">
+              <h3>LOG O-PITDEV</h3>
+            </div>
+            <pre id="pitdevLogOutput">Aguardando os dois arquivos...</pre>
+          </div>
+        </div>
+      </section>
     </div>
 
     <script type="module" src="./main.js"></script>

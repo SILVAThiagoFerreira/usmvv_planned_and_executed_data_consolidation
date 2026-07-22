@@ -131,6 +131,26 @@ body {
   grid-area: results;
 }
 
+.pitdev-panel {
+  margin-top: 18px;
+}
+
+.pitdev-panel .panel-header {
+  align-items: end;
+}
+
+.pitdev-panel .panel-header p {
+  max-width: 52rem;
+}
+
+.pitdev-result-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+  gap: 18px;
+  margin-top: 16px;
+  align-items: start;
+}
+
 .section-code,
 .dropzone-label,
 .metric span,
@@ -542,6 +562,10 @@ h1 {
       "results";
   }
 
+  .pitdev-result-grid {
+    grid-template-columns: 1fr;
+  }
+
   h1 {
     font-size: clamp(1.1rem, 3vw, 1.55rem);
   }
@@ -571,7 +595,8 @@ h1 {
 
   .upload-grid,
   .summary-grid,
-  .options-grid {
+  .options-grid,
+  .pitdev-result-grid {
     grid-template-columns: 1fr;
   }
 

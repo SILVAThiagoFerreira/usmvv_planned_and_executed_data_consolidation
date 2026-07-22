@@ -1,4 +1,4 @@
-import { asText, headerIndexMap, isBlank, toNumber } from './utils.js';
+import { asText, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js';
 
 export function validateMvvSource(rawMvv, config) {
   const headers = rawMvv.headers;
@@ -130,4 +130,78 @@ export function validateRdSource(rawRd, config) {
   }
 
   return { rowCount };
+}
+
+function resolveConfiguredHeader(indexMap, aliases, label) {
+  const header = aliases.find((candidate) => indexMap.has(candidate));
+  if (!header) {
+    throw new Error(`Plano O-PitDev: missing required column ${label} (${aliases.join(' / ')})`);
+  }
+  return indexMap.get(header);
+}
+
+export function validatePitdevFieldSource(rawField, config) {
+  const allowedFieldCounts = new Set(config.input.pitdev_field_allowed_field_counts);
+  const trailingEmptyFields = Number(config.input.pitdev_field_trailing_empty_fields || 0);
+  const numericFields = config.validation.pitdev_field_numeric_fields;
+  const seen = new Set();
+  let rowCount = 0;
+
+  for (const row of rawField.rows) {
+    if (row.blank) continue;
+    rowCount += 1;
+    if (!allowedFieldCounts.has(row.values.length)) {
+      throw new Error(`Levantamento linha ${row.sourceLine}: esperados ${[...allowedFieldCounts].join(' ou ')} campos, encontrados ${row.values.length}`);
+    }
+
+    const trailing = row.values.slice(-trailingEmptyFields);
+    if (row.values.length > 4 && trailing.some((value) => !isBlank(value))) {
+      throw new Error(`Levantamento linha ${row.sourceLine}: a coluna adicional deve estar vazia`);
+    }
+
+    const context = `Levantamento linha ${row.sourceLine}`;
+    const id = asText(row.values[0]);
+    if (!id) throw new Error(`${context}: missing ID`);
+    const holeKey = normalizeHoleKey(id, []);
+    if (seen.has(holeKey)) throw new Error(`${context}: duplicate ID ${id}`);
+    seen.add(holeKey);
+
+    numericFields.forEach((field, index) => {
+      toNumber(row.values[index + 1], context, field);
+    });
+  }
+
+  if (rowCount === 0) throw new Error('Levantamento de campo sem linhas validas');
+  return { rowCount, seenHoleKeys: seen };
+}
+
+export function validatePitdevPlanSource(rawPlan, config) {
+  const indexMap = headerIndexMap(rawPlan.headers);
+  const configured = config.pitdev.plan_columns;
+  const columns = {
+    id: resolveConfiguredHeader(indexMap, configured.id, 'ID'),
+    diameter: resolveConfiguredHeader(indexMap, configured.diameter, 'Diâmetro'),
+    azimuth: resolveConfiguredHeader(indexMap, configured.azimuth, 'Azimute'),
+    angle: resolveConfiguredHeader(indexMap, configured.angle, 'Ângulo planejado'),
+  };
+  const seen = new Set();
+  let rowCount = 0;
+
+  for (const row of rawPlan.rows) {
+    if (row.blank) continue;
+    rowCount += 1;
+    const context = `Plano linha ${row.sourceRow}`;
+    const id = asText(row.values[columns.id]);
+    if (!id) throw new Error(`${context}: missing ID`);
+    const holeKey = normalizeHoleKey(id, []);
+    if (seen.has(holeKey)) throw new Error(`${context}: duplicate ID ${id}`);
+    seen.add(holeKey);
+
+    for (const [field, column] of Object.entries(columns).slice(1)) {
+      toNumber(row.values[column], context, field);
+    }
+  }
+
+  if (rowCount === 0) throw new Error('Plano de perfuração sem linhas validas');
+  return { rowCount, indexMap, columns, seenHoleKeys: seen };
 }

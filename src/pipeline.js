@@ -1,7 +1,7 @@
-import { readMvvFile, readRdFile } from './reader.js';
-import { validateMvvPlanSource, validateMvvSource, validateRdSource } from './validator.js';
-import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows } from './processor.js';
-import { createMvvPlanWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js';
+import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js';
+import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js';
+import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows } from './processor.js';
+import { createMvvPlanWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js';
 
 export async function runPipeline({ config, mvvFile, rdFile }) {
   const rawMvv = await readMvvFile(mvvFile, config);
@@ -76,4 +76,30 @@ export async function runRdOnlyPipeline({ config, rdFile, toeElevation, subdrill
   const buffer = await createRdOnlyWorkbookBuffer({ config, rdOnlyRows });
 
   return { buffer, summary };
+}
+
+export async function runPitdevPipeline({ config, fieldFile, planFile }) {
+  const rawField = await readPitdevFieldFile(fieldFile, config);
+  const rawPlan = await readPitdevPlanFile(planFile, config);
+  const fieldValidation = validatePitdevFieldSource(rawField, config);
+  const planValidation = validatePitdevPlanSource(rawPlan, config);
+  const processed = buildPitdevRows(rawField, rawPlan, fieldValidation, planValidation, config);
+  const metadata = {
+    runId: new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, '').replace('T', '_'),
+    generatedAt: new Date().toISOString(),
+    fieldFile: rawField.fileName,
+    planFile: rawPlan.fileName,
+    planSheet: rawPlan.sheetName,
+    angleFormula: processed.summary.angleFormula,
+    outputPath: config.output.pitdev_file_name,
+  };
+
+  const buffer = await createPitdevWorkbookBuffer({
+    config,
+    pitdevRows: processed.rows,
+    summary: processed.summary,
+    metadata,
+  });
+
+  return { buffer, summary: processed.summary, metadata };
 }

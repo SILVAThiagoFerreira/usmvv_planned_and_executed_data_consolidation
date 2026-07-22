@@ -1,5 +1,5 @@
 import { loadConfig } from './config.js';
-import { runMvvPlanPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js';
+import { runMvvPlanPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js';
 
 function qs(id) {
   const element = document.getElementById(id);
@@ -47,6 +47,40 @@ function renderSummary(summaryCards, languagePack, summary) {
   summaryCards.innerHTML = metrics
     .map(([label, value]) => `<article class="metric"><span>${label}</span><strong>${value}</strong></article>`)
     .join('');
+}
+
+function renderPitdevSummary(summaryCards, languagePack, summary) {
+  const metrics = [
+    [languagePack.pitdev_metrics.field_count, summary.fieldCount],
+    [languagePack.pitdev_metrics.matched_count, summary.matchedCount],
+    [languagePack.pitdev_metrics.field_without_plan_count, summary.fieldWithoutPlanCount],
+    [languagePack.pitdev_metrics.plan_without_field_count, summary.planWithoutFieldCount],
+  ];
+  summaryCards.innerHTML = metrics
+    .map(([label, value]) => `<article class="metric"><span>${label}</span><strong>${value}</strong></article>`)
+    .join('');
+}
+
+function renderPitdevLog(logOutput, summary, metadata, languageCode) {
+  const compactSummary = {
+    ...summary,
+    fieldWithoutPlan: summary.fieldWithoutPlan,
+    planWithoutField: summary.planWithoutField.length <= 17
+      ? summary.planWithoutField
+      : [
+        ...summary.planWithoutField.slice(0, 12),
+        '…',
+        ...summary.planWithoutField.slice(-5),
+      ],
+    planWithoutFieldNote: summary.planWithoutField.length > 17
+      ? 'Lista resumida na tela; a lista completa está na aba LOG_O-PITDEV.'
+      : null,
+  };
+  logOutput.textContent = JSON.stringify({
+    language: languageCode,
+    ...compactSummary,
+    ...metadata,
+  }, null, 2);
 }
 
 function renderLog(logOutput, summary, config, languagePack, languageCode) {
@@ -136,17 +170,43 @@ export async function bootstrapApp() {
   const toeElevationInput = qs('toeElevationInput');
   const subdrillingValueInput = qs('subdrillingValueInput');
   const executedOptionsError = qs('executedOptionsError');
+  const pitdevTitle = qs('pitdevTitle');
+  const pitdevHint = qs('pitdevHint');
+  const pitdevFieldFile = qs('pitdevFieldFile');
+  const pitdevPlanFile = qs('pitdevPlanFile');
+  const pitdevFieldDropzone = qs('pitdevFieldDropzone');
+  const pitdevPlanDropzone = qs('pitdevPlanDropzone');
+  const pitdevFieldFileLabel = qs('pitdevFieldFileLabel');
+  const pitdevFieldFileHint = qs('pitdevFieldFileHint');
+  const pitdevPlanFileLabel = qs('pitdevPlanFileLabel');
+  const pitdevPlanFileHint = qs('pitdevPlanFileHint');
+  const pitdevFieldFileName = qs('pitdevFieldFileName');
+  const pitdevPlanFileName = qs('pitdevPlanFileName');
+  const pitdevGenerateBtn = qs('pitdevGenerateBtn');
+  const pitdevDownloadLink = qs('pitdevDownloadLink');
+  const pitdevStatusBox = qs('pitdevStatusBox');
+  const pitdevStatusText = qs('pitdevStatusText');
+  const pitdevSummaryCards = qs('pitdevSummaryCards');
+  const pitdevLogOutput = qs('pitdevLogOutput');
 
   document.title = config.app.title;
   const state = {
     mvv: null,
     rd: null,
+    pitdevField: null,
+    pitdevPlan: null,
     downloadUrl: null,
+    pitdevDownloadUrl: null,
     outputFileName: config.output.file_name,
+    pitdevOutputFileName: config.output.pitdev_file_name,
     language: defaultLanguage,
     phase: 'idle',
     errorMessage: null,
     summary: null,
+    pitdevSummary: null,
+    pitdevMetadata: null,
+    pitdevPhase: 'idle',
+    pitdevErrorMessage: null,
   };
 
   const currentUi = () => getLanguagePack(config, state.language);
@@ -207,6 +267,31 @@ export async function bootstrapApp() {
     rdOnlyBtn.disabled = !hasRd || state.phase === 'working';
   };
 
+  const updatePitdevStatus = () => {
+    const ui = currentUi();
+    const hasField = Boolean(state.pitdevField);
+    const hasPlan = Boolean(state.pitdevPlan);
+    let tone = 'idle';
+    let text = ui.pitdev_status_idle;
+
+    if (state.pitdevPhase === 'working') {
+      tone = 'working';
+      text = ui.pitdev_status_working;
+    } else if (state.pitdevPhase === 'error') {
+      tone = 'error';
+      text = state.pitdevErrorMessage || ui.pitdev_status_error;
+    } else if (state.pitdevPhase === 'done') {
+      tone = 'done';
+      text = ui.pitdev_status_done;
+    } else if (hasField && hasPlan) {
+      tone = 'ready';
+      text = ui.pitdev_status_ready;
+    }
+
+    setStatus(pitdevStatusBox, pitdevStatusText, tone, text);
+    pitdevGenerateBtn.disabled = !(hasField && hasPlan) || state.pitdevPhase === 'working';
+  };
+
   const updateLog = () => {
     const ui = currentUi();
     if ((state.phase === 'done' || state.phase === 'mvv_done' || state.phase === 'rd_done') && state.summary) {
@@ -243,9 +328,19 @@ export async function bootstrapApp() {
     detailsTitle.textContent = ui.details_title;
     mvvFileName.textContent = state.mvv ? state.mvv.name : ui.no_file_selected;
     rdFileName.textContent = state.rd ? state.rd.name : ui.no_file_selected;
+    pitdevTitle.textContent = ui.pitdev_title;
+    pitdevHint.textContent = ui.pitdev_hint;
+    pitdevFieldFileLabel.textContent = ui.pitdev_field_label;
+    pitdevFieldFileHint.textContent = ui.pitdev_field_hint;
+    pitdevPlanFileLabel.textContent = ui.pitdev_plan_label;
+    pitdevPlanFileHint.textContent = ui.pitdev_plan_hint;
+    pitdevFieldFileName.textContent = state.pitdevField ? state.pitdevField.name : ui.no_file_selected;
+    pitdevPlanFileName.textContent = state.pitdevPlan ? state.pitdevPlan.name : ui.no_file_selected;
     generateBtn.textContent = ui.primary_action;
     rdOnlyBtn.textContent = ui.rd_only_action;
     mvvOnlyBtn.textContent = ui.mvv_only_action;
+    pitdevGenerateBtn.textContent = ui.pitdev_action;
+    pitdevDownloadLink.textContent = `${ui.pitdev_download_prefix} ${state.pitdevOutputFileName}`;
     executedOptionsTitle.textContent = ui.executed_options_title;
     executedOptionsHint.textContent = ui.executed_options_hint;
     toeElevationLabel.textContent = ui.toe_elevation_label;
@@ -265,9 +360,25 @@ export async function bootstrapApp() {
       summaryCards.innerHTML = '';
     }
 
+    if (state.pitdevSummary && state.pitdevPhase === 'done') {
+      renderPitdevSummary(pitdevSummaryCards, ui, state.pitdevSummary);
+      renderPitdevLog(pitdevLogOutput, state.pitdevSummary, state.pitdevMetadata, state.language);
+    } else if (state.pitdevPhase === 'working') {
+      pitdevSummaryCards.innerHTML = '';
+      pitdevLogOutput.textContent = ui.pitdev_status_working;
+    } else if (state.pitdevPhase === 'error') {
+      pitdevSummaryCards.innerHTML = '';
+      pitdevLogOutput.textContent = state.pitdevErrorMessage || ui.pitdev_status_error;
+    } else {
+      pitdevSummaryCards.innerHTML = '';
+      pitdevLogOutput.textContent = ui.pitdev_log_waiting;
+    }
+
     downloadLink.hidden = !state.downloadUrl;
+    pitdevDownloadLink.hidden = !state.pitdevDownloadUrl;
 
     updateStatus();
+    updatePitdevStatus();
     updateLog();
   };
 
@@ -280,6 +391,19 @@ export async function bootstrapApp() {
     state.errorMessage = null;
     state.outputFileName = config.output.file_name;
     downloadLink.hidden = true;
+  };
+
+  const clearPitdevOutput = () => {
+    if (state.pitdevDownloadUrl) {
+      URL.revokeObjectURL(state.pitdevDownloadUrl);
+      state.pitdevDownloadUrl = null;
+    }
+    state.pitdevSummary = null;
+    state.pitdevMetadata = null;
+    state.pitdevErrorMessage = null;
+    state.pitdevPhase = 'idle';
+    state.pitdevOutputFileName = config.output.pitdev_file_name;
+    pitdevDownloadLink.hidden = true;
   };
 
   renderLanguage();
@@ -298,6 +422,15 @@ export async function bootstrapApp() {
 
   wireDropzone(mvvDropzone, mvvFile, (file) => setFile('mvv', file));
   wireDropzone(rdDropzone, rdFile, (file) => setFile('rd', file));
+
+  const setPitdevFile = (kind, file) => {
+    state[kind] = file;
+    clearPitdevOutput();
+    renderLanguage();
+  };
+
+  wireDropzone(pitdevFieldDropzone, pitdevFieldFile, (file) => setPitdevFile('pitdevField', file));
+  wireDropzone(pitdevPlanDropzone, pitdevPlanFile, (file) => setPitdevFile('pitdevPlan', file));
 
   generateBtn.addEventListener('click', async () => {
     if (!state.mvv || !state.rd) return;
@@ -382,6 +515,47 @@ export async function bootstrapApp() {
 
     executedOptions.hidden = false;
     toeElevationInput.focus();
+  });
+
+  pitdevGenerateBtn.addEventListener('click', async () => {
+    if (!state.pitdevField || !state.pitdevPlan) return;
+
+    try {
+      clearPitdevOutput();
+      state.pitdevPhase = 'working';
+      updatePitdevStatus();
+      renderLanguage();
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const result = await runPitdevPipeline({
+        config,
+        fieldFile: state.pitdevField,
+        planFile: state.pitdevPlan,
+      });
+      const blob = new Blob([result.buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      state.pitdevDownloadUrl = URL.createObjectURL(blob);
+      state.pitdevOutputFileName = config.output.pitdev_file_name;
+      pitdevDownloadLink.href = state.pitdevDownloadUrl;
+      pitdevDownloadLink.download = state.pitdevOutputFileName;
+      state.pitdevSummary = result.summary;
+      state.pitdevMetadata = result.metadata;
+      state.pitdevPhase = 'done';
+      state.pitdevErrorMessage = null;
+      renderLanguage();
+      pitdevDownloadLink.hidden = false;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      state.pitdevPhase = 'error';
+      state.pitdevErrorMessage = message;
+      state.pitdevSummary = null;
+      state.pitdevMetadata = null;
+      pitdevDownloadLink.hidden = true;
+      updatePitdevStatus();
+      renderLanguage();
+      console.error(error);
+    }
   });
 
   document.querySelectorAll('input[name="subdrilling"]').forEach((input) => {

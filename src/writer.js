@@ -262,3 +262,89 @@ export async function createRdOnlyWorkbookBuffer({ config, rdOnlyRows }) {
 
   return workbook.xlsx.writeBuffer();
 }
+
+function addPitdevLogSheet(workbook, summary, config, metadata) {
+  const sheet = workbook.addWorksheet(config.output.sheets.pitdev_log, {
+    views: [{ state: 'frozen', ySplit: 1 }],
+  });
+  const headerFill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: hexColor(config.formatting.header_fill) },
+  };
+  const sectionFill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: hexColor(config.formatting.section_fill) },
+  };
+
+  sheet.getCell('A1').value = 'Indicador';
+  sheet.getCell('B1').value = 'Valor';
+  sheet.getCell('D1').value = 'Campo';
+  sheet.getCell('E1').value = 'Valor';
+  const metricRows = [
+    [config.output.labels.pitdev_field_count, summary.fieldCount],
+    ['Furos no plano', summary.planCount],
+    [config.output.labels.pitdev_matched_count, summary.matchedCount],
+    [config.output.labels.pitdev_field_without_plan_count, summary.fieldWithoutPlanCount],
+    [config.output.labels.pitdev_plan_without_field_count, summary.planWithoutFieldCount],
+  ];
+  metricRows.forEach(([label, value], index) => {
+    sheet.getCell(`A${index + 2}`).value = label;
+    sheet.getCell(`B${index + 2}`).value = value;
+  });
+
+  const metadataRows = [
+    ['Levantamento', metadata.fieldFile],
+    ['Plano', metadata.planFile],
+    ['Aba do plano', metadata.planSheet],
+    ['Formula', metadata.angleFormula],
+    ['Gerado em', metadata.generatedAt],
+    ['Arquivo', metadata.outputPath],
+  ];
+  metadataRows.forEach(([label, value], index) => {
+    sheet.getCell(`D${index + 2}`).value = label;
+    sheet.getCell(`E${index + 2}`).value = value;
+  });
+
+  sheet.getCell('A9').value = config.output.labels.pitdev_field_without_plan_title;
+  sheet.getCell('D9').value = config.output.labels.pitdev_plan_without_field_title;
+  sheet.getCell('A9').fill = sectionFill;
+  sheet.getCell('D9').fill = sectionFill;
+  sheet.getCell('A9').font = { name: config.formatting.font_name, bold: true };
+  sheet.getCell('D9').font = { name: config.formatting.font_name, bold: true };
+  summary.fieldWithoutPlan.forEach((id, index) => {
+    sheet.getCell(`A${index + 10}`).value = id;
+  });
+  summary.planWithoutField.forEach((id, index) => {
+    sheet.getCell(`D${index + 10}`).value = id;
+  });
+
+  sheet.getRow(1).eachCell((cell) => {
+    cell.font = { name: config.formatting.font_name, size: 11, bold: true };
+    cell.fill = headerFill;
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+  });
+  ['A', 'D'].forEach((column) => { sheet.getColumn(column).width = 48; });
+  ['B', 'E'].forEach((column) => { sheet.getColumn(column).width = 30; });
+}
+
+export async function createPitdevWorkbookBuffer({ config, pitdevRows, summary, metadata }) {
+  const ExcelJS = getExcelJS();
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'MVV O-PitDev GitHub Pages';
+  workbook.lastModifiedBy = 'MVV O-PitDev GitHub Pages';
+  workbook.created = new Date();
+  workbook.modified = new Date();
+
+  addTableSheet(
+    workbook,
+    config.output.sheets.pitdev_consolidated,
+    config.columns.pitdev_consolidated,
+    pitdevRows,
+    config,
+    { highlightFinal: true, finalColumns: ['Ângulo do talude'] },
+  );
+  addPitdevLogSheet(workbook, summary, config, metadata);
+  return workbook.xlsx.writeBuffer();
+}

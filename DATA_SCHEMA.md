@@ -75,3 +75,35 @@ Saida gerada quando somente `MVV.xlsx` e processado.
 | Dip | numero | sim | Dip |
 | Tampao | numero | sim | Tampao planejado |
 | Carga | numero | sim | Carga planejada |
+
+## Levantamento de Campo Enaex
+
+Arquivo `.csv` ou `.txt` delimitado por vírgula, sem cabeçalho. A quinta posição pode existir vazia quando a linha termina com vírgula.
+
+| Posição | Tipo | Obrigatorio | Significado |
+| --- | --- | --- | --- |
+| 1 | numero/texto | sim | ID do furo |
+| 2 | numero | sim | Coordenada Y levantada |
+| 3 | numero | sim | Coordenada X levantada |
+| 4 | numero | sim | Coordenada Z levantada |
+| 5 | vazio | nao | Coluna final vazia do exportador Enaex |
+
+## Plano de Perfuração Planejado para O-PìtDev
+
+Fonte: `.xlsx`, aba configurada em `config.json`.
+
+| Campo lógico | Colunas aceitas por configuração | Significado |
+| --- | --- | --- |
+| ID | `ID` | Identificador usado no vínculo |
+| Diâmetro | `Diameter` ou `Diâmetro` | Diâmetro planejado |
+| Azimute | `Azimuth` ou `Azimute` | Azimute planejado |
+| Ângulo planejado | `Angulo`, `Ângulo`, `Dip`, `Inclination` ou `Inclinação` | Inclinação da lança no plano |
+
+## Saída O-PìtDev
+
+| Coluna | Fonte/regra |
+| --- | --- |
+| `ID` | Levantamento de Campo Enaex |
+| `Y`, `X`, `Z` | Levantamento de Campo Enaex |
+| `Diâmetro`, `Azimute`, `Ângulo planejado` | Plano de Perfuração Planejado |
+| `Ângulo do talude` | `90 - Ângulo planejado` |

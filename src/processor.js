@@ -203,3 +203,79 @@ export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefi
 
   return { consolidatedRows, summary };
 }
+
+export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidation, config) {
+  const [idColumn, yColumn, xColumn, zColumn, diameterColumn, azimuthColumn, plannedAngleColumn, slopeAngleColumn] = config.columns.pitdev_consolidated;
+  const planByHole = new Map();
+  const planColumns = planValidation.columns;
+
+  for (const row of rawPlan.rows) {
+    if (row.blank) continue;
+    const id = row.values[planColumns.id];
+    const holeKey = normalizeHoleKey(id, []);
+    planByHole.set(holeKey, {
+      diameter: toNumber(row.values[planColumns.diameter], `Plano linha ${row.sourceRow}`, 'diameter'),
+      azimuth: toNumber(row.values[planColumns.azimuth], `Plano linha ${row.sourceRow}`, 'azimuth'),
+      angle: toNumber(row.values[planColumns.angle], `Plano linha ${row.sourceRow}`, 'angle'),
+      sourceRow: row.sourceRow,
+    });
+  }
+
+  const rows = [];
+  const fieldWithoutPlan = [];
+  const matchedPlanKeys = new Set();
+  const referenceAngle = Number(config.pitdev.angle_reference_degrees);
+
+  if (!Number.isFinite(referenceAngle)) {
+    throw new Error('Configuração inválida: pitdev.angle_reference_degrees');
+  }
+
+  for (const row of rawField.rows) {
+    if (row.blank) continue;
+    const id = normalizeIdValue(row.values[0]);
+    const holeKey = normalizeHoleKey(id, []);
+    const plan = planByHole.get(holeKey);
+    if (!plan) {
+      fieldWithoutPlan.push(asText(row.values[0]));
+      continue;
+    }
+
+    matchedPlanKeys.add(holeKey);
+    const plannedAngle = plan.angle;
+    rows.push({
+      [idColumn]: id,
+      [yColumn]: toNumber(row.values[1], `Levantamento linha ${row.sourceLine}`, 'Y'),
+      [xColumn]: toNumber(row.values[2], `Levantamento linha ${row.sourceLine}`, 'X'),
+      [zColumn]: toNumber(row.values[3], `Levantamento linha ${row.sourceLine}`, 'Z'),
+      [diameterColumn]: plan.diameter,
+      [azimuthColumn]: plan.azimuth,
+      [plannedAngleColumn]: plannedAngle,
+      [slopeAngleColumn]: Number((referenceAngle - plannedAngle).toFixed(3)),
+    });
+  }
+
+  if (!rows.length) {
+    throw new Error('Nenhum ID do levantamento de campo foi encontrado no plano de perfuração');
+  }
+
+  const planWithoutField = [...planByHole.keys()]
+    .filter((holeKey) => !matchedPlanKeys.has(holeKey))
+    .sort(compareHoleKeys);
+
+  return {
+    rows,
+    summary: {
+      mode: 'pitdev',
+      fieldCount: fieldValidation.rowCount,
+      planCount: planValidation.rowCount,
+      matchedCount: rows.length,
+      fieldWithoutPlan,
+      fieldWithoutPlanCount: fieldWithoutPlan.length,
+      planWithoutField,
+      planWithoutFieldCount: planWithoutField.length,
+      outputColumns: config.columns.pitdev_consolidated,
+      sheetName: config.output.sheets.pitdev_consolidated,
+      angleFormula: `${referenceAngle} - ângulo planejado`,
+    },
+  };
+}
