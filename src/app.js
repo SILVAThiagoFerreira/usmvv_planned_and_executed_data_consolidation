@@ -406,7 +406,6 @@ export async function bootstrapApp() {
     state.pitdevMetadata = null;
     state.pitdevErrorMessage = null;
     state.pitdevPhase = 'idle';
-    state.pitdevAuxiliaryOptions = null;
     state.pitdevOutputFileName = config.output.pitdev_file_name;
     pitdevDownloadLink.hidden = true;
   };

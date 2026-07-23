@@ -54,7 +54,7 @@ def main() -> int:
     assert [cell.value for cell in sheet[1]] == [
         "ID", "Y", "X", "Z", "Diâmetro", "Azimute", "Ângulo planejado", "Ângulo do talude", "Profundidade"
     ]
-    assert sheet.max_row >= 25
+    assert sheet.max_row == 36
     assert sheet[2][0].value == 97
     assert sheet[2][1].value == 8929912.804
     assert sheet[2][4].value == 5
@@ -66,6 +66,8 @@ def main() -> int:
     auxiliary_depths = [sheet.cell(row, depth_index).value for row in range(2, sheet.max_row + 1) if sheet.cell(row, 5).value is None]
     if auxiliary_depths:
         assert all(value is not None for value in auxiliary_depths)
+        assert len(auxiliary_depths) == 11
+        assert round(auxiliary_depths[0], 3) == 3.955
     print(f"ok - O-PitDev browser flow | rows={sheet.max_row - 1} | screenshot={screenshot_path}")
     download_path.unlink(missing_ok=True)
     return 0
