@@ -33,6 +33,10 @@ def main() -> int:
         page.wait_for_function("document.querySelector('#pitdevStatusText')?.textContent?.includes('Pronto para consolidar')")
         page.get_by_role("button", name="Consolidar Projeto para O-PìtDev").click()
         page.wait_for_timeout(2000)
+        if not page.locator("#pitdevOptions").get_attribute("hidden"):
+            page.locator("#pitdevToeElevationInput").fill("290")
+            page.locator("#pitdevSubdrillingValueInput").fill("1")
+            page.get_by_role("button", name="Calcular auxiliares e consolidar").click()
         print("pitdev status:", page.locator("#pitdevStatusText").text_content())
         print("pitdev log:", page.locator("#pitdevLogOutput").text_content())
         page.wait_for_function("document.querySelector('#pitdevStatusText')?.textContent?.includes('Consolidação gerada.')")
@@ -50,13 +54,18 @@ def main() -> int:
     assert [cell.value for cell in sheet[1]] == [
         "ID", "Y", "X", "Z", "Diâmetro", "Azimute", "Ângulo planejado", "Ângulo do talude", "Profundidade"
     ]
-    assert sheet.max_row == 25
+    assert sheet.max_row >= 25
     assert sheet[2][0].value == 97
     assert sheet[2][1].value == 8929912.804
     assert sheet[2][4].value == 5
     assert sheet[2][6].value == 0
     assert sheet[2][7].value == 90
     assert sheet[2][8].value == 14.24
+    headers = [cell.value for cell in sheet[1]]
+    depth_index = headers.index("Profundidade") + 1
+    auxiliary_depths = [sheet.cell(row, depth_index).value for row in range(2, sheet.max_row + 1) if sheet.cell(row, 5).value is None]
+    if auxiliary_depths:
+        assert all(value is not None for value in auxiliary_depths)
     print(f"ok - O-PitDev browser flow | rows={sheet.max_row - 1} | screenshot={screenshot_path}")
     download_path.unlink(missing_ok=True)
     return 0

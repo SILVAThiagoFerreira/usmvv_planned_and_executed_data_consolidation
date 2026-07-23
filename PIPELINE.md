@@ -31,6 +31,8 @@
 6. `src/writer.js` gera `RD_EXECUTADO_ORGANIZADO.xlsx` com uma unica aba.
 7. `src/app.js` libera o download e mostra o resumo.
 
+Quando há IDs somente no levantamento, `app.js` solicita a cota do pé e a subfuração; `processor.js` calcula a profundidade somente dessas linhas auxiliares e preserva os valores do plano nas linhas correspondentes.
+
 ## Responsabilidades
 
 - `reader.js`: leitura dos arquivos.

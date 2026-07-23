@@ -151,6 +151,17 @@
           <a id="pitdevDownloadLink" class="secondary" hidden>Baixar CONSOLIDACAO_PROJETO_O-PITDEV.xlsx</a>
         </div>
 
+        <form id="pitdevOptions" class="executed-options" hidden>
+          <div class="options-heading"><div><span class="options-kicker">Furos auxiliares</span><h3>Dados para calcular a profundidade</h3></div></div>
+          <p>Há furos no levantamento que não existem no projeto. Informe os dados usados somente neles.</p>
+          <div class="options-grid">
+            <label class="field"><span>Cota do pé do projeto (m)</span><input id="pitdevToeElevationInput" type="number" min="0.001" step="any" required /></label>
+            <label class="field"><span>Subfuração (m), se houver</span><input id="pitdevSubdrillingValueInput" type="number" min="0" step="any" value="0" /></label>
+          </div>
+          <p class="formula">Profundidade auxiliar = Z do levantamento − cota do pé + subfuração</p>
+          <div class="options-actions"><button class="primary" type="submit">Calcular auxiliares e consolidar</button></div>
+        </form>
+
         <div class="status" id="pitdevStatusBox" data-tone="idle">
           <span class="status-dot"></span>
           <p id="pitdevStatusText">Anexe o levantamento de campo e o plano de perfuração planejado.</p>

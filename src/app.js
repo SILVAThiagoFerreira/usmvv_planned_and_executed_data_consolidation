@@ -188,6 +188,9 @@ export async function bootstrapApp() {
   const pitdevStatusText = qs('pitdevStatusText');
   const pitdevSummaryCards = qs('pitdevSummaryCards');
   const pitdevLogOutput = qs('pitdevLogOutput');
+  const pitdevOptions = qs('pitdevOptions');
+  const pitdevToeElevationInput = qs('pitdevToeElevationInput');
+  const pitdevSubdrillingValueInput = qs('pitdevSubdrillingValueInput');
 
   document.title = config.app.title;
   const state = {
@@ -207,6 +210,7 @@ export async function bootstrapApp() {
     pitdevMetadata: null,
     pitdevPhase: 'idle',
     pitdevErrorMessage: null,
+    pitdevAuxiliaryOptions: null,
   };
 
   const currentUi = () => getLanguagePack(config, state.language);
@@ -402,6 +406,7 @@ export async function bootstrapApp() {
     state.pitdevMetadata = null;
     state.pitdevErrorMessage = null;
     state.pitdevPhase = 'idle';
+    state.pitdevAuxiliaryOptions = null;
     state.pitdevOutputFileName = config.output.pitdev_file_name;
     pitdevDownloadLink.hidden = true;
   };
@@ -425,6 +430,7 @@ export async function bootstrapApp() {
 
   const setPitdevFile = (kind, file) => {
     state[kind] = file;
+    state.pitdevAuxiliaryOptions = null;
     clearPitdevOutput();
     renderLanguage();
   };
@@ -521,6 +527,15 @@ export async function bootstrapApp() {
     if (!state.pitdevField || !state.pitdevPlan) return;
 
     try {
+      if (!state.pitdevAuxiliaryOptions) {
+        const preview = await runPitdevPipeline({ config, fieldFile: state.pitdevField, planFile: state.pitdevPlan });
+        if (preview.summary.fieldWithoutPlanCount > 0) {
+          state.pitdevSummary = preview.summary;
+          pitdevOptions.hidden = false;
+          pitdevToeElevationInput.focus();
+          return;
+        }
+      }
       clearPitdevOutput();
       state.pitdevPhase = 'working';
       updatePitdevStatus();
@@ -531,6 +546,7 @@ export async function bootstrapApp() {
         config,
         fieldFile: state.pitdevField,
         planFile: state.pitdevPlan,
+        auxiliaryOptions: state.pitdevAuxiliaryOptions,
       });
       const blob = new Blob([result.buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -556,6 +572,16 @@ export async function bootstrapApp() {
       renderLanguage();
       console.error(error);
     }
+  });
+
+  pitdevOptions.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const toe = parseNumberInput(pitdevToeElevationInput.value);
+    const sub = parseNumberInput(pitdevSubdrillingValueInput.value) || 0;
+    if (toe === null || toe <= 0 || sub < 0) return;
+    state.pitdevAuxiliaryOptions = { toeElevation: toe, subdrilling: sub };
+    pitdevOptions.hidden = true;
+    pitdevGenerateBtn.click();
   });
 
   document.querySelectorAll('input[name="subdrilling"]').forEach((input) => {

@@ -122,6 +122,10 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - Arquivos invalidos bloqueiam o processamento.
 - A profundidade informada para o fluxo RD-only deve ser numerica e maior que zero.
 
+## Regra de furos auxiliares
+
+IDs do levantamento ausentes no plano são furos auxiliares. A interface solicita a cota do pé e a subfuração; a profundidade auxiliar é `Z do levantamento - cota do pé + subfuração`. Esses parâmetros valem somente para auxiliares; furos presentes no plano mantêm a profundidade planejada.
+
 ## Saidas
 
 - Aba `CONSOLIDADO_FINAL`.

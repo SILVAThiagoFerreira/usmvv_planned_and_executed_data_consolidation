@@ -78,12 +78,12 @@ export async function runRdOnlyPipeline({ config, rdFile, toeElevation, subdrill
   return { buffer, summary };
 }
 
-export async function runPitdevPipeline({ config, fieldFile, planFile }) {
+export async function runPitdevPipeline({ config, fieldFile, planFile, auxiliaryOptions = null }) {
   const rawField = await readPitdevFieldFile(fieldFile, config);
   const rawPlan = await readPitdevPlanFile(planFile, config);
   const fieldValidation = validatePitdevFieldSource(rawField, config);
   const planValidation = validatePitdevPlanSource(rawPlan, config);
-  const processed = buildPitdevRows(rawField, rawPlan, fieldValidation, planValidation, config);
+  const processed = buildPitdevRows(rawField, rawPlan, fieldValidation, planValidation, config, auxiliaryOptions);
   const metadata = {
     runId: new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, '').replace('T', '_'),
     generatedAt: new Date().toISOString(),

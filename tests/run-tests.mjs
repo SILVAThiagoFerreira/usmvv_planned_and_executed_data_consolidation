@@ -198,6 +198,18 @@ test('O-PitDev joins field coordinates and calculates slope angle', () => {
   assert.equal(summary.planWithoutFieldCount, 1);
 });
 
+test('O-PitDev calculates auxiliary holes only with custom toe and subdrilling', () => {
+  const pitdevConfig = { columns: { pitdev_consolidated: ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude', 'Profundidade'] }, pitdev: { angle_reference_degrees: 90 }, output: { sheets: { pitdev_consolidated: 'CONSOLIDACAO_O-PITDEV' } } };
+  const field = { rows: [{ sourceLine: 1, values: ['1', '10', '20', '300'] }, { sourceLine: 2, values: ['AUX-9', '11', '21', '298.5'] }] };
+  const plan = { rows: [{ sourceRow: 2, values: [1, 5, 10, 25, 12] }] };
+  const result = buildPitdevRows(field, plan, { rowCount: 2 }, { rowCount: 1, columns: { id: 0, diameter: 1, azimuth: 2, angle: 3, depth: 4 } }, pitdevConfig, { toeElevation: 290, subdrilling: 1 });
+  assert.equal(result.rows.length, 2);
+  assert.equal(result.rows[0].Profundidade, 12);
+  assert.equal(result.rows[1].Profundidade, 9.5);
+  assert.equal(result.rows[1].Diâmetro, null);
+  assert.equal(result.summary.auxiliaryCount, 1);
+});
+
 test('legacy branding is removed', () => {
   const configText = JSON.stringify(projectConfig);
   const legacyTitle = ['M', 'V', 'V', '/', 'R', 'D', ' ', 'D', 'a', 't', 'a', ' ', 'C', 'o', 'n', 's', 'o', 'l', 'e'].join('');

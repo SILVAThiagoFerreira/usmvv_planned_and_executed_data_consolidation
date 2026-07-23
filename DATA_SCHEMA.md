@@ -108,3 +108,5 @@ Fonte: `.xlsx`, aba configurada em `config.json`.
 | `Y`, `X`, `Z` | Levantamento de Campo Enaex |
 | `Diâmetro`, `Azimute`, `Ângulo planejado`, `Profundidade` | Plano de Perfuração Planejado |
 | `Ângulo do talude` | `90 - Ângulo planejado` |
+
+IDs auxiliares, presentes somente no levantamento, têm os campos de projeto vazios e `Profundidade = Z - cota do pé + subfuração`.

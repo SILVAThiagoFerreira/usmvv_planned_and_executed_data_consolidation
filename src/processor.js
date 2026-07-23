@@ -204,7 +204,7 @@ export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefi
   return { consolidatedRows, summary };
 }
 
-export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidation, config) {
+export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidation, config, auxiliaryOptions = null) {
   const [idColumn, yColumn, xColumn, zColumn, diameterColumn, azimuthColumn, plannedAngleColumn, slopeAngleColumn, depthColumn] = config.columns.pitdev_consolidated;
   const planByHole = new Map();
   const planColumns = planValidation.columns;
@@ -238,6 +238,11 @@ export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidati
     const plan = planByHole.get(holeKey);
     if (!plan) {
       fieldWithoutPlan.push(asText(row.values[0]));
+      if (!auxiliaryOptions) continue;
+      const customToe = Number(auxiliaryOptions.toeElevation);
+      const subdrilling = Number(auxiliaryOptions.subdrilling || 0);
+      if (!Number.isFinite(customToe) || !Number.isFinite(subdrilling) || customToe <= 0 || subdrilling < 0) throw new Error('Cota do pé e subfuração dos furos auxiliares são inválidas');
+      rows.push({ [idColumn]: id, [yColumn]: toNumber(row.values[1], `Levantamento linha ${row.sourceLine}`, 'Y'), [xColumn]: toNumber(row.values[2], `Levantamento linha ${row.sourceLine}`, 'X'), [zColumn]: toNumber(row.values[3], `Levantamento linha ${row.sourceLine}`, 'Z'), [diameterColumn]: null, [azimuthColumn]: null, [plannedAngleColumn]: null, [slopeAngleColumn]: null, [depthColumn]: Number((Number(row.values[3]) - customToe + subdrilling).toFixed(3)), auxiliary: true });
       continue;
     }
 
@@ -271,6 +276,7 @@ export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidati
       fieldCount: fieldValidation.rowCount,
       planCount: planValidation.rowCount,
       matchedCount: rows.length,
+      auxiliaryCount: rows.filter((row) => row.auxiliary).length,
       fieldWithoutPlan,
       fieldWithoutPlanCount: fieldWithoutPlan.length,
       planWithoutField,
