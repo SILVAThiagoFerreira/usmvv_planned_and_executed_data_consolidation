@@ -290,7 +290,7 @@
           "zh": "Chines"
         },
         "eyebrow": "Console de Dados",
-        "hubbar_title": "Consolidação Plan./Exec.",
+        "hubbar_title": "MVV × RD",
         "app_subtitle": "",
         "header_label": "Cabecalho da aplicacao",
         "workflow_label": "Fluxo de trabalho",
@@ -388,7 +388,7 @@
           "zh": "Chinese"
         },
         "eyebrow": "Data Console",
-        "hubbar_title": "Plan./Exec. consolidation",
+        "hubbar_title": "MVV × RD",
         "app_subtitle": "Local validation. Controlled Excel output.",
         "header_label": "Application header",
         "workflow_label": "Workflow",
@@ -486,7 +486,7 @@
           "zh": "中文"
         },
         "eyebrow": "数据控制台",
-        "hubbar_title": "计划/执行整合",
+        "hubbar_title": "MVV × RD",
         "app_subtitle": "本地校验。受控 Excel 输出。",
         "header_label": "应用程序标题",
         "workflow_label": "工作流程",

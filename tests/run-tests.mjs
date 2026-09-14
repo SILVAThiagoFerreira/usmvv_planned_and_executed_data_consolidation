@@ -95,6 +95,7 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.default_language, 'pt');
   assert.deepEqual(Object.keys(projectConfig.ui.languages), ['pt', 'en', 'zh']);
   assert.equal(projectConfig.ui.languages.pt.language_label, 'Idioma');
+  assert.equal(projectConfig.ui.languages.pt.hubbar_title, 'MVV × RD');
   assert.equal(projectConfig.ui.languages.en.primary_action, 'Consolidate MVV + RD');
   assert.equal(projectConfig.ui.languages.zh.primary_action, '整合 MVV + RD');
   assert.equal(projectConfig.ui.languages.pt.app_subtitle, '');
