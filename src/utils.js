@@ -88,6 +88,16 @@ export function toNumber(value, context, fieldName) {
   return num;
 }
 
+export function dipNumber(value, context, fieldName = 'Dip') {
+  const text = asText(value);
+  if (isBlank(value) || text === '-') return 0;
+  const num = Number(text);
+  if (!Number.isFinite(num)) {
+    throw new Error(`${context}: invalid numeric value for ${fieldName}: ${text}`);
+  }
+  return num;
+}
+
 export function optionalNumber(value) {
   if (isBlank(value)) return null;
   const num = Number(asText(value));

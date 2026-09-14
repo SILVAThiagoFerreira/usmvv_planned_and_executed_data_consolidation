@@ -1,4 +1,4 @@
-import { asText, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js';
+import { asText, dipNumber, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js';
 
 export function validateMvvSource(rawMvv, config) {
   const headers = rawMvv.headers;
@@ -26,6 +26,10 @@ export function validateMvvSource(rawMvv, config) {
     }
     for (const column of requiredRowColumns) {
       const value = row.values[indexMap.get(column)];
+      if (column === 'Dip') {
+        dipNumber(value, context, column);
+        continue;
+      }
       if (isBlank(value)) {
         throw new Error(`${context}: missing required field ${column}`);
       }
@@ -68,6 +72,10 @@ export function validateMvvPlanSource(rawMvv, config) {
     }
     for (const column of requiredRowColumns) {
       const value = row.values[indexMap.get(column)];
+      if (column === 'Dip') {
+        dipNumber(value, context, column);
+        continue;
+      }
       if (isBlank(value)) {
         throw new Error(`${context}: missing required field ${column}`);
       }
@@ -78,7 +86,8 @@ export function validateMvvPlanSource(rawMvv, config) {
     for (const column of numericFields) {
       const value = row.values[indexMap.get(column)];
       if (!isBlank(value)) {
-        toNumber(value, context, column);
+        if (column === 'Dip') dipNumber(value, context, column);
+        else toNumber(value, context, column);
       }
     }
   }
@@ -199,7 +208,8 @@ export function validatePitdevPlanSource(rawPlan, config) {
     seen.add(holeKey);
 
     for (const [field, column] of Object.entries(columns).slice(1)) {
-      toNumber(row.values[column], context, field);
+      if (field === 'angle') dipNumber(row.values[column], context, field);
+      else toNumber(row.values[column], context, field);
     }
   }
 

@@ -17,7 +17,7 @@
 | Depth | numero | sim | Profundidade planejada |
 | Sub Drill | numero | sim | Sub drill |
 | Azimuth | numero | sim | Azimute |
-| Dip | numero | sim | Dip |
+| Dip | numero | sim | Dip. Valores vazios e `-` sao normalizados para `0`; outros textos nao numericos falham na validacao. |
 
 ## RD raw
 
@@ -72,7 +72,7 @@ Saida gerada quando somente `MVV.xlsx` e processado.
 | Depth | numero | sim | Profundidade planejada |
 | Sub Drill | numero | sim | Sub drill |
 | Azimuth | numero | sim | Azimute |
-| Dip | numero | sim | Dip |
+| Dip | numero | sim | Dip. Valores vazios e `-` sao normalizados para `0`; outros textos nao numericos falham na validacao. |
 | Tampao | numero | sim | Tampao planejado |
 | Carga | numero | sim | Carga planejada |
 
@@ -97,7 +97,7 @@ Fonte: `.xlsx`, aba configurada em `config.json`.
 | ID | `ID` | Identificador usado no vínculo |
 | Diâmetro | `Diameter` ou `Diâmetro` | Diâmetro planejado |
 | Azimute | `Azimuth` ou `Azimute` | Azimute planejado |
-| Ângulo planejado | `Angulo`, `Ângulo`, `Dip`, `Inclination` ou `Inclinação` | Inclinação da lança no plano |
+| Ângulo planejado | `Angulo`, `Ângulo`, `Dip`, `Inclination` ou `Inclinação` | Inclinação da lança no plano; valor vazio ou `-` vira `0` |
 | Profundidade | `Depth` ou `Profundidade` | Profundidade planejada |
 
 ## Saída O-PìtDev

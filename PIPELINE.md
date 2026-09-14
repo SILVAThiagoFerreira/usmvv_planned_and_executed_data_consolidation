@@ -7,8 +7,8 @@
 3. `src/config.js` carrega `config.json`.
 4. O usuario anexa `PLANEJADO.xlsx` e `REALIZADO.txt`.
 5. `src/reader.js` le os arquivos.
-6. `src/validator.js` valida estrutura e tipos.
-7. `src/processor.js` normaliza, deduplica e consolida.
+6. `src/validator.js` valida estrutura e tipos; em `Dip`, vazio ou `-` e aceito como `0`.
+7. `src/processor.js` normaliza, deduplica e consolida, preservando `Dip = 0` quando a origem veio vazia ou com `-`.
 8. `src/writer.js` monta o workbook final.
 9. `src/app.js` dispara o download e mostra o resumo.
 
@@ -16,8 +16,8 @@
 
 1. O usuario anexa somente `PLANEJADO.xlsx`.
 2. `src/reader.js` le a aba configurada da MVV.
-3. `src/validator.js` valida as colunas exigidas para `PLANO_MVV`.
-4. `src/processor.js` extrai somente as colunas configuradas para o plano.
+3. `src/validator.js` valida as colunas exigidas para `PLANO_MVV`; em `Dip`, vazio ou `-` e aceito como `0`.
+4. `src/processor.js` extrai somente as colunas configuradas para o plano e normaliza `Dip` vazio ou `-` para `0`.
 5. `src/writer.js` gera `MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx`.
 6. `src/app.js` libera o download e mostra o resumo.
 
@@ -45,7 +45,7 @@ Quando há IDs somente no levantamento, `app.js` solicita a cota do pé e a subf
 
 1. O usuario anexa o `Levantamento de Campo Enaex` (`.csv` ou `.txt`) e o `Plano de Perfuração Planejado` (`.xlsx`).
 2. `src/reader.js` le o texto delimitado e a aba configurada do Excel.
-3. `src/validator.js` valida quantidades de campos, IDs unicos, colunas do plano e valores numericos.
-4. `src/processor.js` normaliza os IDs, cruza os arquivos na ordem do levantamento, traz a `Depth` do plano como `Profundidade` e calcula `90 - angulo planejado`.
+3. `src/validator.js` valida quantidades de campos, IDs unicos, colunas do plano e valores numericos; no angulo planejado/Dip, vazio ou `-` e aceito como `0`.
+4. `src/processor.js` normaliza os IDs, cruza os arquivos na ordem do levantamento, traz a `Depth` do plano como `Profundidade` e calcula `90 - angulo planejado`, usando `0` quando o angulo planejado veio vazio ou `-`.
 5. `src/writer.js` gera `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx` com a tabela e o log de diferencas.
 6. `src/app.js` habilita o download, exibe os indicadores e registra o resultado na interface.

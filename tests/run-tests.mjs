@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buildConsolidatedRows, buildMvvPlanRows, buildPitdevRows, buildRdOnlyRows, deduplicateRdRows } from '../src/processor.js';
+import { validatePitdevPlanSource } from '../src/validator.js';
 import { getNumericFormatForHeader } from '../src/writer.js';
 import { normalizeHoleKey } from '../src/utils.js';
 
@@ -155,6 +156,31 @@ test('mvv plan extraction keeps only configured output columns', () => {
   assert.equal(Object.hasOwn(rows[0], 'Extra'), false);
 });
 
+test('Dip blank and dash are normalized to zero in MVV plan extraction', () => {
+  const planConfig = {
+    columns: {
+      mvv_plan: ['ID', 'Type', 'Explosivo', 'Diameter', 'X Collar', 'Y Collar', 'Z Collar', 'Depth', 'Sub Drill', 'Azimuth', 'Dip', 'Tampao', 'Carga'],
+    },
+    validation: {
+      mvv_plan_numeric_fields: ['Diameter', 'X Collar', 'Y Collar', 'Z Collar', 'Depth', 'Sub Drill', 'Azimuth', 'Dip', 'Tampao', 'Carga'],
+    },
+  };
+  const validation = {
+    indexMap: new Map(planConfig.columns.mvv_plan.map((header, index) => [header, index])),
+  };
+  const rawMvv = {
+    rows: [
+      { sourceRow: 2, blank: false, values: ['F1', 'P', 'ANFO', 6.5, 100, 200, 300, 12, 0.7, 45, '', 2.1, 35] },
+      { sourceRow: 3, blank: false, values: ['F2', 'P', 'ANFO', 6.5, 100, 200, 300, 12, 0.7, 45, '-', 2.1, 35] },
+    ],
+  };
+
+  const rows = buildMvvPlanRows(rawMvv, planConfig, validation);
+
+  assert.equal(rows[0].Dip, 0);
+  assert.equal(rows[1].Dip, 0);
+});
+
 test('O-PitDev joins field coordinates and calculates slope angle', () => {
   const pitdevConfig = {
     columns: {
@@ -196,6 +222,67 @@ test('O-PitDev joins field coordinates and calculates slope angle', () => {
   assert.equal(rows[1]['Ângulo do talude'], 55);
   assert.equal(summary.matchedCount, 2);
   assert.equal(summary.planWithoutFieldCount, 1);
+});
+
+test('O-PitDev treats blank or dash planned angle as zero', () => {
+  const pitdevConfig = {
+    columns: {
+      pitdev_consolidated: ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude', 'Profundidade'],
+    },
+    pitdev: { angle_reference_degrees: 90 },
+    output: { sheets: { pitdev_consolidated: 'CONSOLIDACAO_O-PITDEV' } },
+  };
+  const field = { rows: [{ sourceLine: 1, values: ['1', '10', '20', '300'] }, { sourceLine: 2, values: ['2', '11', '21', '301'] }] };
+  const plan = { rows: [{ sourceRow: 2, values: [1, 5, 10, '-', 12] }, { sourceRow: 3, values: [2, 5, 10, '', 13] }] };
+  const result = buildPitdevRows(field, plan, { rowCount: 2 }, { rowCount: 2, columns: { id: 0, diameter: 1, azimuth: 2, angle: 3, depth: 4 } }, pitdevConfig);
+
+  assert.equal(result.rows[0]['Ângulo planejado'], 0);
+  assert.equal(result.rows[0]['Ângulo do talude'], 90);
+  assert.equal(result.rows[1]['Ângulo planejado'], 0);
+  assert.equal(result.rows[1]['Ângulo do talude'], 90);
+});
+
+test('O-PitDev plan validation accepts blank or dash planned angle', () => {
+  const validationConfig = {
+    pitdev: {
+      plan_columns: {
+        id: ['ID'],
+        diameter: ['Diameter'],
+        azimuth: ['Azimuth'],
+        angle: ['Dip'],
+        depth: ['Depth'],
+      },
+    },
+  };
+  const rawPlan = {
+    headers: ['ID', 'Diameter', 'Azimuth', 'Dip', 'Depth'],
+    rows: [
+      { sourceRow: 2, blank: false, values: [1, 5, 10, '', 12] },
+      { sourceRow: 3, blank: false, values: [2, 5, 10, '-', 13] },
+    ],
+  };
+
+  const validation = validatePitdevPlanSource(rawPlan, validationConfig);
+
+  assert.equal(validation.rowCount, 2);
+  assert.deepEqual(validation.columns, { id: 0, diameter: 1, azimuth: 2, angle: 3, depth: 4 });
+});
+
+test('O-PitDev still rejects non-numeric planned angle text', () => {
+  const pitdevConfig = {
+    columns: {
+      pitdev_consolidated: ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude', 'Profundidade'],
+    },
+    pitdev: { angle_reference_degrees: 90 },
+    output: { sheets: { pitdev_consolidated: 'CONSOLIDACAO_O-PITDEV' } },
+  };
+  const field = { rows: [{ sourceLine: 1, values: ['1', '10', '20', '300'] }] };
+  const plan = { rows: [{ sourceRow: 2, values: [1, 5, 10, 'abc', 12] }] };
+
+  assert.throws(
+    () => buildPitdevRows(field, plan, { rowCount: 1 }, { rowCount: 1, columns: { id: 0, diameter: 1, azimuth: 2, angle: 3, depth: 4 } }, pitdevConfig),
+    /invalid numeric value for angle: abc/,
+  );
 });
 
 test('O-PitDev calculates auxiliary holes only with custom toe and subdrilling', () => {

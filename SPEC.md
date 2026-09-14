@@ -115,6 +115,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - MVV deve conter todas as colunas requeridas.
 - Para o plano MVV organizado, a MVV deve conter todas as colunas da saida `PLANO_MVV`.
 - MVV deve ter as colunas numericas validas para o calculo.
+- Em `Dip`, valores vazios ou exatamente `-` sao aceitos e normalizados para `0`; outros textos nao numericos continuam invalidos.
 - RD deve ter exatamente 5 campos.
 - O segundo campo da RD deve estar vazio.
 - IDs da RD devem iniciar com `L-`, `L_` ou `E-`.
@@ -138,6 +139,7 @@ IDs do levantamento ausentes no plano são furos auxiliares. A interface solicit
 - O novo quadro funciona separadamente dos fluxos MVV/RD e processa tudo localmente no navegador.
 - O `Levantamento de Campo Enaex` aceita `.csv` ou `.txt` delimitado por vírgula, com as colunas posicionais `ID`, `Y`, `X`, `Z` e, opcionalmente, uma quinta coluna vazia após a última vírgula.
 - O `Plano de Perfuração Planejado` aceita `.xlsx`, usa a aba configurada em `config.json` e localiza `ID`, `Diameter`/`Diâmetro`, `Azimuth`/`Azimute`, `Angulo`/`Ângulo`/`Dip` e `Depth`/`Profundidade` por aliases configurados.
+- No O-PitDev, o `Ângulo planejado` vazio ou `-` e tratado como `0`, entao `Ângulo do talude` fica `90 - 0`.
 - O vínculo é feito pelo `ID` normalizado. IDs duplicados, campos ausentes ou valores não numéricos interrompem a consolidação com erro explícito.
 - A ordem da tabela exportada segue a ordem do levantamento de campo. Somente IDs presentes nos dois arquivos entram na tabela; diferenças ficam documentadas no log do workbook e na interface.
 - A saída tem as colunas `ID`, `Y`, `X`, `Z`, `Diâmetro`, `Azimute`, `Ângulo planejado`, `Ângulo do talude` e `Profundidade`.

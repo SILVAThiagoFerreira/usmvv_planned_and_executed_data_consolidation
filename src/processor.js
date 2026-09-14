@@ -1,4 +1,4 @@
-import { asText, compareHoleKeys, firstNonBlank, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js';
+import { asText, compareHoleKeys, dipNumber, firstNonBlank, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js';
 
 export function buildMvvRows(rawMvv, config, validation) {
   const indexMap = validation.indexMap;
@@ -20,7 +20,7 @@ export function buildMvvRows(rawMvv, config, validation) {
     item.Descricao = asText(item.Descricao);
 
     for (const column of numericFields) {
-      item[column] = optionalNumber(item[column]);
+      item[column] = column === 'Dip' ? dipNumber(item[column], `MVV linha ${rawRow.sourceRow}`, column) : optionalNumber(item[column]);
     }
 
     item.holeKey = normalizeHoleKey(item.ID, stripPrefixes);
@@ -45,7 +45,7 @@ export function buildMvvPlanRows(rawMvv, config, validation) {
     const item = {};
     for (const column of headers) {
       const value = rawRow.values[indexMap.get(column)] ?? null;
-      item[column] = numericFields.has(column) ? optionalNumber(value) : asText(value);
+      item[column] = numericFields.has(column) ? (column === 'Dip' ? dipNumber(value, `MVV linha ${rawRow.sourceRow}`, column) : optionalNumber(value)) : asText(value);
     }
     rows.push(item);
   }
@@ -216,7 +216,7 @@ export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidati
     planByHole.set(holeKey, {
       diameter: toNumber(row.values[planColumns.diameter], `Plano linha ${row.sourceRow}`, 'diameter'),
       azimuth: toNumber(row.values[planColumns.azimuth], `Plano linha ${row.sourceRow}`, 'azimuth'),
-      angle: toNumber(row.values[planColumns.angle], `Plano linha ${row.sourceRow}`, 'angle'),
+      angle: dipNumber(row.values[planColumns.angle], `Plano linha ${row.sourceRow}`, 'angle'),
       depth: toNumber(row.values[planColumns.depth], `Plano linha ${row.sourceRow}`, 'depth'),
       sourceRow: row.sourceRow,
     });
