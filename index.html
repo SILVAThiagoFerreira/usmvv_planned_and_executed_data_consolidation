@@ -15,13 +15,10 @@
   <body>
     <header class="openblast-hubbar">
       <div class="openblast-hubbar__brand"><img src="./assets/openblast-logo.png" alt="OpenBlast" /><span>Open<strong>Blast</strong></span></div>
-      <span class="openblast-hubbar__title">Consolidação Plan./Exec.</span>
+      <span id="hubbarTitle" class="openblast-hubbar__title">Consolidação Plan./Exec.</span>
     </header>
     <div class="page">
       <header class="topbar" aria-label="Cabecalho da aplicacao">
-        <div class="brand" aria-label="OpenBlast">
-          <img class="brand-logo" src="./assets/openblast-logo.png" alt="OpenBlast" />
-        </div>
         <div class="top-meta">
           <label class="language-switch" for="languageSelect">
             <span id="languageLabel" class="language-switch-label">Idioma</span>
@@ -36,35 +33,42 @@
 
       <main class="workspace">
         <section class="intro-panel">
-          <h1 id="appTitle">Consolidação de dados de Perfuração para Desmonte - Planejado/Executado</h1>
+          <span id="appEyebrow" class="eyebrow">Console de Dados</span>
+          <h1 id="appTitle">Consolidação MVV × RD</h1>
         </section>
 
         <section class="panel upload-panel">
           <div class="panel-header">
             <div>
-              <h2 id="filesTitle">ARQUIVOS DE ORIGEM</h2>
+              <span id="filesKicker" class="panel-kicker">MVV / RD</span>
+              <h2 id="filesTitle">Consolidar arquivos</h2>
             </div>
+            <p id="filesHint" class="panel-hint">2 arquivos · processamento local</p>
           </div>
 
           <div class="upload-grid">
             <label class="dropzone" id="mvvDropzone" for="mvvFile">
-              <input id="mvvFile" type="file" accept=".xlsx" hidden />
+              <input id="mvvFile" class="visually-hidden-input" type="file" accept=".xlsx" aria-labelledby="mvvFileLabel mvvFileName" aria-describedby="mvvFileHint" />
               <span id="mvvFileLabel" class="dropzone-label">PLANEJADO.xlsx</span>
               <strong id="mvvFileName">Nenhum arquivo selecionado</strong>
+              <small id="mvvFileHint">Plano de perfuração</small>
             </label>
 
             <label class="dropzone" id="rdDropzone" for="rdFile">
-              <input id="rdFile" type="file" accept=".txt" hidden />
+              <input id="rdFile" class="visually-hidden-input" type="file" accept=".txt" aria-labelledby="rdFileLabel rdFileName" aria-describedby="rdFileHint" />
               <span id="rdFileLabel" class="dropzone-label">REALIZADO.txt</span>
               <strong id="rdFileName">Nenhum arquivo selecionado</strong>
+              <small id="rdFileHint">Coordenadas de topografia</small>
             </label>
           </div>
 
           <div class="actions">
             <button id="generateBtn" class="primary" type="button" disabled>Gerar Dado Consolidado Planejado vs Realizado</button>
-            <button id="rdOnlyBtn" class="secondary" type="button" disabled>Organize Somente o Executado</button>
-            <button id="mvvOnlyBtn" class="secondary" type="button" disabled>Organize Somente o Dado Planejado</button>
             <a id="downloadLink" class="secondary" hidden>Baixar MVV_RD_CONSOLIDADO_FINAL.xlsx</a>
+          </div>
+          <div id="secondaryActions" class="secondary-actions" aria-label="Outras saídas">
+            <button id="mvvOnlyBtn" class="secondary" type="button" disabled>Organize Somente o Dado Planejado</button>
+            <button id="rdOnlyBtn" class="secondary" type="button" disabled>Organize Somente o Executado</button>
           </div>
 
           <form id="executedOptions" class="executed-options" hidden>
@@ -99,7 +103,7 @@
             <p id="executedOptionsError" class="form-error" role="alert" hidden></p>
           </form>
 
-          <div class="status" id="statusBox" data-tone="idle">
+          <div class="status" id="statusBox" data-tone="idle" role="status" aria-live="polite" aria-busy="false">
             <span class="status-dot"></span>
             <p id="statusText">Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.</p>
           </div>
@@ -108,41 +112,46 @@
         <aside class="panel summary-panel">
           <div class="panel-header">
             <div>
-              <h2 id="summaryTitle">Resumo:</h2>
+              <span id="summaryKicker" class="panel-kicker">Saída</span>
+              <h2 id="summaryTitle">Resumo</h2>
             </div>
           </div>
+          <p id="summaryEmpty" class="summary-empty">O resumo aparece após a consolidação.</p>
           <div id="summaryCards" class="summary-grid"></div>
-          <div class="log-block">
-            <div class="log-head">
-              <h3 id="detailsTitle">LOG</h3>
-            </div>
+          <details class="log-block">
+            <summary class="log-head">
+              <span id="detailsTitle">Log técnico</span>
+              <span id="detailsBadge">JSON</span>
+            </summary>
             <pre id="logOutput">Aguardando arquivos...</pre>
-          </div>
+          </details>
         </aside>
       </main>
 
-      <section class="panel pitdev-panel" aria-labelledby="pitdevTitle">
-        <div class="panel-header">
-          <div>
-            <h2 id="pitdevTitle">Consolidação de Projeto para O-PìtDev</h2>
-            <p id="pitdevHint">Cruze o levantamento de campo Enaex com o plano de perfuração planejado.</p>
+      <details class="panel pitdev-panel">
+        <summary class="pitdev-summary">
+          <div class="pitdev-summary-main">
+            <span class="section-code">O-PITDEV</span>
+            <h2 id="pitdevTitle">Consolidação para O-PìtDev</h2>
+            <p id="pitdevHint">Cruze levantamento de campo e plano de perfuração.</p>
           </div>
-          <span class="section-code">O-PITDEV</span>
-        </div>
+          <span id="pitdevToggleLabel" class="summary-toggle">Abrir</span>
+        </summary>
+        <div class="pitdev-content">
 
         <div class="upload-grid">
           <label class="dropzone" id="pitdevFieldDropzone" for="pitdevFieldFile">
-            <input id="pitdevFieldFile" type="file" accept=".csv,.txt" hidden />
+            <input id="pitdevFieldFile" class="visually-hidden-input" type="file" accept=".csv,.txt" aria-labelledby="pitdevFieldFileLabel pitdevFieldFileName" aria-describedby="pitdevFieldFileHint" />
             <span id="pitdevFieldFileLabel" class="dropzone-label">Levantamento de Campo Enaex</span>
             <strong id="pitdevFieldFileName">Nenhum arquivo selecionado</strong>
-            <small id="pitdevFieldFileHint">Arquivo .csv ou .txt com ID, Y, X e Z</small>
+            <small id="pitdevFieldFileHint">CSV/TXT · ID, Y, X, Z</small>
           </label>
 
           <label class="dropzone" id="pitdevPlanDropzone" for="pitdevPlanFile">
-            <input id="pitdevPlanFile" type="file" accept=".xlsx" hidden />
+            <input id="pitdevPlanFile" class="visually-hidden-input" type="file" accept=".xlsx" aria-labelledby="pitdevPlanFileLabel pitdevPlanFileName" aria-describedby="pitdevPlanFileHint" />
             <span id="pitdevPlanFileLabel" class="dropzone-label">Plano de Perfuração Planejado</span>
             <strong id="pitdevPlanFileName">Nenhum arquivo selecionado</strong>
-            <small id="pitdevPlanFileHint">Arquivo Excel com Diameter, Azimuth, Dip e Depth</small>
+            <small id="pitdevPlanFileHint">XLSX · Diameter, Azimuth, Dip, Depth</small>
           </label>
         </div>
 
@@ -152,31 +161,34 @@
         </div>
 
         <form id="pitdevOptions" class="executed-options" hidden>
-          <div class="options-heading"><div><span class="options-kicker">Furos auxiliares</span><h3>Dados para calcular a profundidade</h3></div></div>
-          <p>Há furos no levantamento que não existem no projeto. Informe os dados usados somente neles.</p>
+          <div class="options-heading"><div><span id="pitdevOptionsKicker" class="options-kicker">Furos auxiliares</span><h3 id="pitdevOptionsTitle">Parâmetros dos auxiliares</h3></div></div>
+          <p id="pitdevOptionsHint">Informe os dados usados somente nesses furos.</p>
           <div class="options-grid">
-            <label class="field"><span>Cota do pé do projeto (m)</span><input id="pitdevToeElevationInput" type="number" min="0.001" step="any" required /></label>
-            <label class="field"><span>Subfuração (m), se houver</span><input id="pitdevSubdrillingValueInput" type="number" min="0" step="any" value="0" /></label>
+            <label class="field"><span id="pitdevToeElevationLabel">Cota do pé do projeto (m)</span><input id="pitdevToeElevationInput" type="number" min="0.001" step="any" required /></label>
+            <label class="field"><span id="pitdevSubdrillingLabel">Subfuração (m)</span><input id="pitdevSubdrillingValueInput" type="number" min="0" step="any" value="0" /></label>
           </div>
-          <p class="formula">Profundidade auxiliar = Z do levantamento − cota do pé + subfuração</p>
-          <div class="options-actions"><button class="primary" type="submit">Calcular auxiliares e consolidar</button></div>
+          <p id="pitdevFormula" class="formula">Profundidade auxiliar = Z − cota do pé + subfuração</p>
+          <div class="options-actions"><button id="pitdevOptionsSubmit" class="primary" type="submit">Calcular e consolidar</button></div>
+          <p id="pitdevOptionsError" class="form-error" role="alert" hidden></p>
         </form>
 
-        <div class="status" id="pitdevStatusBox" data-tone="idle">
+        <div class="status" id="pitdevStatusBox" data-tone="idle" role="status" aria-live="polite" aria-busy="false">
           <span class="status-dot"></span>
           <p id="pitdevStatusText">Anexe o levantamento de campo e o plano de perfuração planejado.</p>
         </div>
 
         <div class="pitdev-result-grid">
           <div id="pitdevSummaryCards" class="summary-grid"></div>
-          <div class="log-block">
-            <div class="log-head">
-              <h3>LOG O-PITDEV</h3>
-            </div>
+          <details class="log-block">
+            <summary class="log-head">
+              <span id="pitdevDetailsTitle">Log técnico</span>
+              <span id="pitdevDetailsBadge">JSON</span>
+            </summary>
             <pre id="pitdevLogOutput">Aguardando os dois arquivos...</pre>
-          </div>
+          </details>
         </div>
-      </section>
+        </div>
+      </details>
     </div>
 
     <script type="module" src="./main.js"></script>

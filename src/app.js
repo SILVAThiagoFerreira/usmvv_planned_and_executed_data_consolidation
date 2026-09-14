@@ -9,6 +9,8 @@ function qs(id) {
 
 function setStatus(statusBox, statusText, tone, text) {
   statusBox.dataset.tone = tone;
+  statusBox.setAttribute('role', tone === 'error' ? 'alert' : 'status');
+  statusBox.setAttribute('aria-busy', tone === 'working' ? 'true' : 'false');
   statusText.textContent = text;
 }
 
@@ -132,10 +134,14 @@ export async function bootstrapApp() {
   const defaultLanguage = config.ui.default_language || 'pt';
 
   const appTitle = qs('appTitle');
+  const appEyebrow = qs('appEyebrow');
+  const hubbarTitle = qs('hubbarTitle');
   const topbar = document.querySelector('.topbar');
   const languageLabel = qs('languageLabel');
   const languageSelect = qs('languageSelect');
+  const filesKicker = qs('filesKicker');
   const filesTitle = qs('filesTitle');
+  const filesHint = qs('filesHint');
   const mvvFile = qs('mvvFile');
   const rdFile = qs('rdFile');
   const mvvDropzone = qs('mvvDropzone');
@@ -144,6 +150,8 @@ export async function bootstrapApp() {
   const rdFileLabel = qs('rdFileLabel');
   const mvvFileName = qs('mvvFileName');
   const rdFileName = qs('rdFileName');
+  const mvvFileHint = qs('mvvFileHint');
+  const rdFileHint = qs('rdFileHint');
   const generateBtn = qs('generateBtn');
   const mvvOnlyBtn = qs('mvvOnlyBtn');
   const rdOnlyBtn = qs('rdOnlyBtn');
@@ -151,7 +159,10 @@ export async function bootstrapApp() {
   const statusBox = qs('statusBox');
   const statusText = qs('statusText');
   const summaryTitle = qs('summaryTitle');
+  const summaryKicker = qs('summaryKicker');
+  const summaryEmpty = qs('summaryEmpty');
   const detailsTitle = qs('detailsTitle');
+  const detailsBadge = qs('detailsBadge');
   const summaryCards = qs('summaryCards');
   const logOutput = qs('logOutput');
   const executedOptions = qs('executedOptions');
@@ -188,7 +199,20 @@ export async function bootstrapApp() {
   const pitdevStatusText = qs('pitdevStatusText');
   const pitdevSummaryCards = qs('pitdevSummaryCards');
   const pitdevLogOutput = qs('pitdevLogOutput');
+  const pitdevDetailsTitle = qs('pitdevDetailsTitle');
+  const pitdevDetailsBadge = qs('pitdevDetailsBadge');
+  const pitdevPanel = document.querySelector('.pitdev-panel');
+  const pitdevToggleLabel = qs('pitdevToggleLabel');
   const pitdevOptions = qs('pitdevOptions');
+  const pitdevOptionsKicker = qs('pitdevOptionsKicker');
+  const pitdevOptionsTitle = qs('pitdevOptionsTitle');
+  const pitdevOptionsHint = qs('pitdevOptionsHint');
+  const pitdevToeElevationLabel = qs('pitdevToeElevationLabel');
+  const pitdevSubdrillingLabel = qs('pitdevSubdrillingLabel');
+  const pitdevFormula = qs('pitdevFormula');
+  const pitdevOptionsSubmit = qs('pitdevOptionsSubmit');
+  const pitdevOptionsError = qs('pitdevOptionsError');
+  const secondaryActions = qs('secondaryActions');
   const pitdevToeElevationInput = qs('pitdevToeElevationInput');
   const pitdevSubdrillingValueInput = qs('pitdevSubdrillingValueInput');
 
@@ -324,12 +348,23 @@ export async function bootstrapApp() {
 
     languageLabel.textContent = ui.language_label;
     languageSelect.setAttribute('aria-label', ui.language_label);
+    appEyebrow.textContent = ui.eyebrow;
+    hubbarTitle.textContent = ui.hubbar_title;
     appTitle.textContent = config.app.title;
+    filesKicker.textContent = ui.files_kicker;
     filesTitle.textContent = ui.files_title;
+    filesHint.textContent = ui.files_hint;
     mvvFileLabel.textContent = ui.mvv_file_label;
     rdFileLabel.textContent = ui.rd_file_label;
+    mvvFileHint.textContent = ui.mvv_file_hint;
+    rdFileHint.textContent = ui.rd_file_hint;
     summaryTitle.textContent = ui.summary_title;
+    summaryKicker.textContent = ui.summary_kicker;
+    summaryEmpty.textContent = ui.summary_empty;
     detailsTitle.textContent = ui.details_title;
+    detailsBadge.textContent = ui.details_badge;
+    pitdevDetailsTitle.textContent = ui.details_title;
+    pitdevDetailsBadge.textContent = ui.details_badge;
     mvvFileName.textContent = state.mvv ? state.mvv.name : ui.no_file_selected;
     rdFileName.textContent = state.rd ? state.rd.name : ui.no_file_selected;
     pitdevTitle.textContent = ui.pitdev_title;
@@ -340,6 +375,7 @@ export async function bootstrapApp() {
     pitdevPlanFileHint.textContent = ui.pitdev_plan_hint;
     pitdevFieldFileName.textContent = state.pitdevField ? state.pitdevField.name : ui.no_file_selected;
     pitdevPlanFileName.textContent = state.pitdevPlan ? state.pitdevPlan.name : ui.no_file_selected;
+    pitdevToggleLabel.textContent = pitdevPanel?.open ? ui.pitdev_close : ui.pitdev_open;
     generateBtn.textContent = ui.primary_action;
     rdOnlyBtn.textContent = ui.rd_only_action;
     mvvOnlyBtn.textContent = ui.mvv_only_action;
@@ -357,6 +393,15 @@ export async function bootstrapApp() {
     cancelExecutedOptionsSecondary.textContent = ui.cancel_action;
     confirmExecutedOptions.textContent = ui.confirm_executed_action;
     downloadLink.textContent = `${ui.download_action} ${state.outputFileName}`;
+    pitdevOptionsKicker.textContent = ui.pitdev_options_kicker;
+    pitdevOptionsTitle.textContent = ui.pitdev_options_title;
+    pitdevOptionsHint.textContent = ui.pitdev_options_hint;
+    pitdevToeElevationLabel.textContent = ui.pitdev_toe_elevation_label;
+    pitdevSubdrillingLabel.textContent = ui.pitdev_subdrilling_label;
+    pitdevFormula.textContent = ui.pitdev_formula;
+    pitdevOptionsSubmit.textContent = ui.pitdev_options_submit;
+    pitdevOptionsError.textContent = ui.pitdev_options_invalid;
+    secondaryActions.setAttribute('aria-label', ui.secondary_actions_label);
 
     if (state.summary && (state.phase === 'done' || state.phase === 'mvv_done' || state.phase === 'rd_done')) {
       renderSummary(summaryCards, ui, state.summary);
@@ -380,6 +425,7 @@ export async function bootstrapApp() {
 
     downloadLink.hidden = !state.downloadUrl;
     pitdevDownloadLink.hidden = !state.pitdevDownloadUrl;
+    summaryEmpty.hidden = Boolean(state.summary) || state.phase === 'error';
 
     updateStatus();
     updatePitdevStatus();
@@ -411,6 +457,8 @@ export async function bootstrapApp() {
   };
 
   renderLanguage();
+
+  pitdevPanel?.addEventListener('toggle', renderLanguage);
 
   languageSelect.addEventListener('change', () => {
     state.language = languageSelect.value || defaultLanguage;
@@ -577,7 +625,11 @@ export async function bootstrapApp() {
     event.preventDefault();
     const toe = parseNumberInput(pitdevToeElevationInput.value);
     const sub = parseNumberInput(pitdevSubdrillingValueInput.value) || 0;
-    if (toe === null || toe <= 0 || sub < 0) return;
+    if (toe === null || toe <= 0 || sub < 0) {
+      pitdevOptionsError.hidden = false;
+      return;
+    }
+    pitdevOptionsError.hidden = true;
     state.pitdevAuxiliaryOptions = { toeElevation: toe, subdrilling: sub };
     pitdevOptions.hidden = true;
     pitdevGenerateBtn.click();
