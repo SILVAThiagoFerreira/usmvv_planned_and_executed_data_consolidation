@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#263540" />
     <title>Consolidação Plan./Exec. | Console de Dados</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260914-compact-1" />
     <link rel="icon" href="./assets/openblast-favicon-white.svg" type="image/svg+xml" />
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
   </head>
@@ -37,13 +37,13 @@
           <h1 id="appTitle">Consolidação MVV × RD</h1>
         </section>
 
-        <section class="panel upload-panel">
+        <section class="panel upload-panel" aria-labelledby="filesTitle">
           <div class="panel-header">
             <div>
-              <span id="filesKicker" class="panel-kicker">MVV / RD</span>
-              <h2 id="filesTitle">Consolidar arquivos</h2>
+              <span id="filesKicker" class="panel-kicker">Entrada</span>
+              <h2 id="filesTitle">Arquivos de entrada</h2>
             </div>
-            <p id="filesHint" class="panel-hint">2 arquivos · processamento local</p>
+            <p id="filesHint" class="panel-hint">Anexe 1 ou 2 arquivos</p>
           </div>
 
           <div class="upload-grid">
@@ -62,14 +62,19 @@
             </label>
           </div>
 
-          <div class="actions">
-            <button id="generateBtn" class="primary" type="button" disabled>Gerar Dado Consolidado Planejado vs Realizado</button>
+          <div class="actions primary-actions">
+            <button id="generateBtn" class="primary" type="button" disabled>Consolidar MVV + RD</button>
             <a id="downloadLink" class="secondary" hidden>Baixar MVV_RD_CONSOLIDADO_FINAL.xlsx</a>
           </div>
-          <div id="secondaryActions" class="secondary-actions" aria-label="Outras saídas">
-            <button id="mvvOnlyBtn" class="secondary" type="button" disabled>Organize Somente o Dado Planejado</button>
-            <button id="rdOnlyBtn" class="secondary" type="button" disabled>Organize Somente o Executado</button>
-          </div>
+          <details id="secondaryActions" class="secondary-actions" aria-label="Outras saídas">
+            <summary class="secondary-actions-summary">
+              <span id="secondaryActionsTitle">Outras saídas</span>
+            </summary>
+            <div class="secondary-actions__body">
+              <button id="mvvOnlyBtn" class="secondary" type="button" disabled>Organizar planejado</button>
+              <button id="rdOnlyBtn" class="secondary" type="button" disabled>Organizar executado</button>
+            </div>
+          </details>
 
           <form id="executedOptions" class="executed-options" hidden>
             <div class="options-heading">
@@ -105,18 +110,18 @@
 
           <div class="status" id="statusBox" data-tone="idle" role="status" aria-live="polite" aria-busy="false">
             <span class="status-dot"></span>
-            <p id="statusText">Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.</p>
+            <p id="statusText">Anexe o planejado para começar.</p>
           </div>
         </section>
 
-        <aside class="panel summary-panel">
+        <aside class="panel summary-panel" aria-labelledby="summaryTitle" hidden>
           <div class="panel-header">
             <div>
               <span id="summaryKicker" class="panel-kicker">Saída</span>
               <h2 id="summaryTitle">Resumo</h2>
             </div>
           </div>
-          <p id="summaryEmpty" class="summary-empty">O resumo aparece após a consolidação.</p>
+          <p id="summaryEmpty" class="summary-empty">Nenhuma saída gerada.</p>
           <div id="summaryCards" class="summary-grid"></div>
           <details class="log-block">
             <summary class="log-head">
@@ -132,31 +137,31 @@
         <summary class="pitdev-summary">
           <div class="pitdev-summary-main">
             <span class="section-code">O-PITDEV</span>
-            <h2 id="pitdevTitle">Consolidação para O-PìtDev</h2>
-            <p id="pitdevHint">Cruze levantamento de campo e plano de perfuração.</p>
+            <h2 id="pitdevTitle">Consolidação O-PitDev</h2>
+            <p id="pitdevHint">Levantamento de campo + plano.</p>
           </div>
-          <span id="pitdevToggleLabel" class="summary-toggle">Abrir</span>
+          <span id="pitdevToggleLabel" class="summary-toggle" aria-hidden="true">Abrir</span>
         </summary>
         <div class="pitdev-content">
 
         <div class="upload-grid">
           <label class="dropzone" id="pitdevFieldDropzone" for="pitdevFieldFile">
             <input id="pitdevFieldFile" class="visually-hidden-input" type="file" accept=".csv,.txt" aria-labelledby="pitdevFieldFileLabel pitdevFieldFileName" aria-describedby="pitdevFieldFileHint" />
-            <span id="pitdevFieldFileLabel" class="dropzone-label">Levantamento de Campo Enaex</span>
+            <span id="pitdevFieldFileLabel" class="dropzone-label">Levantamento de campo</span>
             <strong id="pitdevFieldFileName">Nenhum arquivo selecionado</strong>
             <small id="pitdevFieldFileHint">CSV/TXT · ID, Y, X, Z</small>
           </label>
 
           <label class="dropzone" id="pitdevPlanDropzone" for="pitdevPlanFile">
             <input id="pitdevPlanFile" class="visually-hidden-input" type="file" accept=".xlsx" aria-labelledby="pitdevPlanFileLabel pitdevPlanFileName" aria-describedby="pitdevPlanFileHint" />
-            <span id="pitdevPlanFileLabel" class="dropzone-label">Plano de Perfuração Planejado</span>
+            <span id="pitdevPlanFileLabel" class="dropzone-label">Plano planejado</span>
             <strong id="pitdevPlanFileName">Nenhum arquivo selecionado</strong>
-            <small id="pitdevPlanFileHint">XLSX · Diameter, Azimuth, Dip, Depth</small>
+            <small id="pitdevPlanFileHint">XLSX · diâmetro, azimute, dip, profundidade</small>
           </label>
         </div>
 
         <div class="actions">
-          <button id="pitdevGenerateBtn" class="primary" type="button" disabled>Consolidar Projeto para O-PìtDev</button>
+          <button id="pitdevGenerateBtn" class="primary" type="button" disabled>Consolidar O-PitDev</button>
           <a id="pitdevDownloadLink" class="secondary" hidden>Baixar CONSOLIDACAO_PROJETO_O-PITDEV.xlsx</a>
         </div>
 
@@ -191,6 +196,6 @@
       </details>
     </div>
 
-    <script type="module" src="./main.js"></script>
+    <script type="module" src="./main.js?v=20260914-compact-1"></script>
   </body>
 </html>

@@ -91,27 +91,32 @@ test('profundidade final uses a dedicated 2-decimal format', () => {
 });
 
 test('config exposes localized ui packs', () => {
-  assert.equal(projectConfig.app.title, 'Consolidação de dados de Perfuração para Desmonte - Planejado/Executado');
+  assert.equal(projectConfig.app.title, 'Consolidação MVV × RD');
   assert.equal(projectConfig.ui.default_language, 'pt');
   assert.deepEqual(Object.keys(projectConfig.ui.languages), ['pt', 'en', 'zh']);
   assert.equal(projectConfig.ui.languages.pt.language_label, 'Idioma');
-  assert.equal(projectConfig.ui.languages.en.primary_action, 'Generate workbook');
-  assert.equal(projectConfig.ui.languages.zh.primary_action, '生成工作簿');
+  assert.equal(projectConfig.ui.languages.en.primary_action, 'Consolidate MVV + RD');
+  assert.equal(projectConfig.ui.languages.zh.primary_action, '整合 MVV + RD');
   assert.equal(projectConfig.ui.languages.pt.app_subtitle, '');
   assert.deepEqual(projectConfig.ui.languages.pt.workflow_steps.slice(0, 2), ['Anexar Planejado', 'Anexar Realizado']);
   assert.equal(projectConfig.ui.languages.pt.mvv_file_label, 'PLANEJADO.xlsx');
   assert.equal(projectConfig.ui.languages.pt.rd_file_label, 'REALIZADO.txt');
-  assert.equal(projectConfig.ui.languages.pt.mvv_file_hint, 'Plano de Perfuração');
-  assert.equal(projectConfig.ui.languages.pt.rd_file_hint, 'Arquivo de Coordenadas da Topografia');
-  assert.equal(projectConfig.ui.languages.pt.status_idle, 'Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.');
-  assert.equal(projectConfig.ui.languages.pt.files_title, 'ARQUIVOS DE ORIGEM');
-  assert.equal(projectConfig.ui.languages.pt.summary_title, 'Resumo:');
-  assert.equal(projectConfig.ui.languages.pt.details_title, 'LOG');
-  assert.equal(projectConfig.ui.languages.pt.primary_action, 'Gerar Dado Consolidado Planejado vs Realizado');
-  assert.equal(projectConfig.ui.languages.pt.mvv_only_action, 'Organize Somente o Dado Planejado');
-  assert.equal(projectConfig.ui.languages.pt.rd_only_action, 'Organize Somente o Executado');
-  assert.equal(projectConfig.ui.languages.pt.status_ready_mvv, 'Pronto para organizar somente o planejado.');
-  assert.equal(projectConfig.ui.languages.pt.status_ready_rd, 'Pronto para organizar somente o executado.');
+  assert.equal(projectConfig.ui.languages.pt.mvv_file_hint, 'Plano de perfuração');
+  assert.equal(projectConfig.ui.languages.pt.rd_file_hint, 'Coordenadas de topografia');
+  assert.equal(projectConfig.ui.languages.pt.status_idle, 'Anexe o planejado para começar.');
+  assert.equal(projectConfig.ui.languages.pt.files_title, 'Arquivos de entrada');
+  assert.equal(projectConfig.ui.languages.pt.files_kicker, 'Entrada');
+  assert.equal(projectConfig.ui.languages.pt.summary_title, 'Resumo');
+  assert.equal(projectConfig.ui.languages.pt.details_title, 'Log técnico');
+  assert.equal(projectConfig.ui.languages.pt.pitdev_open, 'Abrir');
+  assert.equal(projectConfig.ui.languages.pt.pitdev_close, 'Fechar');
+  assert.equal(projectConfig.ui.languages.pt.summary_kicker, 'Saída');
+  assert.equal(projectConfig.ui.languages.pt.secondary_actions_label, 'Outras saídas');
+  assert.equal(projectConfig.ui.languages.pt.primary_action, 'Consolidar MVV + RD');
+  assert.equal(projectConfig.ui.languages.pt.mvv_only_action, 'Organizar planejado');
+  assert.equal(projectConfig.ui.languages.pt.rd_only_action, 'Organizar executado');
+  assert.equal(projectConfig.ui.languages.pt.status_ready_mvv, 'Pronto para organizar o planejado.');
+  assert.equal(projectConfig.ui.languages.pt.status_ready_rd, 'Pronto para organizar o executado.');
   assert.equal(projectConfig.ui.languages.pt.status_rd_done, 'Executado organizado.');
   assert.equal(projectConfig.ui.languages.pt.toe_elevation_label, 'Cota do pé (m)');
   assert.equal(projectConfig.ui.languages.pt.subdrilling_question, 'Terá subfuração?');
@@ -126,8 +131,10 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.output.sheets.executed, 'RD_EXECUTADO');
   assert.equal(projectConfig.output.pitdev_file_name, 'CONSOLIDACAO_PROJETO_O-PITDEV.xlsx');
   assert.deepEqual(projectConfig.columns.pitdev_consolidated, ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude', 'Profundidade']);
-  assert.equal(projectConfig.ui.languages.pt.pitdev_field_label, 'Levantamento de Campo Enaex');
-  assert.equal(projectConfig.ui.languages.pt.pitdev_title, 'Consolidação de Projeto para O-PìtDev');
+  assert.equal(projectConfig.ui.languages.pt.pitdev_field_label, 'Levantamento de campo');
+  assert.equal(projectConfig.ui.languages.pt.pitdev_title, 'Consolidação O-PitDev');
+  assert.equal(projectConfig.ui.languages.pt.pitdev_action, 'Consolidar O-PitDev');
+  assert.equal(projectConfig.ui.languages.pt.secondary_actions_title, 'Outras saídas');
   assert.equal(Object.hasOwn(projectConfig.ui.languages.pt, 'system_badge'), false);
 });
 
@@ -310,4 +317,23 @@ test('brand uses the OpenBlast asset', async () => {
   const indexHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(indexHtml, /src="\.\/assets\/openblast-logo\.png"/);
   assert.match(indexHtml, /alt="OpenBlast"/);
+});
+
+test('compact interface keeps downloads hidden until a workbook exists', () => {
+  const indexHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const styles = readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
+
+  assert.equal((indexHtml.match(/openblast-logo\.png/g) || []).length, 1);
+  assert.match(indexHtml, /<details id="secondaryActions" class="secondary-actions"/);
+  assert.match(indexHtml, /<details class="panel pitdev-panel">/);
+  assert.match(indexHtml, /<details class="log-block">/);
+  assert.match(indexHtml, /id="downloadLink" class="secondary" hidden/);
+  assert.match(indexHtml, /id="pitdevDownloadLink" class="secondary" hidden/);
+  assert.match(indexHtml, /id="mvvFile" class="visually-hidden-input"/);
+  assert.match(indexHtml, /id="statusBox" data-tone="idle" role="status" aria-live="polite"/);
+  assert.match(indexHtml, /id="pitdevOptionsError" class="form-error" role="alert" hidden/);
+  assert.match(styles, /\[hidden\]\s*\{\s*display:\s*none !important;/);
+  assert.match(styles, /\.visually-hidden-input\s*\{/);
+  assert.match(styles, /\.secondary-actions__body\s*\{\s*display: grid;/);
+  assert.match(styles, /\.summary-panel\[hidden\]\s*\{/);
 });

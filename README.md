@@ -7,15 +7,14 @@ Tambem permite anexar somente o arquivo executado para baixar `RD_EXECUTADO_ORGA
 ## Como usar
 
 1. Abra a pagina publicada no GitHub Pages.
-2. Use o seletor de idioma no topo se quiser alternar a interface.
-3. Anexe `PLANEJADO.xlsx` e `REALIZADO.txt`.
-4. Clique em `Gerar Dado Consolidado Planejado vs Realizado`.
-5. Baixe a planilha gerada.
+2. Anexe `PLANEJADO.xlsx` e, se for consolidar, `REALIZADO.txt`.
+3. Clique em `Consolidar MVV + RD`. Para uma saída isolada, abra `Outras saídas` e escolha o fluxo planejado ou executado.
+4. Baixe o workbook quando o link aparecer; o log tecnico fica disponivel no painel `Resumo`.
 
-Para organizar somente o dado planejado, anexe `PLANEJADO.xlsx`, clique em `Organize Somente o Dado Planejado` e baixe o workbook gerado.
-Para organizar somente o executado, anexe `REALIZADO.txt`. Informe a cota do pé; a profundidade será calculada pela diferença entre a cota de topo do arquivo e a cota do pé. Se houver subfuração, informe também o valor, que será somado ao resultado.
+Para organizar somente o dado planejado, anexe `PLANEJADO.xlsx`, abra `Outras saídas`, clique em `Organizar planejado` e baixe o workbook gerado.
+Para organizar somente o executado, anexe `REALIZADO.txt`, abra `Outras saídas` e clique em `Organizar executado`. Informe a cota do pé; a profundidade será calculada pela diferença entre a cota de topo do arquivo e a cota do pé. Se houver subfuração, informe também o valor, que será somado ao resultado.
 
-Para consolidar um projeto para O-PìtDev, use o quadro abaixo do fluxo principal. Anexe o `Levantamento de Campo Enaex` em `.csv` ou `.txt` e o `Plano de Perfuração Planejado` em `.xlsx`. O levantamento fornece `ID`, `Y`, `X` e `Z`; o plano fornece `Diâmetro`, `Azimute`, `Ângulo planejado` (a coluna `Dip` do arquivo atual) e `Profundidade` (a coluna `Depth`). A coluna `Ângulo do talude` é calculada por `90 - Ângulo planejado`. O download gera `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx` com a tabela consolidada e o log de correspondências.
+Para consolidar um projeto para O-PitDev, abra o quadro abaixo do fluxo principal. Anexe o levantamento de campo em `.csv` ou `.txt` e o plano planejado em `.xlsx`. O levantamento fornece `ID`, `Y`, `X` e `Z`; o plano fornece `Diâmetro`, `Azimute`, `Ângulo planejado` (a coluna `Dip` do arquivo atual) e `Profundidade` (a coluna `Depth`). A coluna `Ângulo do talude` é calculada por `90 - Ângulo planejado`. O download gera `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx` com a tabela consolidada e o log de correspondências.
 
 ## Caracteristicas
 
@@ -24,7 +23,11 @@ Para consolidar um projeto para O-PìtDev, use o quadro abaixo do fluxo principa
 - Validacao antes do processamento.
 - Deduplicacao da RD com prioridade `L-` sobre `E-` e `L_`.
 - Seletor de idioma para portugues, ingles e chines simplificado.
-- Interface minimalista com fundo branco e logo OpenBlast pequeno no topo esquerdo.
+- Interface compacta com fundo branco e uma unica marca OpenBlast na barra superior.
+- A ação principal fica visível; saídas isoladas ficam recolhidas em `Outras saídas`.
+- O resumo só ocupa espaço depois que existe uma saída; o log técnico permanece expansível.
+- O-PitDev inicia recolhido para manter o fluxo principal limpo e pode ser aberto quando necessario.
+- Links de download aparecem somente depois de uma geracao valida.
 - Workbook final com `CONSOLIDADO_FINAL`, `RD_TRATADA` e `LOG_VALIDACAO`.
 - Exportacao MVV-only com a aba `PLANO_MVV` e somente as colunas configuradas.
 

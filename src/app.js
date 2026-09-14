@@ -161,6 +161,7 @@ export async function bootstrapApp() {
   const summaryTitle = qs('summaryTitle');
   const summaryKicker = qs('summaryKicker');
   const summaryEmpty = qs('summaryEmpty');
+  const summaryPanel = document.querySelector('.summary-panel');
   const detailsTitle = qs('detailsTitle');
   const detailsBadge = qs('detailsBadge');
   const summaryCards = qs('summaryCards');
@@ -213,6 +214,7 @@ export async function bootstrapApp() {
   const pitdevOptionsSubmit = qs('pitdevOptionsSubmit');
   const pitdevOptionsError = qs('pitdevOptionsError');
   const secondaryActions = qs('secondaryActions');
+  const secondaryActionsTitle = qs('secondaryActionsTitle');
   const pitdevToeElevationInput = qs('pitdevToeElevationInput');
   const pitdevSubdrillingValueInput = qs('pitdevSubdrillingValueInput');
 
@@ -363,6 +365,7 @@ export async function bootstrapApp() {
     summaryEmpty.textContent = ui.summary_empty;
     detailsTitle.textContent = ui.details_title;
     detailsBadge.textContent = ui.details_badge;
+    secondaryActionsTitle.textContent = ui.secondary_actions_title;
     pitdevDetailsTitle.textContent = ui.details_title;
     pitdevDetailsBadge.textContent = ui.details_badge;
     mvvFileName.textContent = state.mvv ? state.mvv.name : ui.no_file_selected;
@@ -425,6 +428,7 @@ export async function bootstrapApp() {
 
     downloadLink.hidden = !state.downloadUrl;
     pitdevDownloadLink.hidden = !state.pitdevDownloadUrl;
+    if (summaryPanel) summaryPanel.hidden = !state.summary && state.phase !== 'error';
     summaryEmpty.hidden = Boolean(state.summary) || state.phase === 'error';
 
     updateStatus();

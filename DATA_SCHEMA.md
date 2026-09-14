@@ -88,7 +88,7 @@ Arquivo `.csv` ou `.txt` delimitado por vírgula, sem cabeçalho. A quinta posi�
 | 4 | numero | sim | Coordenada Z levantada |
 | 5 | vazio | nao | Coluna final vazia do exportador Enaex |
 
-## Plano de Perfuração Planejado para O-PìtDev
+## Plano de Perfuração Planejado para O-PitDev
 
 Fonte: `.xlsx`, aba configurada em `config.json`.
 
@@ -100,7 +100,7 @@ Fonte: `.xlsx`, aba configurada em `config.json`.
 | Ângulo planejado | `Angulo`, `Ângulo`, `Dip`, `Inclination` ou `Inclinação` | Inclinação da lança no plano; valor vazio ou `-` vira `0` |
 | Profundidade | `Depth` ou `Profundidade` | Profundidade planejada |
 
-## Saída O-PìtDev
+## Saída O-PitDev
 
 | Coluna | Fonte/regra |
 | --- | --- |

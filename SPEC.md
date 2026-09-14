@@ -12,19 +12,25 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - A interface abre em portugues por padrao.
 - O seletor de idioma permite portugues, ingles e chines simplificado.
 - A troca de idioma altera apenas a interface da pagina, nao o workbook gerado.
-- O titulo exibido e `Consolidação Plan./Exec. | Console de Dados`.
+- O titulo exibido na area de trabalho e `Consolidação MVV × RD`.
 - A marca antiga nao aparece na interface.
-- A interface usa fundo branco, estilo minimalista e logo OpenBlast pequeno no topo esquerdo.
+- A interface usa fundo branco, estilo minimalista e uma unica marca OpenBlast na barra superior.
 - O badge `Somente local` nao aparece na interface.
-- O botao principal em portugues exibe `Gerar Dado Consolidado Planejado vs Realizado`.
-- O botao MVV-only em portugues exibe `Organize Somente o Dado Planejado`.
-- O botao RD-only em portugues exibe `Organize Somente o Executado`.
-- O subtitulo `Validacao local. Saida Excel controlada.` nao aparece na interface em portugues.
-- O fluxo em portugues exibe `Anexar Planejado` e `Anexar Realizado`.
-- Os uploads em portugues exibem `PLANEJADO.xlsx`, `REALIZADO.txt`, `Plano de Perfuração` e `Arquivo de Coordenadas da Topografia`.
-- O status inicial em portugues exibe `Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.`
+- O botao principal em portugues exibe `Consolidar MVV + RD`.
+- As ações MVV-only e RD-only ficam dentro do detalhe recolhido `Outras saídas` e exibem `Organizar planejado` e `Organizar executado`.
+- O subtitulo longo de validacao nao aparece na interface em portugues.
+- O fluxo em portugues exibe `PLANEJADO.xlsx` e `REALIZADO.txt` nos cartões de entrada.
+- Os uploads em portugues exibem `PLANEJADO.xlsx`, `REALIZADO.txt`, `Plano de perfuração` e `Coordenadas de topografia`.
+- O status inicial em portugues exibe `Anexe o planejado para começar.`.
 - Quando apenas o arquivo executado estiver carregado, o status deve indicar que o usuario pode organizar somente o executado.
-- Os titulos em portugues usam `ARQUIVOS DE ORIGEM`, `Resumo:` e `LOG`.
+- O bloco principal em portugues usa `Arquivos de entrada`; o log tecnico fica em um detalhe expansivel.
+- O resumo fica oculto enquanto não há saída válida e aparece após a geração; em caso de erro, permanece disponível para o diagnóstico.
+- A seção `Outras saídas` inicia recolhida e reúne os fluxos MVV-only e RD-only.
+- Os links de download permanecem ocultos ate que um workbook valido seja gerado.
+- O quadro O-PitDev inicia recolhido e pode ser expandido pelo usuario sem alterar o fluxo MVV/RD.
+- Os quatro seletores de arquivo permanecem focaveis por teclado, com nome e formato associados para tecnologia assistiva.
+- Os estados de processamento sao anunciados com `role`, `aria-live` e `aria-busy`; erros usam alerta explicito.
+- Parametros invalidos de furos auxiliares exibem mensagem no formulario e preservam os arquivos selecionados.
 - `L-` tem prioridade sobre `E-` e `L_` na RD.
 - Se houver ambos para o mesmo furo, `L-` e mantido na base tratada.
 - Se nao houver RD para um furo, os campos finais usam MVV.
@@ -122,6 +128,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - Coordenadas da RD devem ser numericas.
 - Arquivos invalidos bloqueiam o processamento.
 - A profundidade informada para o fluxo RD-only deve ser numerica e maior que zero.
+- A cota do pe dos auxiliares deve ser maior que zero e a subfuracao deve ser igual ou maior que zero; valores invalidos nao podem falhar silenciosamente.
 
 ## Regra de furos auxiliares
 
@@ -134,7 +141,7 @@ IDs do levantamento ausentes no plano são furos auxiliares. A interface solicit
 - Aba `LOG_VALIDACAO`.
 - Fluxo RD-only: uma unica aba `RD_EXECUTADO` com `ID`, `Y`, `X`, `Z`, `Profundidade` e sem log adicional.
 
-## Consolidação de Projeto para O-PìtDev
+## Consolidação de Projeto para O-PitDev
 
 - O novo quadro funciona separadamente dos fluxos MVV/RD e processa tudo localmente no navegador.
 - O `Levantamento de Campo Enaex` aceita `.csv` ou `.txt` delimitado por vírgula, com as colunas posicionais `ID`, `Y`, `X`, `Z` e, opcionalmente, uma quinta coluna vazia após a última vírgula.

@@ -8,10 +8,12 @@ Portar a consolidacao MVV x RD para uma aplicacao estaticamente hospedavel no Gi
 - Processamento client-side.
 - Download do workbook final.
 - Validacao e log visiveis ao usuario.
+- Interface compacta: uma unica marca, ação principal clara, saídas isoladas recolhidas, resumo sob demanda, download oculto ate a geracao e log tecnico expansivel.
+- O-PitDev inicia recolhido, mas mantem upload, processamento, status, resumo e download funcionais.
 
-## Entrega O-PìtDev
+## Entrega O-PitDev
 
-- Quadro separado abaixo do fluxo principal, chamado `Consolidação de Projeto para O-PìtDev`.
+- Quadro separado abaixo do fluxo principal, chamado `Consolidação O-PitDev`.
 - Upload do `Levantamento de Campo Enaex` em `.csv` ou `.txt`.
 - Upload do `Plano de Perfuração Planejado` em `.xlsx`.
 - Consolidação de `ID`, `Y`, `X`, `Z`, `Diâmetro`, `Azimute`, `Ângulo planejado`, `Ângulo do talude` e `Profundidade` do plano.

@@ -36,38 +36,42 @@ def main() -> int:
         page = browser.new_page(accept_downloads=True)
         page.goto(args.base_url, wait_until="domcontentloaded")
         page.wait_for_selector("#statusText")
-        page.wait_for_function("document.querySelector('.brand-logo')?.getAttribute('src') === './assets/openblast-logo.png'")
+        page.wait_for_function("document.querySelector('.openblast-hubbar__brand img')?.getAttribute('src') === './assets/openblast-logo.png'")
         page.wait_for_function("document.documentElement.lang === 'pt-BR'")
         page.wait_for_function("document.querySelector('#languageSelect')?.value === 'pt'")
         page.wait_for_function("!document.querySelector('#appSubtitle')")
         page.wait_for_function("document.querySelector('#mvvFileLabel')?.textContent === 'PLANEJADO.xlsx'")
         page.wait_for_function("document.querySelector('#rdFileLabel')?.textContent === 'REALIZADO.txt'")
-        page.wait_for_function("document.querySelector('#statusText')?.textContent === 'Anexe PLANEJADO.xlsx para organizar PLANEJADO ou anexe tambem REALIZADO.txt para consolidar.'")
-        page.wait_for_function("document.querySelector('#generateBtn')?.textContent === 'Gerar Dado Consolidado Planejado vs Realizado'")
-        page.wait_for_function("document.querySelector('#rdOnlyBtn')?.textContent === 'Organize Somente o Executado'")
-        page.wait_for_function("document.querySelector('#mvvOnlyBtn')?.textContent === 'Organize Somente o Dado Planejado'")
+        page.wait_for_function("document.querySelector('#statusText')?.textContent === 'Anexe o planejado para começar.'")
+        page.wait_for_function("document.querySelector('#generateBtn')?.textContent === 'Consolidar MVV + RD'")
+        page.wait_for_function("document.querySelector('#rdOnlyBtn')?.textContent === 'Organizar executado'")
+        page.wait_for_function("document.querySelector('#mvvOnlyBtn')?.textContent === 'Organizar planejado'")
+        page.wait_for_function("document.querySelector('#downloadLink')?.hidden === true")
+        page.wait_for_function("document.querySelector('.summary-panel')?.hidden === true")
+        page.wait_for_function("document.querySelector('.pitdev-panel')?.open === false")
 
         page.locator("#languageSelect").select_option("en")
         page.wait_for_function("document.documentElement.lang === 'en'")
         page.wait_for_function("document.querySelector('#languageSelect')?.value === 'en'")
-        page.wait_for_function("document.querySelector('#generateBtn')?.textContent === 'Generate workbook'")
-        page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Attach MVV.xlsx to organize MVV')")
+        page.wait_for_function("document.querySelector('#generateBtn')?.textContent === 'Consolidate MVV + RD'")
+        page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Attach the planning file to start')")
 
         page.locator("#languageSelect").select_option("zh")
         page.wait_for_function("document.documentElement.lang === 'zh-Hans'")
         page.wait_for_function("document.querySelector('#languageSelect')?.value === 'zh'")
-        page.wait_for_function("document.querySelector('#generateBtn')?.textContent === '生成工作簿'")
+        page.wait_for_function("document.querySelector('#generateBtn')?.textContent === '整合 MVV + RD'")
 
         page.locator("#languageSelect").select_option("pt")
         page.wait_for_function("document.documentElement.lang === 'pt-BR'")
         page.wait_for_function("document.querySelector('#languageSelect')?.value === 'pt'")
-        page.wait_for_function("document.querySelector('#generateBtn')?.textContent === 'Gerar Dado Consolidado Planejado vs Realizado'")
+        page.wait_for_function("document.querySelector('#generateBtn')?.textContent === 'Consolidar MVV + RD'")
 
         page.set_input_files("#mvvFile", args.mvv)
+        page.locator("#secondaryActions summary").click()
         page.locator("#mvvOnlyBtn").wait_for(state="visible")
         page.wait_for_function("!document.querySelector('#mvvOnlyBtn')?.disabled")
-        page.get_by_role("button", name="Organize Somente o Dado Planejado").click()
-        page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Plano MVV organizado.')")
+        page.get_by_role("button", name="Organizar planejado").click()
+        page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Planejado organizado.')")
         page.locator("#downloadLink").wait_for(state="visible")
         with page.expect_download() as mvv_only_download_info:
             page.get_by_role("link", name="Baixar MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx").click()
@@ -77,7 +81,7 @@ def main() -> int:
         page.set_input_files("#rdFile", args.rd)
         page.locator("#generateBtn").wait_for(state="visible")
         page.wait_for_function("!document.querySelector('#generateBtn')?.disabled")
-        page.get_by_role("button", name="Gerar Dado Consolidado Planejado vs Realizado").click()
+        page.get_by_role("button", name="Consolidar MVV + RD").click()
         page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Planilha gerada.')")
         page.locator("#downloadLink").wait_for(state="visible")
         with page.expect_download() as download_info:
@@ -87,7 +91,7 @@ def main() -> int:
 
         page.set_input_files("#rdFile", str(rd_only_input_path))
         page.wait_for_function("!document.querySelector('#rdOnlyBtn')?.disabled")
-        page.get_by_role("button", name="Organize Somente o Executado").click()
+        page.get_by_role("button", name="Organizar executado").click()
         page.locator("#toeElevationInput").fill("10")
         page.locator("#confirmExecutedOptions").click()
         page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Executado organizado.')")
@@ -97,10 +101,11 @@ def main() -> int:
         rd_only_download = rd_only_download_info.value
         rd_only_download.save_as(str(rd_only_download_path))
 
+        page.locator(".pitdev-summary").click()
         page.set_input_files("#pitdevFieldFile", args.pitdev_field)
         page.set_input_files("#pitdevPlanFile", args.pitdev_plan)
         page.wait_for_function("!document.querySelector('#pitdevGenerateBtn')?.disabled")
-        page.get_by_role("button", name="Consolidar Projeto para O-PìtDev").click()
+        page.get_by_role("button", name="Consolidar O-PitDev").click()
         page.wait_for_function("document.querySelector('#pitdevStatusText')?.textContent?.includes('Consolidação gerada.')")
         page.locator("#pitdevDownloadLink").wait_for(state="visible")
         with page.expect_download() as pitdev_download_info:
@@ -137,12 +142,13 @@ def main() -> int:
     pitdev_headers = [cell.value for cell in pitdev_ws[1]]
     assert pitdev_headers == ["ID", "Y", "X", "Z", "Diâmetro", "Azimute", "Ângulo planejado", "Ângulo do talude", "Profundidade"]
     assert pitdev_ws.max_row == 25
-    assert pitdev_ws[2][0].value == 97
+    assert pitdev_ws[2][0].value == 1
     assert pitdev_ws[2][1].value == 8929912.804
-    assert pitdev_ws[2][4].value == 5
-    assert pitdev_ws[2][6].value == 0
-    assert pitdev_ws[2][7].value == 90
-    assert pitdev_ws[2][8].value == 14.24
+    assert pitdev_ws[2][4].value == 4
+    assert round(pitdev_ws[2][5].value, 2) == 138.42
+    assert round(pitdev_ws[2][6].value, 2) == 14.98
+    assert round(pitdev_ws[2][7].value, 2) == 75.02
+    assert round(pitdev_ws[2][8].value, 2) == 5.04
     pitdev_download_path.unlink(missing_ok=True)
     rd_only_input_path.unlink(missing_ok=True)
     return 0

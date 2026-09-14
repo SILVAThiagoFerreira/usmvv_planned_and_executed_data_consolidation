@@ -2,7 +2,7 @@
 
 ## Sequencia
 
-1. `index.html` carrega a interface.
+1. `index.html` carrega a interface compacta; a ação principal fica visível, as saídas isoladas e o fluxo O-PitDev ficam recolhidos inicialmente e o log tecnico e expansivel.
 2. `main.js` inicia a aplicacao.
 3. `src/config.js` carrega `config.json`.
 4. O usuario anexa `PLANEJADO.xlsx` e `REALIZADO.txt`.
@@ -10,7 +10,7 @@
 6. `src/validator.js` valida estrutura e tipos; em `Dip`, vazio ou `-` e aceito como `0`.
 7. `src/processor.js` normaliza, deduplica e consolida, preservando `Dip = 0` quando a origem veio vazia ou com `-`.
 8. `src/writer.js` monta o workbook final.
-9. `src/app.js` dispara o download e mostra o resumo.
+9. `src/app.js` dispara o download, mostra o resumo somente após uma saída ou erro e controla os estados visuais dos detalhes.
 
 ## Sequencia MVV-only
 
@@ -41,7 +41,7 @@ Quando há IDs somente no levantamento, `app.js` solicita a cota do pé e a subf
 - `writer.js`: geracao do Excel.
 - `app.js`: orquestracao e UI.
 
-## Sequencia O-PìtDev
+## Sequencia O-PitDev
 
 1. O usuario anexa o `Levantamento de Campo Enaex` (`.csv` ou `.txt`) e o `Plano de Perfuração Planejado` (`.xlsx`).
 2. `src/reader.js` le o texto delimitado e a aba configurada do Excel.
