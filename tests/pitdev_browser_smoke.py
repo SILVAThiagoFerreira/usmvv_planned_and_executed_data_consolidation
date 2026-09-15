@@ -15,8 +15,10 @@ def main() -> int:
     parser.add_argument("--plan", required=True)
     args = parser.parse_args()
     download_path = Path(tempfile.gettempdir()) / "pitdev-browser-smoke.xlsx"
+    field_only_download_path = Path(tempfile.gettempdir()) / "pitdev-browser-field-only.xlsx"
     screenshot_path = Path(tempfile.gettempdir()) / "pitdev-browser-smoke.png"
     download_path.unlink(missing_ok=True)
+    field_only_download_path.unlink(missing_ok=True)
     screenshot_path.unlink(missing_ok=True)
     field_rows = [
         [value.strip() for value in line.split(",")]
@@ -27,6 +29,7 @@ def main() -> int:
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
         page = browser.new_page(accept_downloads=True, viewport={"width": 1440, "height": 1100})
+        page.set_default_timeout(120000)
         page.goto(args.base_url, wait_until="domcontentloaded")
         page.on("console", lambda message: print(f"browser console: {message.type}: {message.text}"))
         page.wait_for_selector("#pitdevTitle")
@@ -35,6 +38,15 @@ def main() -> int:
         page.wait_for_function("document.querySelector('.pitdev-panel')?.open === false")
         page.locator(".pitdev-summary").click()
         page.set_input_files("#pitdevFieldFile", args.field)
+        page.wait_for_function("document.querySelector('#pitdevFieldOnlyBtn')?.disabled === false")
+        page.wait_for_function("document.querySelector('#pitdevGenerateBtn')?.disabled === true")
+        page.get_by_role("button", name="Organizar somente o levantado").click()
+        page.wait_for_function("document.querySelector('#pitdevStatusText')?.textContent?.includes('Levantamento organizado.')")
+        page.locator("#pitdevDownloadLink").wait_for(state="visible")
+        with page.expect_download() as field_only_download_info:
+            page.get_by_role("link", name="Baixar LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx").click()
+        field_only_download_info.value.save_as(str(field_only_download_path))
+
         page.set_input_files("#pitdevPlanFile", args.plan)
         page.wait_for_function("!document.querySelector('#pitdevGenerateBtn')?.disabled")
         page.wait_for_function("document.querySelector('#pitdevStatusText')?.textContent?.includes('Pronto para consolidar')")
@@ -47,7 +59,10 @@ def main() -> int:
         print("pitdev status:", page.locator("#pitdevStatusText").text_content())
         print("pitdev log:", page.locator("#pitdevLogOutput").text_content())
         page.wait_for_function("document.querySelector('#pitdevStatusText')?.textContent?.includes('Consolidação gerada.')")
-        page.wait_for_function("document.querySelector('#pitdevSummaryCards')?.textContent?.includes('24')")
+        page.wait_for_function(
+            "expected => document.querySelector('#pitdevSummaryCards')?.textContent?.includes(String(expected))",
+            arg=len(field_rows),
+        )
         page.locator("#pitdevDownloadLink").wait_for(state="visible")
         page.screenshot(path=str(screenshot_path), full_page=True)
         with page.expect_download() as download_info:
@@ -77,9 +92,26 @@ def main() -> int:
     auxiliary_depths = [sheet.cell(row, depth_index).value for row in range(2, sheet.max_row + 1) if sheet.cell(row, 5).value is None]
     if auxiliary_depths:
         assert all(value is not None for value in auxiliary_depths)
-        assert all(value > 0 for value in auxiliary_depths)
+        field_z_by_id = {
+            str(int(float(row[0]))): float(row[3])
+            for row in field_rows
+            if row[0].strip()
+        }
+        for row_number in range(2, sheet.max_row + 1):
+            if sheet.cell(row_number, 5).value is None:
+                hole_id = str(sheet.cell(row_number, 1).value)
+                expected_depth = field_z_by_id[hole_id] - 290 + 1
+                assert round(sheet.cell(row_number, depth_index).value, 3) == round(expected_depth, 3)
+    field_only_workbook = load_workbook(field_only_download_path, data_only=True)
+    assert field_only_workbook.sheetnames == ["LEVANTAMENTO_O-PITDEV", "LOG_LEVANTAMENTO_O-PITDEV"]
+    field_only_sheet = field_only_workbook["LEVANTAMENTO_O-PITDEV"]
+    assert [cell.value for cell in field_only_sheet[1]] == ["ID", "Y", "X", "Z"]
+    assert field_only_sheet.max_row == len(field_rows) + 1
+    assert field_only_sheet[2][0].value == int(float(field_rows[0][0]))
+    assert field_only_sheet[field_only_sheet.max_row][0].value == int(float(field_rows[-1][0]))
     print(f"ok - O-PitDev browser flow | rows={sheet.max_row - 1} | screenshot={screenshot_path}")
     download_path.unlink(missing_ok=True)
+    field_only_download_path.unlink(missing_ok=True)
     return 0
 
 

@@ -1,4 +1,4 @@
-import { asText, dipNumber, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js';
+import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js';
 
 export function validateMvvSource(rawMvv, config) {
   const headers = rawMvv.headers;
@@ -153,6 +153,13 @@ export function validatePitdevFieldSource(rawField, config) {
   const allowedFieldCounts = new Set(config.input.pitdev_field_allowed_field_counts);
   const trailingEmptyFields = Number(config.input.pitdev_field_trailing_empty_fields || 0);
   const numericFields = config.validation.pitdev_field_numeric_fields;
+  const positions = getPitdevFieldPositions(config);
+  const positionByField = {
+    ID: positions.id,
+    Y: positions.y,
+    X: positions.x,
+    Z: positions.z,
+  };
   const seen = new Set();
   let rowCount = 0;
 
@@ -169,14 +176,16 @@ export function validatePitdevFieldSource(rawField, config) {
     }
 
     const context = `Levantamento linha ${row.sourceLine}`;
-    const id = asText(row.values[0]);
+    const id = asText(row.values[positions.id]);
     if (!id) throw new Error(`${context}: missing ID`);
     const holeKey = normalizeHoleKey(id, []);
     if (seen.has(holeKey)) throw new Error(`${context}: duplicate ID ${id}`);
     seen.add(holeKey);
 
-    numericFields.forEach((field, index) => {
-      toNumber(row.values[index + 1], context, field);
+    numericFields.forEach((field) => {
+      const position = positionByField[field];
+      if (!Number.isInteger(position)) throw new Error(`Configuração inválida: posição do campo ${field}`);
+      toNumber(row.values[position], context, field);
     });
   }
 

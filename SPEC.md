@@ -18,6 +18,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - O badge `Somente local` nao aparece na interface.
 - O botao principal em portugues exibe `Consolidar MVV + RD`.
 - As ações MVV-only e RD-only ficam dentro do detalhe recolhido `Outras saídas` e exibem `Organizar planejado` e `Organizar executado`.
+- O quadro O-PitDev exibe `Organizar somente o levantado` como ação independente do plano.
 - O subtitulo longo de validacao nao aparece na interface em portugues.
 - O fluxo em portugues exibe `PLANEJADO.xlsx` e `REALIZADO.txt` nos cartões de entrada.
 - Os uploads em portugues exibem `PLANEJADO.xlsx`, `REALIZADO.txt`, `Plano de perfuração` e `Coordenadas de topografia`.
@@ -28,7 +29,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - A seção `Outras saídas` inicia recolhida e reúne os fluxos MVV-only e RD-only.
 - Os links de download permanecem ocultos ate que um workbook valido seja gerado.
 - O quadro O-PitDev inicia recolhido e pode ser expandido pelo usuario sem alterar o fluxo MVV/RD.
-- Os quatro seletores de arquivo permanecem focaveis por teclado, com nome e formato associados para tecnologia assistiva.
+- Os quatro seletores de arquivo e as ações de processamento permanecem focaveis por teclado, com nome e formato associados para tecnologia assistiva.
 - Os estados de processamento sao anunciados com `role`, `aria-live` e `aria-busy`; erros usam alerta explicito.
 - Parametros invalidos de furos auxiliares exibem mensagem no formulario e preservam os arquivos selecionados.
 - `L-` tem prioridade sobre `E-` e `L_` na RD.
@@ -152,3 +153,12 @@ IDs do levantamento ausentes no plano são furos auxiliares. A interface solicit
 - A saída tem as colunas `ID`, `Y`, `X`, `Z`, `Diâmetro`, `Azimute`, `Ângulo planejado`, `Ângulo do talude` e `Profundidade`.
 - `Ângulo do talude = 90 - Ângulo planejado`, usando o valor configurado `pitdev.angle_reference_degrees`.
 - O arquivo gerado é `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx`, com as abas `CONSOLIDACAO_O-PITDEV` e `LOG_O-PITDEV`.
+
+### Organização somente do levantamento para O-PitDev
+
+- A ação `Organizar somente o levantado` exige apenas o arquivo de campo `.csv` ou `.txt`.
+- O plano planejado não é lido, validado nem solicitado nesse modo.
+- A validação continua exigindo `ID`, `Y`, `X` e `Z` numéricos nas posições configuradas, aceitando uma quinta posição somente quando vazia.
+- A saída preserva a ordem do levantamento e normaliza IDs numéricos conforme `normalizeIdValue` (por exemplo, `097` torna-se `97`); IDs textuais são preservados.
+- A saída possui `ID`, `Y`, `X` e `Z` na aba `LEVANTAMENTO_O-PITDEV` e o log de origem na aba `LOG_LEVANTAMENTO_O-PITDEV`.
+- O arquivo gerado é `LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx`.

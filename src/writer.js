@@ -137,10 +137,10 @@ function addLogSheet(workbook, summary, config, metadata) {
     fgColor: { argb: hexColor(config.formatting.section_fill) },
   };
 
-  sheet.getCell('A1').value = 'Indicador';
-  sheet.getCell('B1').value = 'Valor';
-  sheet.getCell('D1').value = 'Campo';
-  sheet.getCell('E1').value = 'Valor';
+  sheet.getCell('A1').value = config.output.labels.pitdev_field_only_indicator_header;
+  sheet.getCell('B1').value = config.output.labels.pitdev_field_only_value_header;
+  sheet.getCell('D1').value = config.output.labels.pitdev_field_only_context_header;
+  sheet.getCell('E1').value = config.output.labels.pitdev_field_only_value_header;
 
   const metricRows = [
     [config.output.labels.mvv_count, summary.mvvCount],
@@ -346,5 +346,61 @@ export async function createPitdevWorkbookBuffer({ config, pitdevRows, summary, 
     { highlightFinal: true, finalColumns: ['Ângulo do talude'] },
   );
   addPitdevLogSheet(workbook, summary, config, metadata);
+  return workbook.xlsx.writeBuffer();
+}
+
+function addPitdevFieldOnlyLogSheet(workbook, summary, config, metadata) {
+  const sheet = workbook.addWorksheet(config.output.sheets.pitdev_field_only_log, {
+    views: [{ state: 'frozen', ySplit: 1 }],
+  });
+  const headerFill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: hexColor(config.formatting.header_fill) },
+  };
+
+  sheet.getCell('A1').value = 'Indicador';
+  sheet.getCell('B1').value = 'Valor';
+  sheet.getCell('D1').value = 'Campo';
+  sheet.getCell('E1').value = 'Valor';
+
+  sheet.getCell('A2').value = config.output.labels.pitdev_field_only_count;
+  sheet.getCell('B2').value = summary.fieldOnlyCount;
+
+  [
+    [config.output.labels.pitdev_field_only_source_label, metadata.fieldFile],
+    [config.output.labels.pitdev_field_only_generated_label, metadata.generatedAt],
+    [config.output.labels.pitdev_field_only_file_label, metadata.outputPath],
+  ].forEach(([label, value], index) => {
+    sheet.getCell(`D${index + 2}`).value = label;
+    sheet.getCell(`E${index + 2}`).value = value;
+  });
+
+  sheet.getRow(1).eachCell((cell) => {
+    cell.font = { name: config.formatting.font_name, size: 11, bold: true };
+    cell.fill = headerFill;
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+  });
+
+  ['A', 'D'].forEach((column) => { sheet.getColumn(column).width = 34; });
+  ['B', 'E'].forEach((column) => { sheet.getColumn(column).width = 42; });
+}
+
+export async function createPitdevFieldOnlyWorkbookBuffer({ config, pitdevFieldOnlyRows, summary, metadata }) {
+  const ExcelJS = getExcelJS();
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'MVV O-PitDev GitHub Pages';
+  workbook.lastModifiedBy = 'MVV O-PitDev GitHub Pages';
+  workbook.created = new Date();
+  workbook.modified = new Date();
+
+  addTableSheet(
+    workbook,
+    config.output.sheets.pitdev_field_only,
+    config.columns.pitdev_field_only,
+    pitdevFieldOnlyRows,
+    config,
+  );
+  addPitdevFieldOnlyLogSheet(workbook, summary, config, metadata);
   return workbook.xlsx.writeBuffer();
 }

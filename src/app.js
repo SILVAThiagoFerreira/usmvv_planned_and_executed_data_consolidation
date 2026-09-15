@@ -1,5 +1,5 @@
 import { loadConfig } from './config.js';
-import { runMvvPlanPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js';
+import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js';
 
 function qs(id) {
   const element = document.getElementById(id);
@@ -52,6 +52,16 @@ function renderSummary(summaryCards, languagePack, summary) {
 }
 
 function renderPitdevSummary(summaryCards, languagePack, summary) {
+  if (summary.mode === 'pitdev_field_only') {
+    summaryCards.innerHTML = [
+      [languagePack.pitdev_metrics.field_only_count, summary.fieldOnlyCount],
+      [languagePack.pitdev_metrics.field_only_columns_count, summary.outputColumns.length],
+    ]
+      .map(([label, value]) => `<article class="metric"><span>${label}</span><strong>${value}</strong></article>`)
+      .join('');
+    return;
+  }
+
   const metrics = [
     [languagePack.pitdev_metrics.field_count, summary.fieldCount],
     [languagePack.pitdev_metrics.matched_count, summary.matchedCount],
@@ -64,6 +74,15 @@ function renderPitdevSummary(summaryCards, languagePack, summary) {
 }
 
 function renderPitdevLog(logOutput, summary, metadata, languageCode) {
+  if (summary.mode === 'pitdev_field_only') {
+    logOutput.textContent = JSON.stringify({
+      language: languageCode,
+      ...summary,
+      ...metadata,
+    }, null, 2);
+    return;
+  }
+
   const compactSummary = {
     ...summary,
     fieldWithoutPlan: summary.fieldWithoutPlan,
@@ -195,6 +214,8 @@ export async function bootstrapApp() {
   const pitdevFieldFileName = qs('pitdevFieldFileName');
   const pitdevPlanFileName = qs('pitdevPlanFileName');
   const pitdevGenerateBtn = qs('pitdevGenerateBtn');
+  const pitdevFieldOnlyBtn = qs('pitdevFieldOnlyBtn');
+  const pitdevFieldOnlyHint = qs('pitdevFieldOnlyHint');
   const pitdevDownloadLink = qs('pitdevDownloadLink');
   const pitdevStatusBox = qs('pitdevStatusBox');
   const pitdevStatusText = qs('pitdevStatusText');
@@ -312,14 +333,20 @@ export async function bootstrapApp() {
       text = state.pitdevErrorMessage || ui.pitdev_status_error;
     } else if (state.pitdevPhase === 'done') {
       tone = 'done';
-      text = ui.pitdev_status_done;
+      text = state.pitdevSummary?.mode === 'pitdev_field_only'
+        ? ui.pitdev_field_only_status_done
+        : ui.pitdev_status_done;
     } else if (hasField && hasPlan) {
       tone = 'ready';
       text = ui.pitdev_status_ready;
+    } else if (hasField) {
+      tone = 'ready';
+      text = ui.pitdev_field_only_status_ready;
     }
 
     setStatus(pitdevStatusBox, pitdevStatusText, tone, text);
     pitdevGenerateBtn.disabled = !(hasField && hasPlan) || state.pitdevPhase === 'working';
+    pitdevFieldOnlyBtn.disabled = !hasField || state.pitdevPhase === 'working';
   };
 
   const updateLog = () => {
@@ -383,6 +410,8 @@ export async function bootstrapApp() {
     rdOnlyBtn.textContent = ui.rd_only_action;
     mvvOnlyBtn.textContent = ui.mvv_only_action;
     pitdevGenerateBtn.textContent = ui.pitdev_action;
+    pitdevFieldOnlyBtn.textContent = ui.pitdev_field_only_action;
+    pitdevFieldOnlyHint.textContent = ui.pitdev_field_only_hint;
     pitdevDownloadLink.textContent = `${ui.pitdev_download_prefix} ${state.pitdevOutputFileName}`;
     executedOptionsTitle.textContent = ui.executed_options_title;
     executedOptionsHint.textContent = ui.executed_options_hint;
@@ -488,6 +517,42 @@ export async function bootstrapApp() {
 
   wireDropzone(pitdevFieldDropzone, pitdevFieldFile, (file) => setPitdevFile('pitdevField', file));
   wireDropzone(pitdevPlanDropzone, pitdevPlanFile, (file) => setPitdevFile('pitdevPlan', file));
+
+  pitdevFieldOnlyBtn.addEventListener('click', async () => {
+    if (!state.pitdevField) return;
+
+    try {
+      clearPitdevOutput();
+      state.pitdevPhase = 'working';
+      updatePitdevStatus();
+      renderLanguage();
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const result = await runPitdevFieldOnlyPipeline({ config, fieldFile: state.pitdevField });
+      const blob = new Blob([result.buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      state.pitdevDownloadUrl = URL.createObjectURL(blob);
+      state.pitdevOutputFileName = config.output.pitdev_field_only_file_name;
+      pitdevDownloadLink.href = state.pitdevDownloadUrl;
+      pitdevDownloadLink.download = state.pitdevOutputFileName;
+      state.pitdevSummary = result.summary;
+      state.pitdevMetadata = result.metadata;
+      state.pitdevPhase = 'done';
+      state.pitdevErrorMessage = null;
+      renderLanguage();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      state.pitdevPhase = 'error';
+      state.pitdevErrorMessage = message;
+      state.pitdevSummary = null;
+      state.pitdevMetadata = null;
+      pitdevDownloadLink.hidden = true;
+      updatePitdevStatus();
+      renderLanguage();
+      console.error(error);
+    }
+  });
 
   generateBtn.addEventListener('click', async () => {
     if (!state.mvv || !state.rd) return;

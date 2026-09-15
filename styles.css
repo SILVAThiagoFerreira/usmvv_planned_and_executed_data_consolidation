@@ -304,6 +304,17 @@ h1 {
   margin-top: 8px;
 }
 
+.pitdev-actions {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) auto;
+}
+
+.pitdev-field-only-hint {
+  margin-top: 6px;
+  color: var(--muted);
+  font: 0.67rem "IBM Plex Mono", Consolas, monospace;
+  line-height: 1.35;
+}
+
 .actions:not(:has(.secondary:not([hidden]))) > .primary {
   grid-column: 1 / -1;
 }

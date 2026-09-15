@@ -13,4 +13,6 @@
 - [ ] O ID do RD-only sai apenas numerico.
 - [ ] O workbook RD-only possui apenas a aba `RD_EXECUTADO`.
 - [ ] As colunas `ID`, `Y`, `X`, `Z` e `Profundidade` existem no RD-only.
+- [ ] O usuario consegue organizar somente o levantamento do O-PitDev sem anexar plano.
+- [ ] O workbook de levantamento possui `ID`, `Y`, `X`, `Z` na ordem original e log de origem.
 - [ ] Os testes locais passam.

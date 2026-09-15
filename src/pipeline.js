@@ -1,7 +1,7 @@
 import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js';
 import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js';
-import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows } from './processor.js';
-import { createMvvPlanWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js';
+import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows } from './processor.js';
+import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js';
 
 export async function runPipeline({ config, mvvFile, rdFile }) {
   const rawMvv = await readMvvFile(mvvFile, config);
@@ -97,6 +97,27 @@ export async function runPitdevPipeline({ config, fieldFile, planFile, auxiliary
   const buffer = await createPitdevWorkbookBuffer({
     config,
     pitdevRows: processed.rows,
+    summary: processed.summary,
+    metadata,
+  });
+
+  return { buffer, summary: processed.summary, metadata };
+}
+
+export async function runPitdevFieldOnlyPipeline({ config, fieldFile }) {
+  const rawField = await readPitdevFieldFile(fieldFile, config);
+  const fieldValidation = validatePitdevFieldSource(rawField, config);
+  const processed = buildPitdevFieldOnlyRows(rawField, fieldValidation, config);
+  const metadata = {
+    runId: new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, '').replace('T', '_'),
+    generatedAt: new Date().toISOString(),
+    fieldFile: rawField.fileName,
+    outputPath: config.output.pitdev_field_only_file_name,
+  };
+
+  const buffer = await createPitdevFieldOnlyWorkbookBuffer({
+    config,
+    pitdevFieldOnlyRows: processed.rows,
     summary: processed.summary,
     metadata,
   });

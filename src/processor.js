@@ -1,4 +1,4 @@
-import { asText, compareHoleKeys, dipNumber, firstNonBlank, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js';
+import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js';
 
 export function buildMvvRows(rawMvv, config, validation) {
   const indexMap = validation.indexMap;
@@ -226,6 +226,7 @@ export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidati
   const fieldWithoutPlan = [];
   const matchedPlanKeys = new Set();
   const referenceAngle = Number(config.pitdev.angle_reference_degrees);
+  const fieldPositions = getPitdevFieldPositions(config);
 
   if (!Number.isFinite(referenceAngle)) {
     throw new Error('Configuração inválida: pitdev.angle_reference_degrees');
@@ -233,16 +234,16 @@ export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidati
 
   for (const row of rawField.rows) {
     if (row.blank) continue;
-    const id = normalizeIdValue(row.values[0]);
+    const id = normalizeIdValue(row.values[fieldPositions.id]);
     const holeKey = normalizeHoleKey(id, []);
     const plan = planByHole.get(holeKey);
     if (!plan) {
-      fieldWithoutPlan.push(asText(row.values[0]));
+      fieldWithoutPlan.push(asText(row.values[fieldPositions.id]));
       if (!auxiliaryOptions) continue;
       const customToe = Number(auxiliaryOptions.toeElevation);
       const subdrilling = Number(auxiliaryOptions.subdrilling || 0);
       if (!Number.isFinite(customToe) || !Number.isFinite(subdrilling) || customToe <= 0 || subdrilling < 0) throw new Error('Cota do pé e subfuração dos furos auxiliares são inválidas');
-      rows.push({ [idColumn]: id, [yColumn]: toNumber(row.values[1], `Levantamento linha ${row.sourceLine}`, 'Y'), [xColumn]: toNumber(row.values[2], `Levantamento linha ${row.sourceLine}`, 'X'), [zColumn]: toNumber(row.values[3], `Levantamento linha ${row.sourceLine}`, 'Z'), [diameterColumn]: null, [azimuthColumn]: null, [plannedAngleColumn]: null, [slopeAngleColumn]: null, [depthColumn]: Number((Number(row.values[3]) - customToe + subdrilling).toFixed(3)), auxiliary: true });
+      rows.push({ [idColumn]: id, [yColumn]: toNumber(row.values[fieldPositions.y], `Levantamento linha ${row.sourceLine}`, 'Y'), [xColumn]: toNumber(row.values[fieldPositions.x], `Levantamento linha ${row.sourceLine}`, 'X'), [zColumn]: toNumber(row.values[fieldPositions.z], `Levantamento linha ${row.sourceLine}`, 'Z'), [diameterColumn]: null, [azimuthColumn]: null, [plannedAngleColumn]: null, [slopeAngleColumn]: null, [depthColumn]: Number((Number(row.values[fieldPositions.z]) - customToe + subdrilling).toFixed(3)), auxiliary: true });
       continue;
     }
 
@@ -250,9 +251,9 @@ export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidati
     const plannedAngle = plan.angle;
     rows.push({
       [idColumn]: id,
-      [yColumn]: toNumber(row.values[1], `Levantamento linha ${row.sourceLine}`, 'Y'),
-      [xColumn]: toNumber(row.values[2], `Levantamento linha ${row.sourceLine}`, 'X'),
-      [zColumn]: toNumber(row.values[3], `Levantamento linha ${row.sourceLine}`, 'Z'),
+      [yColumn]: toNumber(row.values[fieldPositions.y], `Levantamento linha ${row.sourceLine}`, 'Y'),
+      [xColumn]: toNumber(row.values[fieldPositions.x], `Levantamento linha ${row.sourceLine}`, 'X'),
+      [zColumn]: toNumber(row.values[fieldPositions.z], `Levantamento linha ${row.sourceLine}`, 'Z'),
       [diameterColumn]: plan.diameter,
       [azimuthColumn]: plan.azimuth,
       [plannedAngleColumn]: plannedAngle,
@@ -284,6 +285,36 @@ export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidati
       outputColumns: config.columns.pitdev_consolidated,
       sheetName: config.output.sheets.pitdev_consolidated,
       angleFormula: `${referenceAngle} - ângulo planejado`,
+    },
+  };
+}
+
+export function buildPitdevFieldOnlyRows(rawField, fieldValidation, config) {
+  const [idColumn, yColumn, xColumn, zColumn] = config.columns.pitdev_field_only;
+  const positions = getPitdevFieldPositions(config);
+  const rows = [];
+
+  for (const row of rawField.rows) {
+    if (row.blank) continue;
+    const context = `Levantamento linha ${row.sourceLine}`;
+    rows.push({
+      [idColumn]: normalizeIdValue(row.values[positions.id]),
+      [yColumn]: toNumber(row.values[positions.y], context, 'Y'),
+      [xColumn]: toNumber(row.values[positions.x], context, 'X'),
+      [zColumn]: toNumber(row.values[positions.z], context, 'Z'),
+    });
+  }
+
+  if (!rows.length) throw new Error('Levantamento de campo sem linhas validas');
+
+  return {
+    rows,
+    summary: {
+      mode: 'pitdev_field_only',
+      fieldCount: fieldValidation.rowCount,
+      fieldOnlyCount: rows.length,
+      outputColumns: config.columns.pitdev_field_only,
+      sheetName: config.output.sheets.pitdev_field_only,
     },
   };
 }

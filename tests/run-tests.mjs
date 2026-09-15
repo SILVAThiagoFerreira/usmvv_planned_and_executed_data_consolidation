@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildConsolidatedRows, buildMvvPlanRows, buildPitdevRows, buildRdOnlyRows, deduplicateRdRows } from '../src/processor.js';
+import { buildConsolidatedRows, buildMvvPlanRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, deduplicateRdRows } from '../src/processor.js';
 import { validatePitdevPlanSource } from '../src/validator.js';
 import { getNumericFormatForHeader } from '../src/writer.js';
 import { normalizeHoleKey } from '../src/utils.js';
 
 const projectConfig = JSON.parse(readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
+const pitdevFieldPositions = { id: 0, y: 1, x: 2, z: 3 };
 
 const config = {
   matching: {
@@ -135,6 +136,14 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.languages.pt.pitdev_field_label, 'Levantamento de campo');
   assert.equal(projectConfig.ui.languages.pt.pitdev_title, 'Consolidação O-PitDev');
   assert.equal(projectConfig.ui.languages.pt.pitdev_action, 'Consolidar O-PitDev');
+  assert.equal(projectConfig.ui.languages.pt.pitdev_field_only_action, 'Organizar somente o levantado');
+  assert.equal(projectConfig.ui.languages.pt.pitdev_field_only_status_ready, 'Pronto para organizar somente o levantado.');
+  assert.equal(projectConfig.ui.languages.pt.pitdev_metrics.field_only_columns_count, 'Colunas');
+  assert.equal(projectConfig.output.pitdev_field_only_file_name, 'LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx');
+  assert.deepEqual(projectConfig.columns.pitdev_field_only, ['ID', 'Y', 'X', 'Z']);
+  assert.equal(projectConfig.output.sheets.pitdev_field_only, 'LEVANTAMENTO_O-PITDEV');
+  assert.equal(projectConfig.output.sheets.pitdev_field_only_log, 'LOG_LEVANTAMENTO_O-PITDEV');
+  assert.equal(projectConfig.output.labels.pitdev_field_only_source_label, 'Levantamento');
   assert.equal(projectConfig.ui.languages.pt.secondary_actions_title, 'Outras saídas');
   assert.equal(Object.hasOwn(projectConfig.ui.languages.pt, 'system_badge'), false);
 });
@@ -195,6 +204,7 @@ test('O-PitDev joins field coordinates and calculates slope angle', () => {
       pitdev_consolidated: ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude', 'Profundidade'],
     },
     pitdev: { angle_reference_degrees: 90 },
+    input: { pitdev_field_positions: pitdevFieldPositions },
     output: { sheets: { pitdev_consolidated: 'CONSOLIDACAO_O-PITDEV' } },
   };
   const field = {
@@ -238,6 +248,7 @@ test('O-PitDev treats blank or dash planned angle as zero', () => {
       pitdev_consolidated: ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude', 'Profundidade'],
     },
     pitdev: { angle_reference_degrees: 90 },
+    input: { pitdev_field_positions: pitdevFieldPositions },
     output: { sheets: { pitdev_consolidated: 'CONSOLIDACAO_O-PITDEV' } },
   };
   const field = { rows: [{ sourceLine: 1, values: ['1', '10', '20', '300'] }, { sourceLine: 2, values: ['2', '11', '21', '301'] }] };
@@ -282,6 +293,7 @@ test('O-PitDev still rejects non-numeric planned angle text', () => {
       pitdev_consolidated: ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude', 'Profundidade'],
     },
     pitdev: { angle_reference_degrees: 90 },
+    input: { pitdev_field_positions: pitdevFieldPositions },
     output: { sheets: { pitdev_consolidated: 'CONSOLIDACAO_O-PITDEV' } },
   };
   const field = { rows: [{ sourceLine: 1, values: ['1', '10', '20', '300'] }] };
@@ -294,7 +306,7 @@ test('O-PitDev still rejects non-numeric planned angle text', () => {
 });
 
 test('O-PitDev calculates auxiliary holes only with custom toe and subdrilling', () => {
-  const pitdevConfig = { columns: { pitdev_consolidated: ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude', 'Profundidade'] }, pitdev: { angle_reference_degrees: 90 }, output: { sheets: { pitdev_consolidated: 'CONSOLIDACAO_O-PITDEV' } } };
+  const pitdevConfig = { columns: { pitdev_consolidated: ['ID', 'Y', 'X', 'Z', 'Diâmetro', 'Azimute', 'Ângulo planejado', 'Ângulo do talude', 'Profundidade'] }, pitdev: { angle_reference_degrees: 90 }, input: { pitdev_field_positions: pitdevFieldPositions }, output: { sheets: { pitdev_consolidated: 'CONSOLIDACAO_O-PITDEV' } } };
   const field = { rows: [{ sourceLine: 1, values: ['1', '10', '20', '300'] }, { sourceLine: 2, values: ['AUX-9', '11', '21', '298.5'] }] };
   const plan = { rows: [{ sourceRow: 2, values: [1, 5, 10, 25, 12] }] };
   const result = buildPitdevRows(field, plan, { rowCount: 2 }, { rowCount: 1, columns: { id: 0, diameter: 1, azimuth: 2, angle: 3, depth: 4 } }, pitdevConfig, { toeElevation: 290, subdrilling: 1 });
@@ -303,6 +315,30 @@ test('O-PitDev calculates auxiliary holes only with custom toe and subdrilling',
   assert.equal(result.rows[1].Profundidade, 9.5);
   assert.equal(result.rows[1].Diâmetro, null);
   assert.equal(result.summary.auxiliaryCount, 1);
+});
+
+test('O-PitDev organizes the field survey without a plan and preserves order', () => {
+  const field = {
+    rows: [
+      { sourceLine: 1, values: ['717', '8930336.609', '748680.663', '187.726', ''] },
+      { sourceLine: 2, values: ['716', '8930335.100', '748680.497', '187.891', ''] },
+    ],
+  };
+  const config = {
+    input: { pitdev_field_positions: pitdevFieldPositions },
+    columns: { pitdev_field_only: ['ID', 'Y', 'X', 'Z'] },
+    output: { sheets: { pitdev_field_only: 'LEVANTAMENTO_O-PITDEV' } },
+  };
+
+  const result = buildPitdevFieldOnlyRows(field, { rowCount: 2 }, config);
+
+  assert.deepEqual(result.rows, [
+    { ID: 717, Y: 8930336.609, X: 748680.663, Z: 187.726 },
+    { ID: 716, Y: 8930335.1, X: 748680.497, Z: 187.891 },
+  ]);
+  assert.equal(result.summary.mode, 'pitdev_field_only');
+  assert.equal(result.summary.fieldOnlyCount, 2);
+  assert.deepEqual(result.summary.outputColumns, ['ID', 'Y', 'X', 'Z']);
 });
 
 test('legacy branding is removed', () => {
@@ -330,6 +366,8 @@ test('compact interface keeps downloads hidden until a workbook exists', () => {
   assert.match(indexHtml, /<details class="log-block">/);
   assert.match(indexHtml, /id="downloadLink" class="secondary" hidden/);
   assert.match(indexHtml, /id="pitdevDownloadLink" class="secondary" hidden/);
+  assert.match(indexHtml, /id="pitdevFieldOnlyBtn" class="secondary" type="button" disabled/);
+  assert.match(indexHtml, /id="pitdevFieldOnlyHint" class="pitdev-field-only-hint"/);
   assert.match(indexHtml, /id="mvvFile" class="visually-hidden-input"/);
   assert.match(indexHtml, /id="statusBox" data-tone="idle" role="status" aria-live="polite"/);
   assert.match(indexHtml, /id="pitdevOptionsError" class="form-error" role="alert" hidden/);

@@ -49,3 +49,12 @@ Quando há IDs somente no levantamento, `app.js` solicita a cota do pé e a subf
 4. `src/processor.js` normaliza os IDs, cruza os arquivos na ordem do levantamento, traz a `Depth` do plano como `Profundidade` e calcula `90 - angulo planejado`, usando `0` quando o angulo planejado veio vazio ou `-`.
 5. `src/writer.js` gera `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx` com a tabela e o log de diferencas.
 6. `src/app.js` habilita o download, exibe os indicadores e registra o resultado na interface.
+
+## Sequencia O-PitDev somente levantado
+
+1. O usuario anexa somente o `Levantamento de Campo Enaex` (`.csv` ou `.txt`).
+2. `src/reader.js` le as posições configuradas `ID`, `Y`, `X` e `Z` e preserva a ordem original.
+3. `src/validator.js` valida quantidade de campos, quinta posição vazia, IDs unicos e coordenadas numericas.
+4. `src/processor.js` gera somente as colunas `ID`, `Y`, `X` e `Z`, sem plano, ângulos ou profundidade.
+5. `src/writer.js` gera `LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx` com `LEVANTAMENTO_O-PITDEV` e `LOG_LEVANTAMENTO_O-PITDEV`.
+6. `src/app.js` libera o download e exibe o resumo de linhas organizadas.

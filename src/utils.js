@@ -117,3 +117,18 @@ export function firstNonBlank(...values) {
 export function formatDecimal3(value) {
   return typeof value === 'number' && Number.isFinite(value) ? value.toFixed(3) : '';
 }
+
+export function getPitdevFieldPositions(config) {
+  const positions = config?.input?.pitdev_field_positions;
+  const required = ['id', 'y', 'x', 'z'];
+  if (!positions || typeof positions !== 'object') {
+    throw new Error('Configuração inválida: input.pitdev_field_positions');
+  }
+
+  const values = required.map((key) => positions[key]);
+  if (values.some((value) => !Number.isInteger(value) || value < 0) || new Set(values).size !== values.length) {
+    throw new Error('Configuração inválida: posições do levantamento O-PitDev');
+  }
+
+  return positions;
+}

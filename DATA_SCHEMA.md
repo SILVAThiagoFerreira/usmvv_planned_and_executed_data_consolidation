@@ -110,3 +110,20 @@ Fonte: `.xlsx`, aba configurada em `config.json`.
 | `Ângulo do talude` | `90 - Ângulo planejado` |
 
 IDs auxiliares, presentes somente no levantamento, têm os campos de projeto vazios e `Profundidade = Z - cota do pé + subfuração`.
+
+## Saída O-PitDev somente levantado
+
+Arquivo gerado por `Organizar somente o levantado`, sem leitura do plano planejado.
+
+| Coluna | Fonte/regra |
+| --- | --- |
+| `ID` | Posição configurada do levantamento, normalizada para número quando for numérica |
+| `Y` | Posição configurada do levantamento |
+| `X` | Posição configurada do levantamento |
+| `Z` | Posição configurada do levantamento |
+
+- A ordem das linhas é a mesma do arquivo de campo.
+- A quinta posição vazia opcional do CSV não entra na saída.
+- A aba de dados é `LEVANTAMENTO_O-PITDEV`.
+- A aba de rastreabilidade é `LOG_LEVANTAMENTO_O-PITDEV`.
+- O arquivo é `LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx`.

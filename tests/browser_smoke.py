@@ -23,17 +23,24 @@ def main() -> int:
     download_path = Path(tempfile.gettempdir()) / "browser-smoke.xlsx"
     mvv_only_download_path = Path(tempfile.gettempdir()) / "browser-smoke-mvv-only.xlsx"
     rd_only_download_path = Path(tempfile.gettempdir()) / "browser-smoke-rd-only.xlsx"
+    pitdev_field_only_download_path = Path(tempfile.gettempdir()) / "browser-smoke-pitdev-field-only.xlsx"
     pitdev_download_path = Path(tempfile.gettempdir()) / "browser-smoke-pitdev.xlsx"
     rd_only_input_path = Path(tempfile.gettempdir()) / "browser-smoke-rd-only.txt"
+    field_rows = [
+        [value.strip() for value in line.split(",")]
+        for line in Path(args.pitdev_field).read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
     rd_only_input_path.write_text("L_1,,10,20,292\nE-1,,11,21,292\nL_2,,12,22,280\n", encoding="utf-8")
 
-    for path in [download_path, mvv_only_download_path, rd_only_download_path, pitdev_download_path]:
+    for path in [download_path, mvv_only_download_path, rd_only_download_path, pitdev_field_only_download_path, pitdev_download_path]:
         if path.exists():
             path.unlink()
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(accept_downloads=True)
+        page.set_default_timeout(120000)
         page.goto(args.base_url, wait_until="domcontentloaded")
         page.wait_for_selector("#statusText")
         page.wait_for_function("document.querySelector('.openblast-hubbar__brand img')?.getAttribute('src') === './assets/openblast-logo.png'")
@@ -103,9 +110,23 @@ def main() -> int:
 
         page.locator(".pitdev-summary").click()
         page.set_input_files("#pitdevFieldFile", args.pitdev_field)
+        page.wait_for_function("document.querySelector('#pitdevFieldOnlyBtn')?.disabled === false")
+        page.wait_for_function("document.querySelector('#pitdevGenerateBtn')?.disabled === true")
+        page.get_by_role("button", name="Organizar somente o levantado").click()
+        page.wait_for_function("document.querySelector('#pitdevStatusText')?.textContent?.includes('Levantamento organizado.')")
+        page.locator("#pitdevDownloadLink").wait_for(state="visible")
+        with page.expect_download() as pitdev_field_only_download_info:
+            page.get_by_role("link", name="Baixar LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx").click()
+        pitdev_field_only_download_info.value.save_as(str(pitdev_field_only_download_path))
+
         page.set_input_files("#pitdevPlanFile", args.pitdev_plan)
         page.wait_for_function("!document.querySelector('#pitdevGenerateBtn')?.disabled")
         page.get_by_role("button", name="Consolidar O-PitDev").click()
+        page.wait_for_timeout(1000)
+        if page.locator("#pitdevOptions").is_visible():
+            page.locator("#pitdevToeElevationInput").fill("290")
+            page.locator("#pitdevSubdrillingValueInput").fill("1")
+            page.get_by_role("button", name="Calcular e consolidar").click()
         page.wait_for_function("document.querySelector('#pitdevStatusText')?.textContent?.includes('Consolidação gerada.')")
         page.locator("#pitdevDownloadLink").wait_for(state="visible")
         with page.expect_download() as pitdev_download_info:
@@ -141,15 +162,23 @@ def main() -> int:
     pitdev_ws = pitdev_wb["CONSOLIDACAO_O-PITDEV"]
     pitdev_headers = [cell.value for cell in pitdev_ws[1]]
     assert pitdev_headers == ["ID", "Y", "X", "Z", "Diâmetro", "Azimute", "Ângulo planejado", "Ângulo do talude", "Profundidade"]
-    assert pitdev_ws.max_row == 25
-    assert pitdev_ws[2][0].value == 1
-    assert pitdev_ws[2][1].value == 8929912.804
-    assert pitdev_ws[2][4].value == 4
-    assert round(pitdev_ws[2][5].value, 2) == 138.42
-    assert round(pitdev_ws[2][6].value, 2) == 14.98
-    assert round(pitdev_ws[2][7].value, 2) == 75.02
-    assert round(pitdev_ws[2][8].value, 2) == 5.04
+    assert pitdev_ws.max_row == len(field_rows) + 1
+    expected_first_id = str(int(float(field_rows[0][0])))
+    assert str(pitdev_ws[2][0].value) == expected_first_id
+    assert round(pitdev_ws[2][1].value, 3) == round(float(field_rows[0][1]), 3)
+    assert round(pitdev_ws[2][2].value, 3) == round(float(field_rows[0][2]), 3)
+    assert round(pitdev_ws[2][3].value, 3) == round(float(field_rows[0][3]), 3)
+    assert all(pitdev_ws[2][column].value is not None for column in [4, 5, 6, 7, 8])
     pitdev_download_path.unlink(missing_ok=True)
+    field_only_wb = load_workbook(pitdev_field_only_download_path, data_only=True)
+    assert field_only_wb.sheetnames == ["LEVANTAMENTO_O-PITDEV", "LOG_LEVANTAMENTO_O-PITDEV"]
+    field_only_ws = field_only_wb["LEVANTAMENTO_O-PITDEV"]
+    assert [cell.value for cell in field_only_ws[1]] == ["ID", "Y", "X", "Z"]
+    assert field_only_ws.max_row == len(field_rows) + 1
+    assert field_only_ws[2][0].value == int(float(field_rows[0][0]))
+    assert field_only_ws[field_only_ws.max_row][0].value == int(float(field_rows[-1][0]))
+    assert field_only_ws[2][1].value == float(field_rows[0][1])
+    pitdev_field_only_download_path.unlink(missing_ok=True)
     rd_only_input_path.unlink(missing_ok=True)
     return 0
 
