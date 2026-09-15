@@ -33,6 +33,7 @@ def main() -> int:
         page.goto(args.base_url, wait_until="domcontentloaded")
         page.on("console", lambda message: print(f"browser console: {message.type}: {message.text}"))
         page.wait_for_selector("#pitdevTitle")
+        page.wait_for_function("document.querySelector('#languageSelect')?.options?.length === 3")
         page.wait_for_function("document.querySelector('#pitdevTitle')?.textContent === 'Consolidação O-PitDev'")
         page.wait_for_function("document.querySelector('#pitdevGenerateBtn')?.disabled === true")
         page.wait_for_function("document.querySelector('.pitdev-panel')?.open === false")

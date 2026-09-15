@@ -43,6 +43,7 @@ def main() -> int:
         page.set_default_timeout(120000)
         page.goto(args.base_url, wait_until="domcontentloaded")
         page.wait_for_selector("#statusText")
+        page.wait_for_function("document.querySelector('#languageSelect')?.options?.length === 3")
         page.wait_for_function("document.querySelector('.openblast-hubbar__brand img')?.getAttribute('src') === './assets/openblast-logo.png'")
         page.wait_for_function("document.documentElement.lang === 'pt-BR'")
         page.wait_for_function("document.querySelector('#languageSelect')?.value === 'pt'")
