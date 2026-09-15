@@ -1,4 +1,4 @@
-import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js';
+import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js?v=20260915-opitdev-1';
 
 export function buildMvvRows(rawMvv, config, validation) {
   const indexMap = validation.indexMap;

@@ -1,5 +1,5 @@
-import { loadConfig } from './config.js';
-import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js';
+import { loadConfig } from './config.js?v=20260915-opitdev-1';
+import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20260915-opitdev-1';
 
 function qs(id) {
   const element = document.getElementById(id);

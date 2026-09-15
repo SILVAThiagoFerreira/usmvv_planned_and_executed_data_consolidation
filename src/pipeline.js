@@ -1,7 +1,7 @@
-import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js';
-import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js';
-import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows } from './processor.js';
-import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js';
+import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js?v=20260915-opitdev-1';
+import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js?v=20260915-opitdev-1';
+import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows } from './processor.js?v=20260915-opitdev-1';
+import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js?v=20260915-opitdev-1';
 
 export async function runPipeline({ config, mvvFile, rdFile }) {
   const rawMvv = await readMvvFile(mvvFile, config);
