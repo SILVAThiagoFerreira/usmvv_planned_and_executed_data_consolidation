@@ -1,4 +1,4 @@
-import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js?v=20260915-opitdev-1';
+import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js?v=20260916-opitdev-toe-1';
 
 export function validateMvvSource(rawMvv, config) {
   const headers = rawMvv.headers;
@@ -196,12 +196,18 @@ export function validatePitdevFieldSource(rawField, config) {
 export function validatePitdevPlanSource(rawPlan, config) {
   const indexMap = headerIndexMap(rawPlan.headers);
   const configured = config.pitdev.plan_columns;
+  const toeSuggestionConfig = config.pitdev.toe_suggestion;
+  const toeSuggestionField = toeSuggestionConfig?.source_field;
+  if (!toeSuggestionField || !Array.isArray(configured[toeSuggestionField]) || !configured[toeSuggestionField].length) {
+    throw new Error('Configuração inválida: coluna de sugestão da cota do pé no plano O-PitDev');
+  }
   const columns = {
     id: resolveConfiguredHeader(indexMap, configured.id, 'ID'),
     diameter: resolveConfiguredHeader(indexMap, configured.diameter, 'Diâmetro'),
     azimuth: resolveConfiguredHeader(indexMap, configured.azimuth, 'Azimute'),
     angle: resolveConfiguredHeader(indexMap, configured.angle, 'Ângulo planejado'),
     depth: resolveConfiguredHeader(indexMap, configured.depth, 'Profundidade'),
+    [toeSuggestionField]: resolveConfiguredHeader(indexMap, configured[toeSuggestionField], 'Z Toe'),
   };
   const seen = new Set();
   let rowCount = 0;

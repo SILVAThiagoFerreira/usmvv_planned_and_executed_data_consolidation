@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260915-opitdev-1" />
+    <link rel="stylesheet" href="./styles.css?v=20260916-opitdev-toe-1" />
     <link rel="icon" href="./assets/openblast-favicon-white.svg" type="image/svg+xml" />
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
   </head>
@@ -156,7 +156,7 @@
             <input id="pitdevPlanFile" class="visually-hidden-input" type="file" accept=".xlsx" aria-labelledby="pitdevPlanFileLabel pitdevPlanFileName" aria-describedby="pitdevPlanFileHint" />
             <span id="pitdevPlanFileLabel" class="dropzone-label">Plano planejado</span>
             <strong id="pitdevPlanFileName">Nenhum arquivo selecionado</strong>
-            <small id="pitdevPlanFileHint">XLSX · diâmetro, azimute, dip, profundidade</small>
+            <small id="pitdevPlanFileHint">XLSX · diâmetro, azimute, dip, profundidade e Z Toe</small>
           </label>
         </div>
 
@@ -170,6 +170,7 @@
         <form id="pitdevOptions" class="executed-options" hidden>
           <div class="options-heading"><div><span id="pitdevOptionsKicker" class="options-kicker">Furos auxiliares</span><h3 id="pitdevOptionsTitle">Parâmetros dos auxiliares</h3></div></div>
           <p id="pitdevOptionsHint">Informe os dados usados somente nesses furos.</p>
+          <p id="pitdevToeSuggestion" class="pitdev-toe-suggestion" hidden></p>
           <div class="options-grid">
             <label class="field"><span id="pitdevToeElevationLabel">Cota do pé do projeto (m)</span><input id="pitdevToeElevationInput" type="number" min="0.001" step="any" required /></label>
             <label class="field"><span id="pitdevSubdrillingLabel">Subfuração (m)</span><input id="pitdevSubdrillingValueInput" type="number" min="0" step="any" value="0" /></label>
@@ -198,6 +199,6 @@
       </details>
     </div>
 
-    <script type="module" src="./main.js?v=20260915-opitdev-1"></script>
+    <script type="module" src="./main.js?v=20260916-opitdev-toe-1"></script>
   </body>
 </html>

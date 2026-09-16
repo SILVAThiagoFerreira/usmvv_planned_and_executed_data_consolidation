@@ -1,4 +1,4 @@
-import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js?v=20260915-opitdev-1';
+import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js?v=20260916-opitdev-toe-1';
 
 export function buildMvvRows(rawMvv, config, validation) {
   const indexMap = validation.indexMap;
@@ -204,7 +204,56 @@ export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefi
   return { consolidatedRows, summary };
 }
 
-export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidation, config, auxiliaryOptions = null) {
+export function suggestPitdevToeElevation(rawPlan, planValidation, config) {
+  const suggestionConfig = config?.pitdev?.toe_suggestion;
+  const sourceField = suggestionConfig?.source_field;
+  const sourcePosition = planValidation?.columns?.[sourceField];
+  if (!sourceField || !Number.isInteger(sourcePosition)) {
+    throw new Error('Configuração inválida: coluna de sugestão da cota do pé no plano O-PitDev');
+  }
+  if (suggestionConfig.tie_break !== 'first_valid_in_document') {
+    throw new Error(`Configuração inválida: desempate da sugestão da cota do pé (${suggestionConfig.tie_break || 'ausente'})`);
+  }
+
+  const sourceColumn = asText(rawPlan.headers?.[sourcePosition]) || sourceField;
+  const frequencies = new Map();
+  let validCount = 0;
+
+  for (const row of rawPlan.rows) {
+    if (row.blank) continue;
+    const value = toNumber(row.values[sourcePosition], `Plano linha ${row.sourceRow}`, sourceColumn);
+    const current = frequencies.get(value);
+    if (current) {
+      current.frequency += 1;
+    } else {
+      frequencies.set(value, { value, frequency: 1, firstIndex: validCount });
+    }
+    validCount += 1;
+  }
+
+  if (!frequencies.size) {
+    throw new Error(`Plano O-PitDev: a coluna ${sourceColumn} não possui valores válidos para sugerir a cota do pé`);
+  }
+
+  const selected = [...frequencies.values()].reduce((best, candidate) => {
+    if (!best) return candidate;
+    if (candidate.frequency > best.frequency) return candidate;
+    if (candidate.frequency === best.frequency && candidate.firstIndex < best.firstIndex) return candidate;
+    return best;
+  }, null);
+
+  return {
+    value: selected.value,
+    frequency: selected.frequency,
+    validCount,
+    distinctValueCount: frequencies.size,
+    sourceField,
+    sourceColumn,
+    tieBreak: suggestionConfig.tie_break,
+  };
+}
+
+export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidation, config, auxiliaryOptions = null, toeSuggestion = null) {
   const [idColumn, yColumn, xColumn, zColumn, diameterColumn, azimuthColumn, plannedAngleColumn, slopeAngleColumn, depthColumn] = config.columns.pitdev_consolidated;
   const planByHole = new Map();
   const planColumns = planValidation.columns;
@@ -282,6 +331,7 @@ export function buildPitdevRows(rawField, rawPlan, fieldValidation, planValidati
       fieldWithoutPlanCount: fieldWithoutPlan.length,
       planWithoutField,
       planWithoutFieldCount: planWithoutField.length,
+      toeSuggestion,
       outputColumns: config.columns.pitdev_consolidated,
       sheetName: config.output.sheets.pitdev_consolidated,
       angleFormula: `${referenceAngle} - ângulo planejado`,

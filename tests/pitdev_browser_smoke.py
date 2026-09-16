@@ -2,10 +2,39 @@ from __future__ import annotations
 
 import argparse
 import tempfile
+from collections import Counter
 from pathlib import Path
 
 from openpyxl import load_workbook
 from playwright.sync_api import sync_playwright
+
+
+def read_toe_suggestion(plan_path: str) -> tuple[float, int, int]:
+    workbook = load_workbook(plan_path, read_only=True, data_only=True)
+    try:
+        sheet_name = next(name for name in workbook.sheetnames if str(name).strip().casefold() == "projeto perfuração")
+        sheet = workbook[sheet_name]
+        headers = list(next(sheet.iter_rows(min_row=1, max_row=1, values_only=True)))
+        toe_index = next(index for index, header in enumerate(headers) if str(header).strip().casefold() == "z toe")
+        values: list[float] = []
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+            raw = row[toe_index] if toe_index < len(row) else None
+            if raw is None or (isinstance(raw, str) and not raw.strip()):
+                continue
+            values.append(float(str(raw).strip().replace(",", ".")))
+    finally:
+        workbook.close()
+
+    counts = Counter(values)
+    first_index: dict[float, int] = {}
+    for index, value in enumerate(values):
+        first_index.setdefault(value, index)
+    suggestion = min(counts, key=lambda value: (-counts[value], first_index[value]))
+    return suggestion, counts[suggestion], len(values)
+
+
+def format_input_number(value: float) -> str:
+    return f"{value:.3f}".rstrip("0").rstrip(".")
 
 
 def main() -> int:
@@ -25,6 +54,7 @@ def main() -> int:
         for line in Path(args.field).read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
+    expected_toe, expected_frequency, expected_valid_count = read_toe_suggestion(args.plan)
 
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
@@ -52,11 +82,14 @@ def main() -> int:
         page.wait_for_function("!document.querySelector('#pitdevGenerateBtn')?.disabled")
         page.wait_for_function("document.querySelector('#pitdevStatusText')?.textContent?.includes('Pronto para consolidar')")
         page.get_by_role("button", name="Consolidar O-PitDev").click()
-        page.wait_for_timeout(2000)
-        if page.locator("#pitdevOptions").is_visible():
-            page.locator("#pitdevToeElevationInput").fill("290")
-            page.locator("#pitdevSubdrillingValueInput").fill("1")
-            page.get_by_role("button", name="Calcular e consolidar").click()
+        page.wait_for_function("document.querySelector('#pitdevOptions')?.hidden === false")
+        assert page.locator("#pitdevToeElevationInput").input_value() == format_input_number(expected_toe)
+        suggestion_text = page.locator("#pitdevToeSuggestion").text_content() or ""
+        assert format_input_number(expected_toe) in suggestion_text
+        assert f"{expected_frequency} de {expected_valid_count}" in suggestion_text
+        page.locator("#pitdevToeElevationInput").fill("290")
+        page.locator("#pitdevSubdrillingValueInput").fill("1")
+        page.get_by_role("button", name="Calcular e consolidar").click()
         print("pitdev status:", page.locator("#pitdevStatusText").text_content())
         print("pitdev log:", page.locator("#pitdevLogOutput").text_content())
         page.wait_for_function("document.querySelector('#pitdevStatusText')?.textContent?.includes('Consolidação gerada.')")
@@ -74,6 +107,12 @@ def main() -> int:
     workbook = load_workbook(download_path, data_only=True)
     assert workbook.sheetnames == ["CONSOLIDACAO_O-PITDEV", "LOG_O-PITDEV"]
     sheet = workbook["CONSOLIDACAO_O-PITDEV"]
+    pitdev_log = workbook["LOG_O-PITDEV"]
+    assert round(pitdev_log["E6"].value, 3) == round(expected_toe, 3)
+    assert pitdev_log["E7"].value == "Z Toe"
+    assert pitdev_log["E8"].value == expected_frequency
+    assert pitdev_log["E9"].value == expected_valid_count
+    assert pitdev_log["E10"].value == "first_valid_in_document"
     assert [cell.value for cell in sheet[1]] == [
         "ID", "Y", "X", "Z", "Diâmetro", "Azimute", "Ângulo planejado", "Ângulo do talude", "Profundidade"
     ]

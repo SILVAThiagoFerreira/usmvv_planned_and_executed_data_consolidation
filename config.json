@@ -135,7 +135,12 @@
       "diameter": ["Diameter", "Diâmetro"],
       "azimuth": ["Azimuth", "Azimute"],
       "angle": ["Angulo", "Ângulo", "Dip", "Inclination", "Inclinação"],
-      "depth": ["Depth", "Profundidade"]
+      "depth": ["Depth", "Profundidade"],
+      "z_toe": ["Z Toe"]
+    },
+    "toe_suggestion": {
+      "source_field": "z_toe",
+      "tie_break": "first_valid_in_document"
     },
     "angle_reference_degrees": 90
   },
@@ -204,7 +209,7 @@
       "Z_RD"
     ],
     "pitdev_field_numeric_fields": ["Y", "X", "Z"],
-    "pitdev_plan_numeric_fields": ["diameter", "azimuth", "angle", "depth"],
+    "pitdev_plan_numeric_fields": ["diameter", "azimuth", "angle", "depth", "z_toe"],
     "fail_on_missing_mvv_rows": true,
     "fail_on_missing_mvv_columns": true,
     "fail_on_bad_rd_rows": true,
@@ -292,6 +297,11 @@
       "pitdev_plan_without_field_count": "Furos do plano sem levantamento",
       "pitdev_field_without_plan_title": "IDs do campo sem correspondencia no plano",
       "pitdev_plan_without_field_title": "Furos do plano sem correspondencia no campo",
+      "pitdev_toe_suggestion": "Cota do pé sugerida (moda de Z Toe)",
+      "pitdev_toe_suggestion_column": "Coluna de origem da sugestão",
+      "pitdev_toe_suggestion_frequency": "Ocorrências do valor sugerido",
+      "pitdev_toe_suggestion_valid_count": "Valores válidos considerados",
+      "pitdev_toe_suggestion_tie_break": "Regra de desempate da sugestão",
       "pitdev_field_only_indicator_header": "Indicador",
       "pitdev_field_only_value_header": "Valor",
       "pitdev_field_only_context_header": "Campo",
@@ -328,7 +338,7 @@
         "pitdev_field_label": "Levantamento de campo",
         "pitdev_field_hint": "CSV/TXT · ID, Y, X, Z",
         "pitdev_plan_label": "Plano planejado",
-        "pitdev_plan_hint": "XLSX · diâmetro, azimute, dip, profundidade",
+        "pitdev_plan_hint": "XLSX · diâmetro, azimute, dip, profundidade e Z Toe",
         "pitdev_action": "Consolidar O-PitDev",
         "pitdev_field_only_action": "Organizar somente o levantado",
         "pitdev_field_only_hint": "Gera ID, Y, X e Z na ordem do CSV.",
@@ -346,7 +356,8 @@
           "field_only_columns_count": "Colunas",
           "matched_count": "Consolidadas",
           "field_without_plan_count": "Campo sem plano",
-          "plan_without_field_count": "Plano sem campo"
+          "plan_without_field_count": "Plano sem campo",
+          "toe_suggestion": "Cota sugerida pelo plano"
         },
         "pitdev_download_prefix": "Baixar",
         "pitdev_open": "Abrir",
@@ -377,6 +388,7 @@
         "pitdev_options_kicker": "Furos auxiliares",
         "pitdev_options_title": "Parâmetros dos auxiliares",
         "pitdev_options_hint": "Informe os dados usados somente nesses furos.",
+        "pitdev_toe_suggestion": "Sugestão automática: {value} m, a partir do valor mais frequente da coluna {column} ({frequency} de {validCount} valores válidos). Você pode alterar antes de consolidar.",
         "pitdev_toe_elevation_label": "Cota do pé do projeto (m)",
         "pitdev_subdrilling_label": "Subfuração (m)",
         "pitdev_formula": "Profundidade auxiliar = Z − cota do pé + subfuração",
@@ -432,7 +444,7 @@
         "pitdev_field_label": "Field survey",
         "pitdev_field_hint": "CSV/TXT · ID, Y, X, Z",
         "pitdev_plan_label": "Planned layout",
-        "pitdev_plan_hint": "XLSX · diameter, azimuth, dip, depth",
+        "pitdev_plan_hint": "XLSX · diameter, azimuth, dip, depth and Z Toe",
         "pitdev_action": "Consolidate O-PitDev",
         "pitdev_field_only_action": "Organize survey only",
         "pitdev_field_only_hint": "Creates ID, Y, X and Z in CSV order.",
@@ -450,7 +462,8 @@
           "field_only_columns_count": "Columns",
           "matched_count": "Consolidated",
           "field_without_plan_count": "Survey without plan",
-          "plan_without_field_count": "Plan without survey"
+          "plan_without_field_count": "Plan without survey",
+          "toe_suggestion": "Plan toe suggestion"
         },
         "pitdev_download_prefix": "Download",
         "pitdev_open": "Open",
@@ -481,6 +494,7 @@
         "pitdev_options_kicker": "Auxiliary holes",
         "pitdev_options_title": "Auxiliary parameters",
         "pitdev_options_hint": "Enter values used only for these holes.",
+        "pitdev_toe_suggestion": "Automatic suggestion: {value} m, based on the most frequent value in {column} ({frequency} of {validCount} valid values). You can change it before consolidating.",
         "pitdev_toe_elevation_label": "Project toe elevation (m)",
         "pitdev_subdrilling_label": "Subdrilling (m)",
         "pitdev_formula": "Auxiliary depth = Z − toe elevation + subdrilling",
@@ -536,7 +550,7 @@
         "pitdev_field_label": "现场测量",
         "pitdev_field_hint": "CSV/TXT · ID、Y、X、Z",
         "pitdev_plan_label": "计划方案",
-        "pitdev_plan_hint": "XLSX · 直径、方位角、倾角、深度",
+        "pitdev_plan_hint": "XLSX · 直径、方位角、倾角、深度和 Z Toe",
         "pitdev_action": "整合 O-PitDev",
         "pitdev_field_only_action": "仅整理现场测量",
         "pitdev_field_only_hint": "按 CSV 顺序生成 ID、Y、X 和 Z。",
@@ -554,7 +568,8 @@
           "field_only_columns_count": "列",
           "matched_count": "已整合",
           "field_without_plan_count": "测量无计划",
-          "plan_without_field_count": "计划无测量"
+          "plan_without_field_count": "计划无测量",
+          "toe_suggestion": "计划建议孔底标高"
         },
         "pitdev_download_prefix": "下载",
         "pitdev_open": "打开",
@@ -585,6 +600,7 @@
         "pitdev_options_kicker": "辅助孔",
         "pitdev_options_title": "辅助参数",
         "pitdev_options_hint": "仅为这些孔输入使用的参数。",
+        "pitdev_toe_suggestion": "自动建议：{value} 米，依据 {column} 列中出现最频繁的值（有效值 {frequency}/{validCount}）。您可以在整合前修改。",
         "pitdev_toe_elevation_label": "项目孔底标高（米）",
         "pitdev_subdrilling_label": "超深（米）",
         "pitdev_formula": "辅助深度 = Z − 孔底标高 + 超深",

@@ -146,13 +146,22 @@ IDs do levantamento ausentes no plano são furos auxiliares. A interface solicit
 
 - O novo quadro funciona separadamente dos fluxos MVV/RD e processa tudo localmente no navegador.
 - O `Levantamento de Campo Enaex` aceita `.csv` ou `.txt` delimitado por vírgula, com as colunas posicionais `ID`, `Y`, `X`, `Z` e, opcionalmente, uma quinta coluna vazia após a última vírgula.
-- O `Plano de Perfuração Planejado` aceita `.xlsx`, usa a aba configurada em `config.json` e localiza `ID`, `Diameter`/`Diâmetro`, `Azimuth`/`Azimute`, `Angulo`/`Ângulo`/`Dip` e `Depth`/`Profundidade` por aliases configurados.
+- O `Plano de Perfuração Planejado` aceita `.xlsx`, usa a aba configurada em `config.json` e localiza `ID`, `Diameter`/`Diâmetro`, `Azimuth`/`Azimute`, `Angulo`/`Ângulo`/`Dip`, `Depth`/`Profundidade` e `Z Toe` por aliases configurados.
 - No O-PitDev, o `Ângulo planejado` vazio ou `-` e tratado como `0`, entao `Ângulo do talude` fica `90 - 0`.
 - O vínculo é feito pelo `ID` normalizado. IDs duplicados, campos ausentes ou valores não numéricos interrompem a consolidação com erro explícito.
+- A coluna `Z Toe` é obrigatória no plano combinado e todos os seus valores de linhas válidas devem ser numéricos.
 - A ordem da tabela exportada segue a ordem do levantamento de campo. Somente IDs presentes nos dois arquivos entram na tabela; diferenças ficam documentadas no log do workbook e na interface.
 - A saída tem as colunas `ID`, `Y`, `X`, `Z`, `Diâmetro`, `Azimute`, `Ângulo planejado`, `Ângulo do talude` e `Profundidade`.
 - `Ângulo do talude = 90 - Ângulo planejado`, usando o valor configurado `pitdev.angle_reference_degrees`.
 - O arquivo gerado é `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx`, com as abas `CONSOLIDACAO_O-PITDEV` e `LOG_O-PITDEV`.
+
+### Sugestão automática da cota do pé no O-PitDev
+
+- Quando houver IDs do levantamento ausentes no plano, a interface calcula a sugestão da cota do pé a partir da coluna `Z Toe` do plano.
+- A sugestão é a moda: o valor numérico que mais se repete entre as linhas válidas do documento.
+- Em caso de empate, permanece o primeiro valor válido encontrado na ordem original do documento, garantindo comportamento determinístico.
+- O campo de cota do pé é aberto já preenchido com essa sugestão; o usuário pode editar o valor e a subfuração antes de consolidar.
+- A sugestão, a coluna de origem, a frequência e a quantidade de valores válidos ficam registradas no log técnico e no `LOG_O-PITDEV`.
 
 ### Organização somente do levantamento para O-PitDev
 

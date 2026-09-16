@@ -1,4 +1,4 @@
-import { asText, isBlank } from './utils.js?v=20260915-opitdev-1';
+import { asText, isBlank } from './utils.js?v=20260916-opitdev-toe-1';
 
 function getExcelJS() {
   if (!globalThis.ExcelJS || !globalThis.ExcelJS.Workbook) {

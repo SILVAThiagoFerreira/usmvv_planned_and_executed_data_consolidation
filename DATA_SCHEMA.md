@@ -99,6 +99,7 @@ Fonte: `.xlsx`, aba configurada em `config.json`.
 | Azimute | `Azimuth` ou `Azimute` | Azimute planejado |
 | Ângulo planejado | `Angulo`, `Ângulo`, `Dip`, `Inclination` ou `Inclinação` | Inclinação da lança no plano; valor vazio ou `-` vira `0` |
 | Profundidade | `Depth` ou `Profundidade` | Profundidade planejada |
+| Z Toe | `Z Toe` | Cota do pé usada como base para a sugestão automática; deve ser numérica em todas as linhas válidas |
 
 ## Saída O-PitDev
 
@@ -108,6 +109,8 @@ Fonte: `.xlsx`, aba configurada em `config.json`.
 | `Y`, `X`, `Z` | Levantamento de Campo Enaex |
 | `Diâmetro`, `Azimute`, `Ângulo planejado`, `Profundidade` | Plano de Perfuração Planejado |
 | `Ângulo do talude` | `90 - Ângulo planejado` |
+
+A cota do pé sugerida antes da consolidação é a moda numérica de `Z Toe` no plano. A frequência, a quantidade de valores válidos e o desempate pela primeira ocorrência ficam registrados no log.
 
 IDs auxiliares, presentes somente no levantamento, têm os campos de projeto vazios e `Profundidade = Z - cota do pé + subfuração`.
 

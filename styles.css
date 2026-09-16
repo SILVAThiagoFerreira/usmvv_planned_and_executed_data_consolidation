@@ -631,6 +631,13 @@ button.secondary,
   line-height: 1.4;
 }
 
+.pitdev-toe-suggestion {
+  border-left: 3px solid var(--accent);
+  padding: 7px 9px;
+  color: var(--ink-soft) !important;
+  background: var(--surface);
+}
+
 .options-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -1,5 +1,5 @@
-import { loadConfig } from './config.js?v=20260915-opitdev-1';
-import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20260915-opitdev-1';
+import { loadConfig } from './config.js?v=20260916-opitdev-toe-1';
+import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20260916-opitdev-toe-1';
 
 function qs(id) {
   const element = document.getElementById(id);
@@ -17,6 +17,24 @@ function setStatus(statusBox, statusText, tone, text) {
 function getLanguagePack(config, languageCode) {
   const languages = config.ui.languages || {};
   return languages[languageCode] || languages[config.ui.default_language] || languages.pt;
+}
+
+function formatNumberForUi(value) {
+  if (!Number.isFinite(Number(value))) return '';
+  return Number(value).toFixed(3).replace(/\.?(0+)$/, '');
+}
+
+function formatPitdevToeSuggestion(template, suggestion) {
+  const values = {
+    value: formatNumberForUi(suggestion.value),
+    column: suggestion.sourceColumn,
+    frequency: suggestion.frequency,
+    validCount: suggestion.validCount,
+  };
+  return Object.entries(values).reduce(
+    (text, [key, value]) => text.split(`{${key}}`).join(String(value)),
+    template,
+  );
 }
 
 function renderSummary(summaryCards, languagePack, summary) {
@@ -67,6 +85,7 @@ function renderPitdevSummary(summaryCards, languagePack, summary) {
     [languagePack.pitdev_metrics.matched_count, summary.matchedCount],
     [languagePack.pitdev_metrics.field_without_plan_count, summary.fieldWithoutPlanCount],
     [languagePack.pitdev_metrics.plan_without_field_count, summary.planWithoutFieldCount],
+    [languagePack.pitdev_metrics.toe_suggestion, summary.toeSuggestion ? `${formatNumberForUi(summary.toeSuggestion.value)} m` : '-'],
   ];
   summaryCards.innerHTML = metrics
     .map(([label, value]) => `<article class="metric"><span>${label}</span><strong>${value}</strong></article>`)
@@ -229,6 +248,7 @@ export async function bootstrapApp() {
   const pitdevOptionsKicker = qs('pitdevOptionsKicker');
   const pitdevOptionsTitle = qs('pitdevOptionsTitle');
   const pitdevOptionsHint = qs('pitdevOptionsHint');
+  const pitdevToeSuggestion = qs('pitdevToeSuggestion');
   const pitdevToeElevationLabel = qs('pitdevToeElevationLabel');
   const pitdevSubdrillingLabel = qs('pitdevSubdrillingLabel');
   const pitdevFormula = qs('pitdevFormula');
@@ -428,6 +448,13 @@ export async function bootstrapApp() {
     pitdevOptionsKicker.textContent = ui.pitdev_options_kicker;
     pitdevOptionsTitle.textContent = ui.pitdev_options_title;
     pitdevOptionsHint.textContent = ui.pitdev_options_hint;
+    if (state.pitdevSummary?.toeSuggestion) {
+      pitdevToeSuggestion.textContent = formatPitdevToeSuggestion(ui.pitdev_toe_suggestion, state.pitdevSummary.toeSuggestion);
+      pitdevToeSuggestion.hidden = false;
+    } else {
+      pitdevToeSuggestion.textContent = '';
+      pitdevToeSuggestion.hidden = true;
+    }
     pitdevToeElevationLabel.textContent = ui.pitdev_toe_elevation_label;
     pitdevSubdrillingLabel.textContent = ui.pitdev_subdrilling_label;
     pitdevFormula.textContent = ui.pitdev_formula;
@@ -486,6 +513,8 @@ export async function bootstrapApp() {
     state.pitdevErrorMessage = null;
     state.pitdevPhase = 'idle';
     state.pitdevOutputFileName = config.output.pitdev_file_name;
+    pitdevOptions.hidden = true;
+    pitdevOptionsError.hidden = true;
     pitdevDownloadLink.hidden = true;
   };
 
@@ -511,6 +540,10 @@ export async function bootstrapApp() {
   const setPitdevFile = (kind, file) => {
     state[kind] = file;
     state.pitdevAuxiliaryOptions = null;
+    pitdevOptions.hidden = true;
+    pitdevOptionsError.hidden = true;
+    pitdevToeElevationInput.value = '';
+    pitdevSubdrillingValueInput.value = '0';
     clearPitdevOutput();
     renderLanguage();
   };
@@ -647,7 +680,10 @@ export async function bootstrapApp() {
         const preview = await runPitdevPipeline({ config, fieldFile: state.pitdevField, planFile: state.pitdevPlan });
         if (preview.summary.fieldWithoutPlanCount > 0) {
           state.pitdevSummary = preview.summary;
+          pitdevToeElevationInput.value = formatNumberForUi(preview.summary.toeSuggestion?.value);
+          pitdevOptionsError.hidden = true;
           pitdevOptions.hidden = false;
+          renderLanguage();
           pitdevToeElevationInput.focus();
           return;
         }

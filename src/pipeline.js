@@ -1,7 +1,7 @@
-import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js?v=20260915-opitdev-1';
-import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js?v=20260915-opitdev-1';
-import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows } from './processor.js?v=20260915-opitdev-1';
-import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js?v=20260915-opitdev-1';
+import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js?v=20260916-opitdev-toe-1';
+import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js?v=20260916-opitdev-toe-1';
+import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows, suggestPitdevToeElevation } from './processor.js?v=20260916-opitdev-toe-1';
+import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js?v=20260916-opitdev-toe-1';
 
 export async function runPipeline({ config, mvvFile, rdFile }) {
   const rawMvv = await readMvvFile(mvvFile, config);
@@ -83,7 +83,8 @@ export async function runPitdevPipeline({ config, fieldFile, planFile, auxiliary
   const rawPlan = await readPitdevPlanFile(planFile, config);
   const fieldValidation = validatePitdevFieldSource(rawField, config);
   const planValidation = validatePitdevPlanSource(rawPlan, config);
-  const processed = buildPitdevRows(rawField, rawPlan, fieldValidation, planValidation, config, auxiliaryOptions);
+  const toeSuggestion = suggestPitdevToeElevation(rawPlan, planValidation, config);
+  const processed = buildPitdevRows(rawField, rawPlan, fieldValidation, planValidation, config, auxiliaryOptions, toeSuggestion);
   const metadata = {
     runId: new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, '').replace('T', '_'),
     generatedAt: new Date().toISOString(),
@@ -91,6 +92,11 @@ export async function runPitdevPipeline({ config, fieldFile, planFile, auxiliary
     planFile: rawPlan.fileName,
     planSheet: rawPlan.sheetName,
     angleFormula: processed.summary.angleFormula,
+    suggestedToeElevation: toeSuggestion.value,
+    suggestedToeFrequency: toeSuggestion.frequency,
+    suggestedToeValidCount: toeSuggestion.validCount,
+    suggestedToeColumn: toeSuggestion.sourceColumn,
+    suggestedToeTieBreak: toeSuggestion.tieBreak,
     outputPath: config.output.pitdev_file_name,
   };
 

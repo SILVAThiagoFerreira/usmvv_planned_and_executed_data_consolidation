@@ -1,4 +1,4 @@
-import { bootstrapApp } from './src/app.js?v=20260915-opitdev-1';
+import { bootstrapApp } from './src/app.js?v=20260916-opitdev-toe-1';
 
 window.addEventListener('DOMContentLoaded', async () => {
   try {

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildConsolidatedRows, buildMvvPlanRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, deduplicateRdRows } from '../src/processor.js';
+import { buildConsolidatedRows, buildMvvPlanRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, deduplicateRdRows, suggestPitdevToeElevation } from '../src/processor.js';
 import { validatePitdevPlanSource } from '../src/validator.js';
 import { getNumericFormatForHeader } from '../src/writer.js';
 import { normalizeHoleKey } from '../src/utils.js';
@@ -139,6 +139,9 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.languages.pt.pitdev_field_only_action, 'Organizar somente o levantado');
   assert.equal(projectConfig.ui.languages.pt.pitdev_field_only_status_ready, 'Pronto para organizar somente o levantado.');
   assert.equal(projectConfig.ui.languages.pt.pitdev_metrics.field_only_columns_count, 'Colunas');
+  assert.deepEqual(projectConfig.pitdev.plan_columns.z_toe, ['Z Toe']);
+  assert.deepEqual(projectConfig.pitdev.toe_suggestion, { source_field: 'z_toe', tie_break: 'first_valid_in_document' });
+  assert.match(projectConfig.ui.languages.pt.pitdev_toe_suggestion, /\{value\}/);
   assert.equal(projectConfig.output.pitdev_field_only_file_name, 'LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx');
   assert.deepEqual(projectConfig.columns.pitdev_field_only, ['ID', 'Y', 'X', 'Z']);
   assert.equal(projectConfig.output.sheets.pitdev_field_only, 'LEVANTAMENTO_O-PITDEV');
@@ -270,21 +273,84 @@ test('O-PitDev plan validation accepts blank or dash planned angle', () => {
         azimuth: ['Azimuth'],
         angle: ['Dip'],
         depth: ['Depth'],
+        z_toe: ['Z Toe'],
+      },
+      toe_suggestion: {
+        source_field: 'z_toe',
+        tie_break: 'first_valid_in_document',
       },
     },
   };
   const rawPlan = {
-    headers: ['ID', 'Diameter', 'Azimuth', 'Dip', 'Depth'],
+    headers: ['ID', 'Diameter', 'Azimuth', 'Dip', 'Depth', 'Z Toe'],
     rows: [
-      { sourceRow: 2, blank: false, values: [1, 5, 10, '', 12] },
-      { sourceRow: 3, blank: false, values: [2, 5, 10, '-', 13] },
+      { sourceRow: 2, blank: false, values: [1, 5, 10, '', 12, 179.4] },
+      { sourceRow: 3, blank: false, values: [2, 5, 10, '-', 13, 179.4] },
     ],
   };
 
   const validation = validatePitdevPlanSource(rawPlan, validationConfig);
 
   assert.equal(validation.rowCount, 2);
-  assert.deepEqual(validation.columns, { id: 0, diameter: 1, azimuth: 2, angle: 3, depth: 4 });
+  assert.deepEqual(validation.columns, { id: 0, diameter: 1, azimuth: 2, angle: 3, depth: 4, z_toe: 5 });
+});
+
+test('O-PitDev suggests the most frequent Z Toe and keeps the first value on a tie', () => {
+  const suggestionConfig = {
+    pitdev: {
+      toe_suggestion: {
+        source_field: 'z_toe',
+        tie_break: 'first_valid_in_document',
+      },
+    },
+  };
+  const rawPlan = {
+    headers: ['ID', 'Z Toe'],
+    rows: [
+      { sourceRow: 2, blank: false, values: [1, 180] },
+      { sourceRow: 3, blank: false, values: [2, 181] },
+      { sourceRow: 4, blank: false, values: [3, 181] },
+      { sourceRow: 5, blank: false, values: [4, 180] },
+    ],
+  };
+  const suggestion = suggestPitdevToeElevation(rawPlan, { columns: { z_toe: 1 } }, suggestionConfig);
+
+  assert.deepEqual(suggestion, {
+    value: 180,
+    frequency: 2,
+    validCount: 4,
+    distinctValueCount: 2,
+    sourceField: 'z_toe',
+    sourceColumn: 'Z Toe',
+    tieBreak: 'first_valid_in_document',
+  });
+});
+
+test('O-PitDev requires the configured Z Toe column', () => {
+  const validationConfig = {
+    pitdev: {
+      plan_columns: {
+        id: ['ID'],
+        diameter: ['Diameter'],
+        azimuth: ['Azimuth'],
+        angle: ['Dip'],
+        depth: ['Depth'],
+        z_toe: ['Z Toe'],
+      },
+      toe_suggestion: {
+        source_field: 'z_toe',
+        tie_break: 'first_valid_in_document',
+      },
+    },
+  };
+
+  assert.throws(
+    () => validatePitdevPlanSource({
+      headers: ['ID', 'Diameter', 'Azimuth', 'Dip', 'Depth'],
+      rows: [{ sourceRow: 2, blank: false, values: [1, 5, 10, 25, 12] }],
+    }, validationConfig),
+    /missing required column Z Toe/,
+  );
 });
 
 test('O-PitDev still rejects non-numeric planned angle text', () => {
@@ -368,6 +434,7 @@ test('compact interface keeps downloads hidden until a workbook exists', () => {
   assert.match(indexHtml, /id="pitdevDownloadLink" class="secondary" hidden/);
   assert.match(indexHtml, /id="pitdevFieldOnlyBtn" class="secondary" type="button" disabled/);
   assert.match(indexHtml, /id="pitdevFieldOnlyHint" class="pitdev-field-only-hint"/);
+  assert.match(indexHtml, /id="pitdevToeSuggestion" class="pitdev-toe-suggestion" hidden/);
   assert.match(indexHtml, /id="mvvFile" class="visually-hidden-input"/);
   assert.match(indexHtml, /id="statusBox" data-tone="idle" role="status" aria-live="polite"/);
   assert.match(indexHtml, /id="pitdevOptionsError" class="form-error" role="alert" hidden/);

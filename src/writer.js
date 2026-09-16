@@ -299,6 +299,11 @@ function addPitdevLogSheet(workbook, summary, config, metadata) {
     ['Plano', metadata.planFile],
     ['Aba do plano', metadata.planSheet],
     ['Formula', metadata.angleFormula],
+    [config.output.labels.pitdev_toe_suggestion, metadata.suggestedToeElevation],
+    [config.output.labels.pitdev_toe_suggestion_column, metadata.suggestedToeColumn],
+    [config.output.labels.pitdev_toe_suggestion_frequency, metadata.suggestedToeFrequency],
+    [config.output.labels.pitdev_toe_suggestion_valid_count, metadata.suggestedToeValidCount],
+    [config.output.labels.pitdev_toe_suggestion_tie_break, metadata.suggestedToeTieBreak],
     ['Gerado em', metadata.generatedAt],
     ['Arquivo', metadata.outputPath],
   ];
@@ -307,17 +312,17 @@ function addPitdevLogSheet(workbook, summary, config, metadata) {
     sheet.getCell(`E${index + 2}`).value = value;
   });
 
-  sheet.getCell('A9').value = config.output.labels.pitdev_field_without_plan_title;
-  sheet.getCell('D9').value = config.output.labels.pitdev_plan_without_field_title;
-  sheet.getCell('A9').fill = sectionFill;
-  sheet.getCell('D9').fill = sectionFill;
-  sheet.getCell('A9').font = { name: config.formatting.font_name, bold: true };
-  sheet.getCell('D9').font = { name: config.formatting.font_name, bold: true };
+  sheet.getCell('A13').value = config.output.labels.pitdev_field_without_plan_title;
+  sheet.getCell('D13').value = config.output.labels.pitdev_plan_without_field_title;
+  sheet.getCell('A13').fill = sectionFill;
+  sheet.getCell('D13').fill = sectionFill;
+  sheet.getCell('A13').font = { name: config.formatting.font_name, bold: true };
+  sheet.getCell('D13').font = { name: config.formatting.font_name, bold: true };
   summary.fieldWithoutPlan.forEach((id, index) => {
-    sheet.getCell(`A${index + 10}`).value = id;
+    sheet.getCell(`A${index + 14}`).value = id;
   });
   summary.planWithoutField.forEach((id, index) => {
-    sheet.getCell(`D${index + 10}`).value = id;
+    sheet.getCell(`D${index + 14}`).value = id;
   });
 
   sheet.getRow(1).eachCell((cell) => {

@@ -21,3 +21,5 @@ Portar a consolidacao MVV x RD para uma aplicacao estaticamente hospedavel no Gi
 - Cálculo documentado: `Ângulo do talude = 90 - Ângulo planejado`.
 - Exportação para `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx` com log auditável.
 - Organização independente para `LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx`, com `ID`, `Y`, `X`, `Z` na ordem do arquivo e log auditável.
+- Sugestão editável da cota do pé dos auxiliares pela moda da coluna `Z Toe` do plano de perfuração.
+- Registro da coluna, frequência e quantidade de valores válidos usados na sugestão.

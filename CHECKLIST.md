@@ -15,4 +15,7 @@
 - [ ] As colunas `ID`, `Y`, `X`, `Z` e `Profundidade` existem no RD-only.
 - [ ] O usuario consegue organizar somente o levantamento do O-PitDev sem anexar plano.
 - [ ] O workbook de levantamento possui `ID`, `Y`, `X`, `Z` na ordem original e log de origem.
+- [ ] O plano O-PitDev valida a coluna `Z Toe` e sugere sua moda como cota do pé dos auxiliares.
+- [ ] O usuario consegue editar a cota sugerida antes de consolidar.
+- [ ] O log O-PitDev registra a cota sugerida e sua origem.
 - [ ] Os testes locais passam.
