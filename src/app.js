@@ -1,5 +1,5 @@
-import { loadConfig } from './config.js?v=20260916-opitdev-toe-1';
-import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20260916-opitdev-toe-1';
+import { loadConfig } from './config.js?v=20260921-rd-export-modes-1';
+import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20260921-rd-export-modes-1';
 
 function qs(id) {
   const element = document.getElementById(id);
@@ -50,9 +50,15 @@ function renderSummary(summaryCards, languagePack, summary) {
       [languagePack.metrics.rd_raw_count, summary.rdRawCount],
       [languagePack.metrics.rd_unique_count, summary.rdUniqueCount],
       [languagePack.metrics.dual_prefix_count, summary.dualPrefixCount],
-      [languagePack.metrics.toe_elevation, `${summary.toeElevation.toFixed(3)} m`],
-      [languagePack.metrics.subdrilling, `${summary.subdrilling.toFixed(3)} m`],
     ];
+    if (summary.includesDepth) {
+      metrics.push(
+        [languagePack.metrics.toe_elevation, `${summary.toeElevation.toFixed(3)} m`],
+        [languagePack.metrics.subdrilling, `${summary.subdrilling.toFixed(3)} m`],
+      );
+    } else {
+      metrics.push([languagePack.metrics.rd_only_columns_count, summary.outputColumns.length]);
+    }
   } else {
     metrics = [
       [languagePack.metrics.mvv_count, summary.mvvCount],
@@ -207,6 +213,11 @@ export async function bootstrapApp() {
   const executedOptions = qs('executedOptions');
   const executedOptionsTitle = qs('executedOptionsTitle');
   const executedOptionsHint = qs('executedOptionsHint');
+  const executedExportModeLegend = qs('executedExportModeLegend');
+  const executedExportWithDepthLabel = qs('executedExportWithDepthLabel');
+  const executedExportWithoutDepthLabel = qs('executedExportWithoutDepthLabel');
+  const executedDepthFields = qs('executedDepthFields');
+  const columnsOnlyHint = qs('columnsOnlyHint');
   const toeElevationLabel = qs('toeElevationLabel');
   const subdrillingLegend = qs('subdrillingLegend');
   const subdrillingNoLabel = qs('subdrillingNoLabel');
@@ -292,10 +303,52 @@ export async function bootstrapApp() {
     return Number.isFinite(number) ? number : null;
   };
 
+  const rdOnlyModeInputs = [...document.querySelectorAll('input[name="rdExportMode"]')];
+  const getSelectedRdOnlyMode = () => {
+    const selected = rdOnlyModeInputs.find((input) => input.checked);
+    if (!selected) throw new Error('Selecione um formato de exportação do executado');
+    return selected.value;
+  };
+  const getRdOnlyModeConfig = (mode = getSelectedRdOnlyMode()) => {
+    const modeConfig = config.rd_only_export?.modes?.[mode];
+    if (!modeConfig) throw new Error(`Configuração inválida: modo de exportação do executado (${mode})`);
+    return modeConfig;
+  };
+  const setDefaultRdOnlyMode = () => {
+    const defaultMode = config.rd_only_export?.default_mode;
+    const input = rdOnlyModeInputs.find((candidate) => candidate.value === defaultMode);
+    if (!input) throw new Error(`Configuração inválida: modo padrão do executado (${defaultMode || 'ausente'})`);
+    input.checked = true;
+  };
+  const updateSubdrillingVisibility = () => {
+    const includesDepth = Boolean(getRdOnlyModeConfig().requires_depth_parameters);
+    const selected = document.querySelector('input[name="subdrilling"]:checked');
+    subdrillingValueField.hidden = !includesDepth || selected?.value !== 'yes';
+  };
+  const updateExecutedModeUi = () => {
+    const ui = currentUi();
+    const includesDepth = Boolean(getRdOnlyModeConfig().requires_depth_parameters);
+    executedOptionsTitle.textContent = includesDepth ? ui.executed_options_title : ui.executed_columns_only_title;
+    executedOptionsHint.textContent = includesDepth ? ui.executed_options_hint : ui.executed_columns_only_hint;
+    executedDepthFields.hidden = !includesDepth;
+    depthFormula.hidden = !includesDepth;
+    columnsOnlyHint.hidden = includesDepth;
+    toeElevationInput.required = includesDepth;
+    toeElevationInput.disabled = !includesDepth;
+    document.querySelectorAll('input[name="subdrilling"]').forEach((input) => {
+      input.disabled = !includesDepth;
+    });
+    subdrillingValueInput.disabled = !includesDepth;
+    updateSubdrillingVisibility();
+    if (!includesDepth) executedOptionsError.hidden = true;
+  };
+
   const closeExecutedOptions = () => {
     executedOptions.hidden = true;
     executedOptionsError.hidden = true;
     executedOptions.reset();
+    setDefaultRdOnlyMode();
+    updateExecutedModeUi();
   };
 
   const updateStatus = () => {
@@ -435,6 +488,10 @@ export async function bootstrapApp() {
     pitdevDownloadLink.textContent = `${ui.pitdev_download_prefix} ${state.pitdevOutputFileName}`;
     executedOptionsTitle.textContent = ui.executed_options_title;
     executedOptionsHint.textContent = ui.executed_options_hint;
+    executedExportModeLegend.textContent = ui.executed_export_mode_label;
+    executedExportWithDepthLabel.textContent = ui.executed_export_with_depth;
+    executedExportWithoutDepthLabel.textContent = ui.executed_export_without_depth;
+    columnsOnlyHint.textContent = ui.executed_columns_only_hint;
     toeElevationLabel.textContent = ui.toe_elevation_label;
     subdrillingLegend.textContent = ui.subdrilling_question;
     subdrillingNoLabel.textContent = ui.no_label;
@@ -461,6 +518,7 @@ export async function bootstrapApp() {
     pitdevOptionsSubmit.textContent = ui.pitdev_options_submit;
     pitdevOptionsError.textContent = ui.pitdev_options_invalid;
     secondaryActions.setAttribute('aria-label', ui.secondary_actions_label);
+    updateExecutedModeUi();
 
     if (state.summary && (state.phase === 'done' || state.phase === 'mvv_done' || state.phase === 'rd_done')) {
       renderSummary(summaryCards, ui, state.summary);
@@ -518,6 +576,7 @@ export async function bootstrapApp() {
     pitdevDownloadLink.hidden = true;
   };
 
+  setDefaultRdOnlyMode();
   renderLanguage();
 
   pitdevPanel?.addEventListener('toggle', renderLanguage);
@@ -668,8 +727,11 @@ export async function bootstrapApp() {
   rdOnlyBtn.addEventListener('click', async () => {
     if (!state.rd) return;
 
+    setDefaultRdOnlyMode();
     executedOptions.hidden = false;
-    toeElevationInput.focus();
+    updateExecutedModeUi();
+    const selectedModeInput = rdOnlyModeInputs.find((input) => input.checked);
+    selectedModeInput?.focus();
   });
 
   pitdevGenerateBtn.addEventListener('click', async () => {
@@ -742,9 +804,13 @@ export async function bootstrapApp() {
 
   document.querySelectorAll('input[name="subdrilling"]').forEach((input) => {
     input.addEventListener('change', () => {
-      subdrillingValueField.hidden = input.value !== 'yes' || !input.checked;
+      updateSubdrillingVisibility();
       if (input.value === 'no' && input.checked) subdrillingValueInput.value = '';
     });
+  });
+
+  rdOnlyModeInputs.forEach((input) => {
+    input.addEventListener('change', updateExecutedModeUi);
   });
 
   [cancelExecutedOptions, cancelExecutedOptionsSecondary].forEach((button) => {
@@ -756,10 +822,12 @@ export async function bootstrapApp() {
     if (!state.rd) return;
 
     const ui = currentUi();
-    const toeElevation = parseNumberInput(toeElevationInput.value);
-    const hasSubdrilling = document.querySelector('input[name="subdrilling"]:checked')?.value === 'yes';
+    const exportMode = getSelectedRdOnlyMode();
+    const includesDepth = Boolean(getRdOnlyModeConfig(exportMode).requires_depth_parameters);
+    const toeElevation = includesDepth ? parseNumberInput(toeElevationInput.value) : null;
+    const hasSubdrilling = includesDepth && document.querySelector('input[name="subdrilling"]:checked')?.value === 'yes';
     const subdrilling = hasSubdrilling ? parseNumberInput(subdrillingValueInput.value) : 0;
-    if (toeElevation === null || (hasSubdrilling && (subdrilling === null || subdrilling < 0))) {
+    if (includesDepth && (toeElevation === null || (hasSubdrilling && (subdrilling === null || subdrilling < 0)))) {
       executedOptionsError.textContent = ui.executed_options_invalid;
       executedOptionsError.hidden = false;
       return;
@@ -773,7 +841,7 @@ export async function bootstrapApp() {
       updateLog();
 
       await new Promise((resolve) => setTimeout(resolve, 0));
-      const result = await runRdOnlyPipeline({ config, rdFile: state.rd, toeElevation, subdrilling });
+      const result = await runRdOnlyPipeline({ config, rdFile: state.rd, toeElevation, subdrilling, exportMode });
 
       const blob = new Blob([result.buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

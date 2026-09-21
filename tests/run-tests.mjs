@@ -16,6 +16,15 @@ const config = {
   },
   columns: {
     mvv: ['ID', 'Type', 'Descricao', 'Diameter', 'X Collar', 'Y Collar', 'X Toe', 'Y Toe', 'Z Toe', 'Z Collar', 'Depth', 'Sub Drill', 'Azimuth', 'Dip'],
+    rd_only: ['ID', 'Y', 'X', 'Z', 'Profundidade'],
+    rd_only_without_depth: ['ID', 'Y', 'X', 'Z'],
+  },
+  rd_only_export: {
+    default_mode: 'with_depth',
+    modes: {
+      with_depth: { columns_key: 'rd_only', requires_depth_parameters: true },
+      without_depth: { columns_key: 'rd_only_without_depth', requires_depth_parameters: false },
+    },
   },
 };
 
@@ -56,6 +65,14 @@ test('buildRdOnlyRows maps treated RD rows to configured output columns', () => 
   const rdOnlyConfig = {
     columns: {
       rd_only: ['ID', 'Y', 'X', 'Z', 'Profundidade'],
+      rd_only_without_depth: ['ID', 'Y', 'X', 'Z'],
+    },
+    rd_only_export: {
+      default_mode: 'with_depth',
+      modes: {
+        with_depth: { columns_key: 'rd_only', requires_depth_parameters: true },
+        without_depth: { columns_key: 'rd_only_without_depth', requires_depth_parameters: false },
+      },
     },
   };
 
@@ -64,6 +81,22 @@ test('buildRdOnlyRows maps treated RD rows to configured output columns', () => 
     { ID: 1, Y: 11, X: 21, Z: 292, Profundidade: 23.5 },
     { ID: 2, Y: 12, X: 22, Z: 280, Profundidade: 11.5 },
   ]);
+});
+
+test('buildRdOnlyRows without depth keeps L- over E- and exports only coordinates', () => {
+  const rdRows = [
+    { holeKey: '1', TIPO_RD: 'E-', ID_RD: 'E-1', Y_RD: 40, X_RD: 50, Z_RD: 60, sourceLine: 1 },
+    { holeKey: '1', TIPO_RD: 'L-', ID_RD: 'L-1', Y_RD: 10, X_RD: 20, Z_RD: 30, sourceLine: 2 },
+    { holeKey: '2', TIPO_RD: 'E-', ID_RD: 'E-2', Y_RD: 70, X_RD: 80, Z_RD: 90, sourceLine: 3 },
+  ];
+  const { treatedRows } = deduplicateRdRows(rdRows, config);
+  const rows = buildRdOnlyRows(treatedRows, config, null, 0, 'without_depth');
+
+  assert.deepEqual(rows, [
+    { ID: 1, Y: 10, X: 20, Z: 30 },
+    { ID: 2, Y: 70, X: 80, Z: 90 },
+  ]);
+  assert.equal(Object.hasOwn(rows[0], 'Profundidade'), false);
 });
 
 test('buildConsolidatedRows falls back to MVV values', () => {
@@ -117,6 +150,8 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.languages.pt.primary_action, 'Consolidar MVV + RD');
   assert.equal(projectConfig.ui.languages.pt.mvv_only_action, 'Organizar planejado');
   assert.equal(projectConfig.ui.languages.pt.rd_only_action, 'Organizar executado');
+  assert.equal(projectConfig.ui.languages.pt.executed_export_mode_label, 'Formato de exportação');
+  assert.equal(projectConfig.ui.languages.pt.executed_export_without_depth, 'Sem profundidade (somente colunas)');
   assert.equal(projectConfig.ui.languages.pt.status_ready_mvv, 'Pronto para organizar o planejado.');
   assert.equal(projectConfig.ui.languages.pt.status_ready_rd, 'Pronto para organizar o executado.');
   assert.equal(projectConfig.ui.languages.pt.status_rd_done, 'Executado organizado.');
@@ -129,6 +164,10 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.languages.en.metrics.subdrilling, 'Subdrilling');
   assert.equal(projectConfig.ui.languages.zh.toe_elevation_label, '孔底标高（米）');
   assert.deepEqual(projectConfig.columns.rd_only, ['ID', 'Y', 'X', 'Z', 'Profundidade']);
+  assert.deepEqual(projectConfig.columns.rd_only_without_depth, ['ID', 'Y', 'X', 'Z']);
+  assert.equal(projectConfig.rd_only_export.default_mode, 'with_depth');
+  assert.equal(projectConfig.rd_only_export.modes.with_depth.requires_depth_parameters, true);
+  assert.equal(projectConfig.rd_only_export.modes.without_depth.requires_depth_parameters, false);
   assert.equal(projectConfig.output.rd_only_file_name, 'RD_EXECUTADO_ORGANIZADO.xlsx');
   assert.equal(projectConfig.output.sheets.executed, 'RD_EXECUTADO');
   assert.equal(projectConfig.output.pitdev_file_name, 'CONSOLIDACAO_PROJETO_O-PITDEV.xlsx');
@@ -438,6 +477,9 @@ test('compact interface keeps downloads hidden until a workbook exists', () => {
   assert.match(indexHtml, /id="mvvFile" class="visually-hidden-input"/);
   assert.match(indexHtml, /id="statusBox" data-tone="idle" role="status" aria-live="polite"/);
   assert.match(indexHtml, /id="pitdevOptionsError" class="form-error" role="alert" hidden/);
+  assert.match(indexHtml, /name="rdExportMode" value="with_depth" checked/);
+  assert.match(indexHtml, /name="rdExportMode" value="without_depth"/);
+  assert.match(indexHtml, /id="executedDepthFields" class="options-grid"/);
   assert.match(styles, /\[hidden\]\s*\{\s*display:\s*none !important;/);
   assert.match(styles, /\.visually-hidden-input\s*\{/);
   assert.match(styles, /\.secondary-actions__body\s*\{\s*display: grid;/);

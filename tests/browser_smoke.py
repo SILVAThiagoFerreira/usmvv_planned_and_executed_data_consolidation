@@ -51,7 +51,8 @@ def main() -> int:
     args = parse_args()
     download_path = Path(tempfile.gettempdir()) / "browser-smoke.xlsx"
     mvv_only_download_path = Path(tempfile.gettempdir()) / "browser-smoke-mvv-only.xlsx"
-    rd_only_download_path = Path(tempfile.gettempdir()) / "browser-smoke-rd-only.xlsx"
+    rd_only_without_depth_download_path = Path(tempfile.gettempdir()) / "browser-smoke-rd-only-without-depth.xlsx"
+    rd_only_with_depth_download_path = Path(tempfile.gettempdir()) / "browser-smoke-rd-only-with-depth.xlsx"
     pitdev_field_only_download_path = Path(tempfile.gettempdir()) / "browser-smoke-pitdev-field-only.xlsx"
     pitdev_download_path = Path(tempfile.gettempdir()) / "browser-smoke-pitdev.xlsx"
     rd_only_input_path = Path(tempfile.gettempdir()) / "browser-smoke-rd-only.txt"
@@ -61,9 +62,9 @@ def main() -> int:
         if line.strip()
     ]
     expected_toe, expected_frequency, expected_valid_count = read_toe_suggestion(args.pitdev_plan)
-    rd_only_input_path.write_text("L_1,,10,20,292\nE-1,,11,21,292\nL_2,,12,22,280\n", encoding="utf-8")
+    rd_only_input_path.write_text("E-1,,11,21,292\nL-1,,10,20,292\nE-2,,12,22,280\n", encoding="utf-8")
 
-    for path in [download_path, mvv_only_download_path, rd_only_download_path, pitdev_field_only_download_path, pitdev_download_path]:
+    for path in [download_path, mvv_only_download_path, rd_only_without_depth_download_path, rd_only_with_depth_download_path, pitdev_field_only_download_path, pitdev_download_path]:
         if path.exists():
             path.unlink()
 
@@ -130,14 +131,24 @@ def main() -> int:
         page.set_input_files("#rdFile", str(rd_only_input_path))
         page.wait_for_function("!document.querySelector('#rdOnlyBtn')?.disabled")
         page.get_by_role("button", name="Organizar executado").click()
+        page.locator('input[name="rdExportMode"][value="without_depth"]').check()
+        page.wait_for_function("document.querySelector('#executedDepthFields')?.hidden === true")
+        page.get_by_role("button", name="Calcular e organizar").click()
+        page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Executado organizado.')")
+        page.locator("#downloadLink").wait_for(state="visible")
+        with page.expect_download() as rd_only_without_depth_download_info:
+            page.get_by_role("link", name="Baixar RD_EXECUTADO_ORGANIZADO.xlsx").click()
+        rd_only_without_depth_download_info.value.save_as(str(rd_only_without_depth_download_path))
+
+        page.get_by_role("button", name="Organizar executado").click()
+        page.locator('input[name="rdExportMode"][value="with_depth"]').check()
         page.locator("#toeElevationInput").fill("10")
         page.locator("#confirmExecutedOptions").click()
         page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Executado organizado.')")
         page.locator("#downloadLink").wait_for(state="visible")
-        with page.expect_download() as rd_only_download_info:
+        with page.expect_download() as rd_only_with_depth_download_info:
             page.get_by_role("link", name="Baixar RD_EXECUTADO_ORGANIZADO.xlsx").click()
-        rd_only_download = rd_only_download_info.value
-        rd_only_download.save_as(str(rd_only_download_path))
+        rd_only_with_depth_download_info.value.save_as(str(rd_only_with_depth_download_path))
 
         page.locator(".pitdev-summary").click()
         page.set_input_files("#pitdevFieldFile", args.pitdev_field)
@@ -179,18 +190,30 @@ def main() -> int:
     assert headers == ["ID", "Type", "Explosivo", "Diameter", "X Collar", "Y Collar", "Z Collar", "Depth", "Sub Drill", "Azimuth", "Dip", "Tampao", "Carga"]
     mvv_only_download_path.unlink(missing_ok=True)
 
-    rd_only_wb = load_workbook(rd_only_download_path, data_only=True)
-    assert rd_only_wb.sheetnames == ["RD_EXECUTADO"]
-    rd_headers = [cell.value for cell in rd_only_wb["RD_EXECUTADO"][1]]
+    rd_only_without_depth_wb = load_workbook(rd_only_without_depth_download_path, data_only=True)
+    assert rd_only_without_depth_wb.sheetnames == ["RD_EXECUTADO"]
+    rd_without_depth_headers = [cell.value for cell in rd_only_without_depth_wb["RD_EXECUTADO"][1]]
+    assert rd_without_depth_headers == ["ID", "Y", "X", "Z"]
+    assert rd_only_without_depth_wb["RD_EXECUTADO"][2][0].value == 1
+    assert rd_only_without_depth_wb["RD_EXECUTADO"][2][1].value == 10
+    assert rd_only_without_depth_wb["RD_EXECUTADO"][2][2].value == 20
+    assert rd_only_without_depth_wb["RD_EXECUTADO"][2][3].value == 292
+    assert rd_only_without_depth_wb["RD_EXECUTADO"][3][0].value == 2
+    assert rd_only_without_depth_wb["RD_EXECUTADO"][3][1].value == 12
+    rd_only_without_depth_download_path.unlink(missing_ok=True)
+
+    rd_only_with_depth_wb = load_workbook(rd_only_with_depth_download_path, data_only=True)
+    assert rd_only_with_depth_wb.sheetnames == ["RD_EXECUTADO"]
+    rd_headers = [cell.value for cell in rd_only_with_depth_wb["RD_EXECUTADO"][1]]
     assert rd_headers == ["ID", "Y", "X", "Z", "Profundidade"]
-    assert rd_only_wb["RD_EXECUTADO"][2][0].value == 1
-    assert rd_only_wb["RD_EXECUTADO"][2][1].value == 11
-    assert rd_only_wb["RD_EXECUTADO"][2][2].value == 21
-    assert rd_only_wb["RD_EXECUTADO"][2][3].value == 292
-    assert rd_only_wb["RD_EXECUTADO"][2][4].value == 282
-    assert rd_only_wb["RD_EXECUTADO"][3][0].value == 2
-    assert rd_only_wb["RD_EXECUTADO"][3][4].value == 270
-    rd_only_download_path.unlink(missing_ok=True)
+    assert rd_only_with_depth_wb["RD_EXECUTADO"][2][0].value == 1
+    assert rd_only_with_depth_wb["RD_EXECUTADO"][2][1].value == 10
+    assert rd_only_with_depth_wb["RD_EXECUTADO"][2][2].value == 20
+    assert rd_only_with_depth_wb["RD_EXECUTADO"][2][3].value == 292
+    assert rd_only_with_depth_wb["RD_EXECUTADO"][2][4].value == 282
+    assert rd_only_with_depth_wb["RD_EXECUTADO"][3][0].value == 2
+    assert rd_only_with_depth_wb["RD_EXECUTADO"][3][4].value == 270
+    rd_only_with_depth_download_path.unlink(missing_ok=True)
     pitdev_wb = load_workbook(pitdev_download_path, data_only=True)
     assert pitdev_wb.sheetnames == ["CONSOLIDACAO_O-PITDEV", "LOG_O-PITDEV"]
     pitdev_ws = pitdev_wb["CONSOLIDACAO_O-PITDEV"]

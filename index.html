@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260916-opitdev-toe-1" />
+    <link rel="stylesheet" href="./styles.css?v=20260921-rd-export-modes-1" />
     <link rel="icon" href="./assets/openblast-favicon-white.svg" type="image/svg+xml" />
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
   </head>
@@ -85,7 +85,12 @@
               <button id="cancelExecutedOptions" class="options-close" type="button" aria-label="Fechar">×</button>
             </div>
             <p id="executedOptionsHint">A cota de topo vem do arquivo REALIZADO.txt.</p>
-            <div class="options-grid">
+            <fieldset id="executedExportModeField" class="field choice-field">
+              <legend id="executedExportModeLegend">Formato de exportação</legend>
+              <label><input type="radio" name="rdExportMode" value="with_depth" checked /> <span id="executedExportWithDepthLabel">Com profundidade</span></label>
+              <label><input type="radio" name="rdExportMode" value="without_depth" /> <span id="executedExportWithoutDepthLabel">Sem profundidade (somente colunas)</span></label>
+            </fieldset>
+            <div id="executedDepthFields" class="options-grid">
               <label class="field">
                 <span id="toeElevationLabel">Cota do pé (m)</span>
                 <input id="toeElevationInput" type="number" step="any" required />
@@ -101,6 +106,7 @@
               </label>
             </div>
             <p id="depthFormula" class="formula">Profundidade = cota de topo − cota do pé + subfuração</p>
+            <p id="columnsOnlyHint" class="formula" hidden>A saída terá somente ID, Y, X e Z; a profundidade não será calculada.</p>
             <div class="options-actions">
               <button id="cancelExecutedOptionsSecondary" class="secondary" type="button">Cancelar</button>
               <button id="confirmExecutedOptions" class="primary" type="submit">Calcular e organizar</button>
@@ -199,6 +205,6 @@
       </details>
     </div>
 
-    <script type="module" src="./main.js?v=20260916-opitdev-toe-1"></script>
+    <script type="module" src="./main.js?v=20260921-rd-export-modes-1"></script>
   </body>
 </html>

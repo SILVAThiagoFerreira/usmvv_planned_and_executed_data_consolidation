@@ -1,4 +1,4 @@
-import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js?v=20260916-opitdev-toe-1';
+import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js?v=20260921-rd-export-modes-1';
 
 export function validateMvvSource(rawMvv, config) {
   const headers = rawMvv.headers;

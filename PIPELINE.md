@@ -24,12 +24,13 @@
 ## Sequencia RD-only
 
 1. O usuario anexa somente `REALIZADO.txt`.
-2. `src/app.js` solicita a cota do pé e pergunta se haverá subfuração.
-3. `src/reader.js` le a RD.
-4. `src/validator.js` valida a estrutura da RD.
-5. `src/processor.js` deduplica a RD, normaliza `ID` para numero e calcula `Z - cota do pé + subfuração` em cada linha.
-6. `src/writer.js` gera `RD_EXECUTADO_ORGANIZADO.xlsx` com uma unica aba.
-7. `src/app.js` libera o download e mostra o resumo.
+2. `src/app.js` permite escolher entre exportar com profundidade ou sem profundidade.
+3. No modo com profundidade, `src/app.js` solicita a cota do pé e pergunta se haverá subfuração; no modo sem profundidade, esses parâmetros ficam ocultos.
+4. `src/reader.js` le a RD.
+5. `src/validator.js` valida a estrutura da RD.
+6. `src/processor.js` deduplica a RD, mantendo `L-` sobre `E-`, normaliza `ID` para numero e, somente no modo com profundidade, calcula `Z - cota do pé + subfuração`.
+7. `src/writer.js` gera `RD_EXECUTADO_ORGANIZADO.xlsx` com uma unica aba e as colunas configuradas para o modo escolhido.
+8. `src/app.js` libera o download e mostra o resumo.
 
 Quando há IDs somente no levantamento, `app.js` solicita a cota do pé e a subfuração; `processor.js` calcula a profundidade somente dessas linhas auxiliares e preserva os valores do plano nas linhas correspondentes.
 

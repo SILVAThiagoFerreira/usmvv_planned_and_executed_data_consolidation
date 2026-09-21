@@ -97,11 +97,11 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 ### RD-only
 
 - Entrada: somente o arquivo executado `.txt`.
-- O usuario informa a cota do pé em metros ao acionar o fluxo.
-- O usuario informa se haverá subfuração; quando sim, informa seu valor em metros.
+- O usuario escolhe o formato de exportação `Com profundidade` ou `Sem profundidade (somente colunas)`.
+- No modo com profundidade, informa a cota do pé em metros e, quando houver, a subfuração; a profundidade é calculada para cada registro.
+- No modo sem profundidade, nenhum parâmetro de cota é solicitado e a saída contém somente `ID`, `Y`, `X` e `Z`.
 - Saida: workbook `RD_EXECUTADO_ORGANIZADO.xlsx`.
 - Aba: `RD_EXECUTADO`.
-- Colunas: `ID`, `Y`, `X`, `Z`, `Profundidade`.
 - `ID` no RD-only usa somente o numero do furo, sem letras nem tracos.
 
 ## Regras de processamento
@@ -115,7 +115,9 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - Sem RD, `PROFUNDIDADE_FINAL` usa `Depth` da MVV.
 - `PROFUNDIDADE_FINAL` e formatada com 2 casas decimais no workbook final.
 - No fluxo RD-only, `Profundidade` e calculada por `Z (cota de topo) - cota do pé + subfuração` para cada linha.
+- No fluxo RD-only sem profundidade, a organização mantém somente `ID`, `Y`, `X` e `Z`, sem calcular ou exportar `Profundidade`.
 - No fluxo RD-only, `ID` usa o numero do furo sem prefixo e sem caracteres nao numericos.
+- Para números de furo duplicados, `L-` (levantado) tem prioridade; `E-` (executado) só permanece quando não existe um registro `L-` para o mesmo número.
 
 ## Validacao
 
@@ -140,7 +142,7 @@ IDs do levantamento ausentes no plano são furos auxiliares. A interface solicit
 - Aba `CONSOLIDADO_FINAL`.
 - Aba `RD_TRATADA`.
 - Aba `LOG_VALIDACAO`.
-- Fluxo RD-only: uma unica aba `RD_EXECUTADO` com `ID`, `Y`, `X`, `Z`, `Profundidade` e sem log adicional.
+- Fluxo RD-only: uma unica aba `RD_EXECUTADO`, com `ID`, `Y`, `X`, `Z` e opcionalmente `Profundidade` conforme o formato escolhido, sem log adicional.
 
 ## Consolidação de Projeto para O-PitDev
 

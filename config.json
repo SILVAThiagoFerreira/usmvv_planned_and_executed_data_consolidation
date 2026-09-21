@@ -58,6 +58,12 @@
       "Z",
       "Profundidade"
     ],
+    "rd_only_without_depth": [
+      "ID",
+      "Y",
+      "X",
+      "Z"
+    ],
     "rd_treated": [
       "ID_RD",
       "Y_RD",
@@ -156,6 +162,19 @@
       "L_"
     ],
     "prefer_first_within_same_prefix": true
+  },
+  "rd_only_export": {
+    "default_mode": "with_depth",
+    "modes": {
+      "with_depth": {
+        "columns_key": "rd_only",
+        "requires_depth_parameters": true
+      },
+      "without_depth": {
+        "columns_key": "rd_only_without_depth",
+        "requires_depth_parameters": false
+      }
+    }
   },
   "validation": {
     "allow_empty_rows": true,
@@ -373,8 +392,13 @@
         "primary_action": "Consolidar MVV + RD",
         "mvv_only_action": "Organizar planejado",
         "rd_only_action": "Organizar executado",
+        "executed_export_mode_label": "Formato de exportação",
+        "executed_export_with_depth": "Com profundidade",
+        "executed_export_without_depth": "Sem profundidade (somente colunas)",
         "executed_options_title": "Dados para calcular a profundidade",
         "executed_options_hint": "A cota de topo vem do arquivo REALIZADO.txt.",
+        "executed_columns_only_title": "Organizar sem profundidade",
+        "executed_columns_only_hint": "A saída terá somente ID, Y, X e Z; a profundidade não será calculada.",
         "toe_elevation_label": "Cota do pé (m)",
         "subdrilling_question": "Terá subfuração?",
         "subdrilling_value_label": "Subfuração (m)",
@@ -416,7 +440,8 @@
           "dual_prefix_count": "Prefixos duplicados",
           "mvv_plan_columns_count": "Colunas",
           "toe_elevation": "Cota do pé",
-          "subdrilling": "Subfuração"
+          "subdrilling": "Subfuração",
+          "rd_only_columns_count": "Colunas exportadas"
         }
       },
       "en": {
@@ -479,8 +504,13 @@
         "primary_action": "Consolidate MVV + RD",
         "mvv_only_action": "Organize planning",
         "rd_only_action": "Organize executed",
+        "executed_export_mode_label": "Export format",
+        "executed_export_with_depth": "With depth",
+        "executed_export_without_depth": "Without depth (columns only)",
         "executed_options_title": "Depth calculation data",
         "executed_options_hint": "The top elevation comes from REALIZADO.txt.",
+        "executed_columns_only_title": "Organize without depth",
+        "executed_columns_only_hint": "The output will contain only ID, Y, X and Z; depth will not be calculated.",
         "toe_elevation_label": "Toe elevation (m)",
         "subdrilling_question": "Will there be subdrilling?",
         "subdrilling_value_label": "Subdrilling (m)",
@@ -522,7 +552,8 @@
           "dual_prefix_count": "Duplicate prefixes",
           "mvv_plan_columns_count": "Columns",
           "toe_elevation": "Toe elevation",
-          "subdrilling": "Subdrilling"
+          "subdrilling": "Subdrilling",
+          "rd_only_columns_count": "Exported columns"
         }
       },
       "zh": {
@@ -585,8 +616,13 @@
         "primary_action": "整合 MVV + RD",
         "mvv_only_action": "整理计划",
         "rd_only_action": "整理已执行",
+        "executed_export_mode_label": "导出格式",
+        "executed_export_with_depth": "包含深度",
+        "executed_export_without_depth": "不含深度（仅列）",
         "executed_options_title": "深度计算数据",
         "executed_options_hint": "顶部标高来自 REALIZADO.txt。",
+        "executed_columns_only_title": "不计算深度整理",
+        "executed_columns_only_hint": "输出仅包含 ID、Y、X 和 Z；不会计算深度。",
         "toe_elevation_label": "孔底标高（米）",
         "subdrilling_question": "是否有超深？",
         "subdrilling_value_label": "超深（米）",
@@ -628,7 +664,8 @@
           "dual_prefix_count": "重复前缀",
           "mvv_plan_columns_count": "列",
           "toe_elevation": "孔底标高",
-          "subdrilling": "超深"
+          "subdrilling": "超深",
+          "rd_only_columns_count": "导出列"
         }
       }
     }

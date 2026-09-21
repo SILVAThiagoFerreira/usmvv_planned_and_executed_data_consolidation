@@ -244,8 +244,11 @@ export async function createMvvPlanWorkbookBuffer({ config, mvvPlanRows }) {
   return workbook.xlsx.writeBuffer();
 }
 
-export async function createRdOnlyWorkbookBuffer({ config, rdOnlyRows }) {
+export async function createRdOnlyWorkbookBuffer({ config, rdOnlyRows, columns }) {
   const ExcelJS = getExcelJS();
+  if (!Array.isArray(columns) || columns.length < 4) {
+    throw new Error('Colunas inválidas para a saída do executado');
+  }
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'MVV RD GitHub Pages';
   workbook.lastModifiedBy = 'MVV RD GitHub Pages';
@@ -255,7 +258,7 @@ export async function createRdOnlyWorkbookBuffer({ config, rdOnlyRows }) {
   addTableSheet(
     workbook,
     config.output.sheets.executed,
-    config.columns.rd_only,
+    columns,
     rdOnlyRows,
     config,
   );

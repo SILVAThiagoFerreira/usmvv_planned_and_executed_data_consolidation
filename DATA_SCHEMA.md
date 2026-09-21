@@ -41,7 +41,7 @@
 
 ## RD executado organizado
 
-Saida gerada quando somente o executado e processado.
+Saida gerada quando somente o executado e processado. O usuario escolhe entre os dois formatos abaixo.
 
 | Coluna | Tipo | Obrigatorio | Significado |
 | --- | --- | --- | --- |
@@ -49,7 +49,24 @@ Saida gerada quando somente o executado e processado.
 | Y | numero | sim | Coordenada Y |
 | X | numero | sim | Coordenada X |
 | Z | numero | sim | Coordenada Z |
-| Profundidade | numero | sim | Profundidade informada pelo usuario, aplicada a todos os furos |
+| Profundidade | numero | somente no modo com profundidade | `Z` de cada registro menos a cota do pé, mais a subfuração |
+
+### RD executado sem profundidade
+
+No modo `Sem profundidade (somente colunas)`, a aba `RD_EXECUTADO` contém somente:
+
+| Coluna | Tipo | Obrigatorio | Significado |
+| --- | --- | --- | --- |
+| ID | numero | sim | ID numerico do furo sem prefixo |
+| Y | numero | sim | Coordenada Y |
+| X | numero | sim | Coordenada X |
+| Z | numero | sim | Coordenada Z |
+
+Nesse modo, a cota do pé e a subfuração não são lidas nem usadas.
+
+### Deduplicação da RD-only
+
+Antes de qualquer formato de exportação, os registros são reduzidos a um por número de furo. Quando existem `L-` e `E-` para o mesmo número, permanece o `L-`; o `E-` só é exportado quando não há levantamento correspondente. Registros repetidos do mesmo prefixo seguem a regra configurada de manter o primeiro registro válido.
 
 ## Consolidado final
 

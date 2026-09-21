@@ -12,7 +12,7 @@ Tambem permite anexar somente o arquivo executado para baixar `RD_EXECUTADO_ORGA
 4. Baixe o workbook quando o link aparecer; o log tecnico fica disponivel no painel `Resumo`.
 
 Para organizar somente o dado planejado, anexe `PLANEJADO.xlsx`, abra `Outras saídas`, clique em `Organizar planejado` e baixe o workbook gerado.
-Para organizar somente o executado, anexe `REALIZADO.txt`, abra `Outras saídas` e clique em `Organizar executado`. Informe a cota do pé; a profundidade será calculada pela diferença entre a cota de topo do arquivo e a cota do pé. Se houver subfuração, informe também o valor, que será somado ao resultado.
+Para organizar somente o executado, anexe `REALIZADO.txt`, abra `Outras saídas` e clique em `Organizar executado`. Escolha `Com profundidade` para informar a cota do pé e, se necessário, a subfuração; a profundidade será calculada pela diferença entre a cota de topo do arquivo, a cota do pé e a subfuração. Escolha `Sem profundidade (somente colunas)` para gerar apenas `ID`, `Y`, `X` e `Z`, sem solicitar parâmetros de profundidade. Quando o mesmo número de furo aparecer mais de uma vez, o registro `L-` (levantado) permanece; o registro `E-` (executado) só é mantido quando não existe levantamento correspondente.
 
 Para consolidar um projeto para O-PitDev, abra o quadro abaixo do fluxo principal. Anexe o levantamento de campo em `.csv` ou `.txt` e o plano planejado em `.xlsx`. O levantamento fornece `ID`, `Y`, `X` e `Z`; o plano fornece `Diâmetro`, `Azimute`, `Ângulo planejado` (a coluna `Dip` do arquivo atual), `Profundidade` (a coluna `Depth`) e `Z Toe`. Quando existirem furos auxiliares, a cota do pé já aparece sugerida com o valor mais frequente de `Z Toe`; o usuário pode alterar a sugestão antes de consolidar. A coluna `Ângulo do talude` é calculada por `90 - Ângulo planejado`. O download gera `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx` com a tabela consolidada e o log de correspondências.
 Para organizar somente o levantado para o O-PitDev, anexe apenas o `.csv` ou `.txt` no mesmo quadro e clique em `Organizar somente o levantado`. O download gera `LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx`, com `ID`, `Y`, `X` e `Z` na ordem do arquivo, além de um log de origem. O plano não é solicitado, e o quinto campo vazio do exportador Enaex não é exportado.
@@ -30,6 +30,8 @@ Para organizar somente o levantado para o O-PitDev, anexe apenas o `.csv` ou `.t
 - O-PitDev inicia recolhido para manter o fluxo principal limpo e pode ser aberto quando necessario.
 - O-PitDev oferece consolidação com plano e organização independente somente do levantamento.
 - O-PitDev sugere automaticamente a cota do pé pela moda da coluna `Z Toe` do plano e permite editar o valor antes da consolidação.
+- A organização do executado permite exportar com profundidade ou somente com as colunas `ID`, `Y`, `X` e `Z`.
+- A deduplicação do executado mantém `L-` sobre `E-` para o mesmo número de furo e conserva `E-` apenas quando não há levantamento correspondente.
 - Links de download aparecem somente depois de uma geracao valida.
 - Workbook final com `CONSOLIDADO_FINAL`, `RD_TRATADA` e `LOG_VALIDACAO`.
 - Exportacao MVV-only com a aba `PLANO_MVV` e somente as colunas configuradas.

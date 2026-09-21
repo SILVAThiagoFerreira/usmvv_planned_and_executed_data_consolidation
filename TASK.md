@@ -8,6 +8,8 @@ Portar a consolidacao MVV x RD para uma aplicacao estaticamente hospedavel no Gi
 - Processamento client-side.
 - Download do workbook final.
 - Validacao e log visiveis ao usuario.
+- No fluxo de executado, escolha de exportação com profundidade ou somente com `ID`, `Y`, `X` e `Z`.
+- Deduplicação do executado com prioridade para o `L-` levantado sobre o `E-` executado no mesmo número de furo.
 - Interface compacta: uma unica marca, ação principal clara, saídas isoladas recolhidas, resumo sob demanda, download oculto ate a geracao e log tecnico expansivel.
 - O-PitDev inicia recolhido, mas mantem upload, processamento, status, resumo e download funcionais.
 - O-PitDev permite organizar somente o levantamento, sem exigir plano planejado.

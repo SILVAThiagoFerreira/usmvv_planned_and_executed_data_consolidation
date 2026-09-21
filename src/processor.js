@@ -1,4 +1,4 @@
-import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js?v=20260916-opitdev-toe-1';
+import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js?v=20260921-rd-export-modes-1';
 
 export function buildMvvRows(rawMvv, config, validation) {
   const indexMap = validation.indexMap;
@@ -112,18 +112,47 @@ export function deduplicateRdRows(rdRows, config) {
   return { treatedRows, selected, dualPrefixCount };
 }
 
-export function buildRdOnlyRows(rdTreatedRows, config, toeElevation, subdrilling = 0) {
+export function resolveRdOnlyExportMode(config, exportMode = null) {
+  const exportConfig = config?.rd_only_export;
+  if (!exportConfig || !exportConfig.default_mode || !exportConfig.modes) {
+    throw new Error('Configuração inválida: modos de exportação do executado');
+  }
+
+  const selectedMode = exportMode ?? exportConfig.default_mode;
+  const modeConfig = exportConfig.modes[selectedMode];
+  if (!modeConfig || typeof modeConfig.columns_key !== 'string') {
+    throw new Error(`Configuração inválida: modo de exportação do executado (${selectedMode})`);
+  }
+
+  const columns = config.columns?.[modeConfig.columns_key];
+  if (!Array.isArray(columns) || columns.length < 4) {
+    throw new Error(`Configuração inválida: colunas do modo de exportação do executado (${selectedMode})`);
+  }
+
+  if (Boolean(modeConfig.requires_depth_parameters) && columns.length < 5) {
+    throw new Error(`Configuração inválida: o modo ${selectedMode} exige a coluna de profundidade`);
+  }
+
+  return {
+    key: selectedMode,
+    ...modeConfig,
+    columns,
+  };
+}
+
+export function buildRdOnlyRows(rdTreatedRows, config, toeElevation, subdrilling = 0, exportMode = null) {
   if (!rdTreatedRows.length) {
     throw new Error('RD has no usable rows after validation');
   }
 
+  const modeConfig = resolveRdOnlyExportMode(config, exportMode);
+  const [idColumn, yColumn, xColumn, zColumn, depthColumn] = modeConfig.columns;
+  const includesDepth = Boolean(modeConfig.requires_depth_parameters);
   const toe = Number(toeElevation);
   const sub = Number(subdrilling);
-  if (!Number.isFinite(toe) || !Number.isFinite(sub) || sub < 0) {
+  if (includesDepth && (!Number.isFinite(toe) || !Number.isFinite(sub) || sub < 0)) {
     throw new Error('Invalid toe elevation or subdrilling');
   }
-
-  const [idColumn, yColumn, xColumn, zColumn, depthColumn] = config.columns.rd_only;
 
   return rdTreatedRows.map((row) => {
     const holeId = Number(row.holeKey);
@@ -131,18 +160,22 @@ export function buildRdOnlyRows(rdTreatedRows, config, toeElevation, subdrilling
       throw new Error(`RD line ${row.sourceLine ?? '?'}: invalid numeric hole ID`);
     }
 
-    const calculatedDepth = Number((row.Z_RD - toe + sub).toFixed(3));
-    if (calculatedDepth <= 0) {
-      throw new Error(`RD line ${row.sourceLine ?? '?'}: calculated depth must be greater than zero`);
-    }
-
-    return {
+    const outputRow = {
       [idColumn]: holeId,
       [yColumn]: row.Y_RD,
       [xColumn]: row.X_RD,
       [zColumn]: row.Z_RD,
-      [depthColumn]: calculatedDepth,
     };
+
+    if (includesDepth) {
+      const calculatedDepth = Number((row.Z_RD - toe + sub).toFixed(3));
+      if (calculatedDepth <= 0) {
+        throw new Error(`RD line ${row.sourceLine ?? '?'}: calculated depth must be greater than zero`);
+      }
+      outputRow[depthColumn] = calculatedDepth;
+    }
+
+    return outputRow;
   });
 }
 

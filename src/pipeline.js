@@ -1,7 +1,7 @@
-import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js?v=20260916-opitdev-toe-1';
-import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js?v=20260916-opitdev-toe-1';
-import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows, suggestPitdevToeElevation } from './processor.js?v=20260916-opitdev-toe-1';
-import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js?v=20260916-opitdev-toe-1';
+import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js?v=20260921-rd-export-modes-1';
+import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js?v=20260921-rd-export-modes-1';
+import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows, resolveRdOnlyExportMode, suggestPitdevToeElevation } from './processor.js?v=20260921-rd-export-modes-1';
+import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js?v=20260921-rd-export-modes-1';
 
 export async function runPipeline({ config, mvvFile, rdFile }) {
   const rawMvv = await readMvvFile(mvvFile, config);
@@ -49,10 +49,12 @@ export async function runMvvPlanPipeline({ config, mvvFile }) {
   };
 }
 
-export async function runRdOnlyPipeline({ config, rdFile, toeElevation, subdrilling = 0 }) {
+export async function runRdOnlyPipeline({ config, rdFile, toeElevation, subdrilling = 0, exportMode = null }) {
+  const modeConfig = resolveRdOnlyExportMode(config, exportMode);
+  const includesDepth = Boolean(modeConfig.requires_depth_parameters);
   const toe = Number(toeElevation);
   const sub = Number(subdrilling);
-  if (!Number.isFinite(toe) || !Number.isFinite(sub) || sub < 0) {
+  if (includesDepth && (!Number.isFinite(toe) || !Number.isFinite(sub) || sub < 0)) {
     throw new Error('Invalid toe elevation or subdrilling');
   }
 
@@ -60,20 +62,21 @@ export async function runRdOnlyPipeline({ config, rdFile, toeElevation, subdrill
   const rdValidation = validateRdSource(rawRd, config);
   const rdRows = buildRdRows(rawRd, config);
   const { treatedRows, dualPrefixCount } = deduplicateRdRows(rdRows, config);
-  const rdOnlyRows = buildRdOnlyRows(treatedRows, config, toe, sub);
+  const rdOnlyRows = buildRdOnlyRows(treatedRows, config, toe, sub, modeConfig.key);
   const summary = {
     mode: 'rd_only',
+    exportMode: modeConfig.key,
+    includesDepth,
     rdRawCount: rdValidation.rowCount,
     rdUniqueCount: treatedRows.length,
     dualPrefixCount,
     discardedRdCount: rdRows.length - treatedRows.length,
-    toeElevation: toe,
-    subdrilling: sub,
-    outputColumns: config.columns.rd_only,
+    ...(includesDepth ? { toeElevation: toe, subdrilling: sub } : {}),
+    outputColumns: modeConfig.columns,
     sheetName: config.output.sheets.executed,
   };
 
-  const buffer = await createRdOnlyWorkbookBuffer({ config, rdOnlyRows });
+  const buffer = await createRdOnlyWorkbookBuffer({ config, rdOnlyRows, columns: modeConfig.columns });
 
   return { buffer, summary };
 }
