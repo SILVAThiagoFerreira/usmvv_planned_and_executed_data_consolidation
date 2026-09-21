@@ -13,6 +13,7 @@ Portar a consolidacao MVV x RD para uma aplicacao estaticamente hospedavel no Gi
 - Interface compacta: uma unica marca, ação principal clara, saídas isoladas recolhidas, resumo sob demanda, download oculto ate a geracao e log tecnico expansivel.
 - O-PitDev inicia recolhido, mas mantem upload, processamento, status, resumo e download funcionais.
 - O-PitDev permite organizar somente o levantamento, sem exigir plano planejado.
+- A organização do planejado identifica o perfil do workbook antes de processar; `REG43` sem o contrato MVV completo deve ser rejeitado com as colunas ausentes e sem gerar XLSX incompleto.
 
 ## Entrega O-PitDev
 

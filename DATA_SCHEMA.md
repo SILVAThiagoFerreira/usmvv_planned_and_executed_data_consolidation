@@ -19,6 +19,12 @@
 | Azimuth | numero | sim | Azimute |
 | Dip | numero | sim | Dip. Valores vazios e `-` sao normalizados para `0`; outros textos nao numericos falham na validacao. |
 
+### Perfil legado nao utilizável como MVV
+
+O perfil `REG43` é reconhecido quando o workbook possui as abas `PROJETO PERFURAÇÃO`, `LEV R&D` e `MEDIÇÃO` e a aba de projeto apresenta os cabeçalhos `ID`, `Diametro`, `X Toe`, `Y Toe` e `Z Toe`. Esse layout não é convertido automaticamente para MVV: ele não fornece, no contrato atual, todas as colunas planejadas necessárias, como `Depth`, `Azimuth`, `Dip`, `Sub Drill`, `X Collar`, `Y Collar`, `Z Collar`, `Explosivo`, `Tampao` e `Carga`.
+
+Quando o perfil é detectado no fluxo MVV ou MVV-only, a validação encerra o processamento e informa as colunas ausentes. Nenhum valor é derivado da aba `LEV R&D` ou da aba `MEDIÇÃO` para completar o plano, pois isso misturaria levantamento/medição com dados planejados.
+
 ## RD raw
 
 | Campo | Tipo | Obrigatorio | Significado |

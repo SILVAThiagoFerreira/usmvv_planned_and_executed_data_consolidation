@@ -1,5 +1,5 @@
-import { loadConfig } from './config.js?v=20260921-rd-export-modes-1';
-import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20260921-rd-export-modes-1';
+import { loadConfig } from './config.js?v=20260921-source-profile-1';
+import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20260921-source-profile-1';
 
 function qs(id) {
   const element = document.getElementById(id);
@@ -17,6 +17,19 @@ function setStatus(statusBox, statusText, tone, text) {
 function getLanguagePack(config, languageCode) {
   const languages = config.ui.languages || {};
   return languages[languageCode] || languages[config.ui.default_language] || languages.pt;
+}
+
+function formatPipelineError(error, languagePack) {
+  const fallback = error instanceof Error ? error.message : String(error);
+  const template = error?.code ? languagePack.errors?.[error.code] : null;
+  if (!template) return fallback;
+
+  const details = error.details || {};
+  return template.replace(/\{(\w+)\}/g, (_, key) => {
+    const value = details[key];
+    if (Array.isArray(value)) return value.join(', ');
+    return value === undefined || value === null ? '' : String(value);
+  });
 }
 
 function formatNumberForUi(value) {
@@ -634,7 +647,7 @@ export async function bootstrapApp() {
       state.pitdevErrorMessage = null;
       renderLanguage();
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = formatPipelineError(error, currentUi());
       state.pitdevPhase = 'error';
       state.pitdevErrorMessage = message;
       state.pitdevSummary = null;
@@ -670,7 +683,7 @@ export async function bootstrapApp() {
       state.errorMessage = null;
       renderLanguage();
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = formatPipelineError(error, currentUi());
       state.phase = 'error';
       state.errorMessage = message;
       state.summary = null;
@@ -709,7 +722,7 @@ export async function bootstrapApp() {
       state.errorMessage = null;
       renderLanguage();
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = formatPipelineError(error, currentUi());
       state.phase = 'error';
       state.errorMessage = message;
       state.summary = null;
@@ -776,7 +789,7 @@ export async function bootstrapApp() {
       renderLanguage();
       pitdevDownloadLink.hidden = false;
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = formatPipelineError(error, currentUi());
       state.pitdevPhase = 'error';
       state.pitdevErrorMessage = message;
       state.pitdevSummary = null;
@@ -855,7 +868,7 @@ export async function bootstrapApp() {
       state.errorMessage = null;
       renderLanguage();
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = formatPipelineError(error, currentUi());
       state.phase = 'error';
       state.errorMessage = message;
       state.summary = null;

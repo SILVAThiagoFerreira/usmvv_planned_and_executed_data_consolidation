@@ -7,19 +7,22 @@
 3. `src/config.js` carrega `config.json`.
 4. O usuario anexa `PLANEJADO.xlsx` e `REALIZADO.txt`.
 5. `src/reader.js` le os arquivos.
-6. `src/validator.js` valida estrutura e tipos; em `Dip`, vazio ou `-` e aceito como `0`.
-7. `src/processor.js` normaliza, deduplica e consolida, preservando `Dip = 0` quando a origem veio vazia ou com `-`.
-8. `src/writer.js` monta o workbook final.
-9. `src/app.js` dispara o download, mostra o resumo somente após uma saída ou erro e controla os estados visuais dos detalhes.
+6. `src/reader.js` registra as abas disponíveis; `src/validator.js` identifica perfis legados configurados antes de validar colunas e tipos.
+7. Em `Dip`, vazio ou `-` e aceito como `0`; um perfil incompatível, como `REG43` sem o contrato MVV completo, interrompe o fluxo e não permite saída parcial.
+8. `src/processor.js` normaliza, deduplica e consolida, preservando `Dip = 0` quando a origem veio vazia ou com `-`.
+9. `src/writer.js` monta o workbook final somente após a validação.
+10. `src/app.js` dispara o download, mostra o resumo somente após uma saída ou erro e controla os estados visuais dos detalhes.
 
 ## Sequencia MVV-only
 
 1. O usuario anexa somente `PLANEJADO.xlsx`.
 2. `src/reader.js` le a aba configurada da MVV.
-3. `src/validator.js` valida as colunas exigidas para `PLANO_MVV`; em `Dip`, vazio ou `-` e aceito como `0`.
-4. `src/processor.js` extrai somente as colunas configuradas para o plano e normaliza `Dip` vazio ou `-` para `0`.
-5. `src/writer.js` gera `MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx`.
-6. `src/app.js` libera o download e mostra o resumo.
+3. `src/reader.js` registra o nome das abas e `src/validator.js` compara o workbook com os perfis incompatíveis configurados.
+4. Se um perfil legado for reconhecido, `src/validator.js` informa o perfil e as colunas ausentes; `src/processor.js` e `src/writer.js` não são chamados.
+5. Para um MVV válido, `src/validator.js` valida as colunas exigidas para `PLANO_MVV`; em `Dip`, vazio ou `-` e aceito como `0`.
+6. `src/processor.js` extrai somente as colunas configuradas para o plano e normaliza `Dip` vazio ou `-` para `0`.
+7. `src/writer.js` gera `MVV_PLANO_PERFURACAO_ORGANIZADO.xlsx`.
+8. `src/app.js` libera o download e mostra o resumo.
 
 ## Sequencia RD-only
 

@@ -38,6 +38,9 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - O workbook final e gerado como download.
 - A interface tambem permite anexar somente o arquivo planejado e gerar um plano planejado organizado, sem exigir realizado.
 - A interface tambem permite anexar somente o arquivo executado e gerar um workbook com `ID`, `Y`, `X`, `Z` e `Profundidade`.
+- A planilha `.xlsx` deve ser identificada pelo contrato de abas e cabeçalhos antes da organização; a extensão do arquivo, sozinha, nao determina que ele seja um `PLANEJADO.xlsx` MVV.
+- Perfis legados reconhecidos em `config.json`, como `REG43`, devem ser bloqueados quando nao contiverem o conjunto completo de colunas do plano. A mensagem deve informar o perfil, as colunas ausentes e que nenhum XLSX foi gerado.
+- Nenhum campo ausente de um perfil incompatível pode ser preenchido por cálculo, outra aba ou valor padrão sem um mapeamento de fonte documentado.
 
 ## Entradas
 
@@ -123,6 +126,8 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 
 - MVV deve conter todas as colunas requeridas.
 - Para o plano MVV organizado, a MVV deve conter todas as colunas da saida `PLANO_MVV`.
+- Antes da validação das linhas, `validator.js` deve comparar o conjunto de abas e cabeçalhos com os perfis incompatíveis configurados. O perfil `REG43` é identificado pelas abas `PROJETO PERFURAÇÃO`, `LEV R&D`, `MEDIÇÃO` e pelos cabeçalhos `ID`, `Diametro`, `X Toe`, `Y Toe`, `Z Toe`.
+- Um perfil incompatível interrompe o fluxo antes de `processor.js` e `writer.js`; o link de download permanece oculto.
 - MVV deve ter as colunas numericas validas para o calculo.
 - Em `Dip`, valores vazios ou exatamente `-` sao aceitos e normalizados para `0`; outros textos nao numericos continuam invalidos.
 - RD deve ter exatamente 5 campos.

@@ -17,10 +17,30 @@
       "accept": ".xlsx"
     }
   },
-  "input": {
-    "mvv_sheet_name": "PROJETO PERFURAÇÃO",
-    "mvv_header_row": 1,
-    "rd_delimiter": ",",
+    "input": {
+      "mvv_sheet_name": "PROJETO PERFURAÇÃO",
+      "mvv_header_row": 1,
+      "workbook_profiles": {
+        "unsupported": [
+          {
+            "key": "reg43",
+            "label": "REG43",
+            "required_sheet_names": [
+              "PROJETO PERFURAÇÃO",
+              "LEV R&D",
+              "MEDIÇÃO"
+            ],
+            "required_headers": [
+              "ID",
+              "Diametro",
+              "X Toe",
+              "Y Toe",
+              "Z Toe"
+            ]
+          }
+        ]
+      },
+      "rd_delimiter": ",",
     "rd_expected_fields": 5,
     "pitdev_field_delimiter": ",",
     "pitdev_field_allowed_field_counts": [4, 5],
@@ -431,6 +451,11 @@
         "status_error": "Validacao ou processamento falhou.",
         "log_waiting": "Aguardando arquivos...",
         "log_processing": "Processando...",
+        "errors": {
+          "unsupported_workbook_profile": "O arquivo \"{fileName}\" foi identificado como {profileLabel}. Ele não é um PLANEJADO.xlsx MVV completo e não contém as colunas necessárias: {missingColumns}. Para evitar informações incorretas, a organização foi interrompida e nenhum XLSX foi gerado. Use o plano exportado no formato MVV.",
+          "missing_mvv_columns": "O arquivo não possui as colunas obrigatórias da entrada MVV: {missingColumns}. Nada foi gerado.",
+          "missing_mvv_plan_columns": "O arquivo não possui as colunas obrigatórias do plano MVV: {missingColumns}. Nada foi gerado."
+        },
         "metrics": {
           "mvv_count": "Furos MVV",
           "rd_raw_count": "Registros RD",
@@ -543,6 +568,11 @@
         "status_error": "Validation or processing failed.",
         "log_waiting": "Waiting for files...",
         "log_processing": "Processing...",
+        "errors": {
+          "unsupported_workbook_profile": "The file \"{fileName}\" was identified as {profileLabel}. It is not a complete MVV PLANEJADO.xlsx and is missing the required columns: {missingColumns}. To prevent incorrect information, processing was stopped and no XLSX was generated. Use the plan exported in the MVV format.",
+          "missing_mvv_columns": "The file does not contain the required MVV input columns: {missingColumns}. Nothing was generated.",
+          "missing_mvv_plan_columns": "The file does not contain the required MVV plan columns: {missingColumns}. Nothing was generated."
+        },
         "metrics": {
           "mvv_count": "MVV holes",
           "rd_raw_count": "RD records",
@@ -655,6 +685,11 @@
         "status_error": "验证或处理失败。",
         "log_waiting": "等待文件...",
         "log_processing": "处理中...",
+        "errors": {
+          "unsupported_workbook_profile": "文件 \"{fileName}\" 被识别为 {profileLabel}。它不是完整的 MVV PLANEJADO.xlsx，缺少必要列：{missingColumns}。为避免生成错误信息，处理已停止，未生成 XLSX。请使用 MVV 格式导出的计划文件。",
+          "missing_mvv_columns": "文件缺少 MVV 输入所需的列：{missingColumns}。未生成任何文件。",
+          "missing_mvv_plan_columns": "文件缺少 MVV 计划所需的列：{missingColumns}。未生成任何文件。"
+        },
         "metrics": {
           "mvv_count": "MVV钻孔",
           "rd_raw_count": "RD记录",

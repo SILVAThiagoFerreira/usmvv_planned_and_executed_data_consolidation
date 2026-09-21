@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buildConsolidatedRows, buildMvvPlanRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, deduplicateRdRows, suggestPitdevToeElevation } from '../src/processor.js';
-import { validatePitdevPlanSource } from '../src/validator.js';
+import { detectMvvWorkbookProfile, validateMvvPlanSource, validatePitdevPlanSource } from '../src/validator.js';
 import { getNumericFormatForHeader } from '../src/writer.js';
 import { normalizeHoleKey } from '../src/utils.js';
 
@@ -155,6 +155,9 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.languages.pt.status_ready_mvv, 'Pronto para organizar o planejado.');
   assert.equal(projectConfig.ui.languages.pt.status_ready_rd, 'Pronto para organizar o executado.');
   assert.equal(projectConfig.ui.languages.pt.status_rd_done, 'Executado organizado.');
+  assert.equal(projectConfig.ui.languages.pt.errors.unsupported_workbook_profile.includes('nenhum XLSX'), true);
+  assert.equal(projectConfig.input.workbook_profiles.unsupported[0].key, 'reg43');
+  assert.deepEqual(projectConfig.input.workbook_profiles.unsupported[0].required_sheet_names, ['PROJETO PERFURAÇÃO', 'LEV R&D', 'MEDIÇÃO']);
   assert.equal(projectConfig.ui.languages.pt.toe_elevation_label, 'Cota do pé (m)');
   assert.equal(projectConfig.ui.languages.pt.subdrilling_question, 'Terá subfuração?');
   assert.equal(projectConfig.ui.languages.pt.metrics.toe_elevation, 'Cota do pé');
@@ -188,6 +191,29 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.output.labels.pitdev_field_only_source_label, 'Levantamento');
   assert.equal(projectConfig.ui.languages.pt.secondary_actions_title, 'Outras saídas');
   assert.equal(Object.hasOwn(projectConfig.ui.languages.pt, 'system_badge'), false);
+});
+
+test('rejects a recognized REG43 workbook before generating an incomplete MVV plan', () => {
+  const rawMvv = {
+    fileName: 'REG43.xlsx',
+    sheetName: 'PROJETO PERFURAÇÃO',
+    sheetNames: ['PROJETO PERFURAÇÃO', 'LEV R&D', 'MEDIÇÃO'],
+    headers: ['ID', 'Diametro', 'X Toe', 'Y Toe', 'Z Toe'],
+    rows: [],
+  };
+
+  const profile = detectMvvWorkbookProfile(rawMvv, projectConfig);
+  assert.equal(profile?.key, 'reg43');
+  assert.throws(
+    () => validateMvvPlanSource(rawMvv, projectConfig),
+    (error) => {
+      assert.equal(error.code, 'unsupported_workbook_profile');
+      assert.equal(error.details.fileName, 'REG43.xlsx');
+      assert.equal(error.details.profileLabel, 'REG43');
+      assert.ok(error.details.missingColumns.includes('Depth'));
+      return true;
+    },
+  );
 });
 
 test('mvv plan extraction keeps only configured output columns', () => {

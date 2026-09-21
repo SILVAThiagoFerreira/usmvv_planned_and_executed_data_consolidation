@@ -1,4 +1,50 @@
-import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js?v=20260921-rd-export-modes-1';
+import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js?v=20260921-source-profile-1';
+
+function normalizeDescriptor(value) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+export function createValidationError(code, details, fallbackMessage) {
+  const error = new Error(fallbackMessage || code);
+  error.code = code;
+  error.details = details || {};
+  return error;
+}
+
+export function detectMvvWorkbookProfile(rawMvv, config) {
+  const profiles = config.input?.workbook_profiles?.unsupported || [];
+  const sheetNames = rawMvv.sheetNames || [rawMvv.sheetName];
+  const normalizedSheetNames = new Set(sheetNames.filter(Boolean).map(normalizeDescriptor));
+  const normalizedHeaders = new Set((rawMvv.headers || []).map(normalizeDescriptor));
+
+  return profiles.find((profile) => {
+    const requiredSheets = profile.required_sheet_names || [];
+    const requiredHeaders = profile.required_headers || [];
+    return requiredSheets.every((sheetName) => normalizedSheetNames.has(normalizeDescriptor(sheetName)))
+      && requiredHeaders.every((header) => normalizedHeaders.has(normalizeDescriptor(header)));
+  }) || null;
+}
+
+function throwUnsupportedWorkbookProfile(rawMvv, config, missingColumns) {
+  const profile = detectMvvWorkbookProfile(rawMvv, config);
+  if (!profile) return;
+
+  const details = {
+    fileName: rawMvv.fileName || 'arquivo selecionado',
+    profileLabel: profile.label || profile.key || 'formato não compatível',
+    missingColumns,
+  };
+  throw createValidationError(
+    'unsupported_workbook_profile',
+    details,
+    `Unsupported workbook profile ${details.profileLabel}: ${details.fileName}`,
+  );
+}
 
 export function validateMvvSource(rawMvv, config) {
   const headers = rawMvv.headers;
@@ -10,7 +56,12 @@ export function validateMvvSource(rawMvv, config) {
   const indexMap = headerIndexMap(headers);
   const missing = requiredHeaders.filter((header) => !indexMap.has(header));
   if (missing.length) {
-    throw new Error(`Missing MVV columns: ${missing.join(', ')}`);
+    throwUnsupportedWorkbookProfile(rawMvv, config, missing);
+    throw createValidationError(
+      'missing_mvv_columns',
+      { missingColumns: missing },
+      `Missing MVV columns: ${missing.join(', ')}`,
+    );
   }
 
   let rowCount = 0;
@@ -56,7 +107,12 @@ export function validateMvvPlanSource(rawMvv, config) {
   const indexMap = headerIndexMap(headers);
   const missing = requiredHeaders.filter((header) => !indexMap.has(header));
   if (missing.length) {
-    throw new Error(`Missing MVV plan columns: ${missing.join(', ')}`);
+    throwUnsupportedWorkbookProfile(rawMvv, config, missing);
+    throw createValidationError(
+      'missing_mvv_plan_columns',
+      { missingColumns: missing },
+      `Missing MVV plan columns: ${missing.join(', ')}`,
+    );
   }
 
   let rowCount = 0;

@@ -17,11 +17,14 @@ Para organizar somente o executado, anexe `REALIZADO.txt`, abra `Outras saídas`
 Para consolidar um projeto para O-PitDev, abra o quadro abaixo do fluxo principal. Anexe o levantamento de campo em `.csv` ou `.txt` e o plano planejado em `.xlsx`. O levantamento fornece `ID`, `Y`, `X` e `Z`; o plano fornece `Diâmetro`, `Azimute`, `Ângulo planejado` (a coluna `Dip` do arquivo atual), `Profundidade` (a coluna `Depth`) e `Z Toe`. Quando existirem furos auxiliares, a cota do pé já aparece sugerida com o valor mais frequente de `Z Toe`; o usuário pode alterar a sugestão antes de consolidar. A coluna `Ângulo do talude` é calculada por `90 - Ângulo planejado`. O download gera `CONSOLIDACAO_PROJETO_O-PITDEV.xlsx` com a tabela consolidada e o log de correspondências.
 Para organizar somente o levantado para o O-PitDev, anexe apenas o `.csv` ou `.txt` no mesmo quadro e clique em `Organizar somente o levantado`. O download gera `LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx`, com `ID`, `Y`, `X` e `Z` na ordem do arquivo, além de um log de origem. O plano não é solicitado, e o quinto campo vazio do exportador Enaex não é exportado.
 
+O arquivo planejado é validado pelo conjunto de abas e colunas, não apenas pela extensão `.xlsx`. Arquivos legados como `REG43.xlsx`, com as abas `PROJETO PERFURAÇÃO`, `LEV R&D` e `MEDIÇÃO`, não são tratados como `PLANEJADO.xlsx` MVV quando não possuem todas as colunas do contrato. Nessa situação a aplicação identifica o formato, informa as colunas ausentes e interrompe a geração; nenhum workbook incompleto é criado por preenchimento ou cálculo presumido.
+
 ## Caracteristicas
 
 - Processamento 100% client-side.
 - Sem backend e sem envio dos arquivos para servidor.
 - Validacao antes do processamento.
+- Identificacao do formato da planilha antes da organizacao; fontes legadas incompatíveis sao bloqueadas com mensagem explicita.
 - Deduplicacao da RD com prioridade `L-` sobre `E-` e `L_`.
 - Seletor de idioma para portugues, ingles e chines simplificado.
 - Interface compacta com fundo branco e uma unica marca OpenBlast na barra superior.

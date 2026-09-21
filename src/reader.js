@@ -1,4 +1,4 @@
-import { asText, isBlank } from './utils.js?v=20260921-rd-export-modes-1';
+import { asText, isBlank } from './utils.js?v=20260921-source-profile-1';
 
 function getExcelJS() {
   if (!globalThis.ExcelJS || !globalThis.ExcelJS.Workbook) {
@@ -12,6 +12,7 @@ export async function readMvvFile(file, config) {
   const workbook = new ExcelJS.Workbook();
   const buffer = await file.arrayBuffer();
   await workbook.xlsx.load(buffer);
+  const sheetNames = workbook.worksheets.map((worksheet) => worksheet.name);
 
   const sheet = workbook.getWorksheet(config.input.mvv_sheet_name);
   if (!sheet) {
@@ -34,6 +35,7 @@ export async function readMvvFile(file, config) {
   return {
     fileName: file.name,
     sheetName: sheet.name,
+    sheetNames,
     headers,
     rows,
   };
