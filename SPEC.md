@@ -178,3 +178,15 @@ IDs do levantamento ausentes no plano são furos auxiliares. A interface solicit
 - A saída preserva a ordem do levantamento e normaliza IDs numéricos conforme `normalizeIdValue` (por exemplo, `097` torna-se `97`); IDs textuais são preservados.
 - A saída possui `ID`, `Y`, `X` e `Z` na aba `LEVANTAMENTO_O-PITDEV` e o log de origem na aba `LOG_LEVANTAMENTO_O-PITDEV`.
 - O arquivo gerado é `LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx`.
+
+## Juntar planos de furos em CSV
+
+- O fluxo funciona separado dos fluxos MVV/RD e O-PitDev e processa os arquivos somente no navegador.
+- O usuário pode importar dois ou mais arquivos `.csv`, sem limite definido pelo aplicativo. Novos arquivos entram no fim da lista; botões acessíveis de mover para cima ou para baixo definem explicitamente a ordem `Plano 1`, `Plano 2` e seguintes. Cada arquivo pode ser removido antes da geração.
+- Todos os arquivos devem ter o mesmo cabeçalho, na mesma ordem, e exatamente uma coluna configurada como `Number`. Cada registro não vazio precisa ter a mesma quantidade de campos do cabeçalho.
+- O parser aceita campos entre aspas, aspas escapadas e quebras de linha dentro de campos. Linhas completamente vazias são ignoradas.
+- `Plano 1` mantém os valores de `Number` como recebidos. O plano na posição `n` recebe o acréscimo `(n - 1) × plan_merge.increment`, que por padrão é `10.000`.
+- `Number` deve ser um inteiro seguro. Depois dos acréscimos, os valores de `Number` precisam continuar seguros e únicos; cabeçalhos incompatíveis, linhas malformadas, IDs inválidos ou colisões interrompem a geração com erro explícito.
+- A saída preserva o cabeçalho, a ordem das colunas e das linhas, e os valores textuais das demais colunas. O único valor de célula alterado é `Number`. Um único cabeçalho é escrito, seguido pelas linhas de cada plano na ordem selecionada.
+- O CSV exportado usa as opções configuradas de separador, aspas, quebra de linha e BOM. O link de download só aparece após a validação e geração bem-sucedidas.
+- Nome de saída: `output.plan_merge_file_name` em `config.json`.

@@ -44,6 +44,8 @@ Quando há IDs somente no levantamento, `app.js` solicita a cota do pé e a subf
 - `processor.js`: regras de negocio.
 - `writer.js`: geracao do Excel.
 - `app.js`: orquestracao e UI.
+- `plan_merge_reader.js`, `plan_merge_validator.js`, `plan_merge_processor.js` e `plan_merge_writer.js`: módulos separados de CSV para leitura, validação, ajuste de `Number` e exportação.
+- `plan_merge_pipeline.js`: orquestração do fluxo de junção CSV.
 
 ## Sequencia O-PitDev
 
@@ -62,3 +64,14 @@ Quando há IDs somente no levantamento, `app.js` solicita a cota do pé e a subf
 4. `src/processor.js` gera somente as colunas `ID`, `Y`, `X` e `Z`, sem plano, ângulos ou profundidade.
 5. `src/writer.js` gera `LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx` com `LEVANTAMENTO_O-PITDEV` e `LOG_LEVANTAMENTO_O-PITDEV`.
 6. `src/app.js` libera o download e exibe o resumo de linhas organizadas.
+
+## Sequência para juntar planos CSV
+
+1. O usuário seleciona dois ou mais CSVs ou arrasta-os para a área de importação. Novos arquivos entram no final da lista.
+2. `src/app.js` mostra a ordem e o acréscimo de cada plano; controles de mover e remover atualizam a lista antes do processamento.
+3. `src/plan_merge_pipeline.js` orquestra o fluxo, lendo os arquivos em `src/plan_merge_reader.js`.
+4. O leitor interpreta aspas, separadores, CRLF e espaços após a vírgula com as opções de `config.json`.
+5. `src/plan_merge_validator.js` exige cabeçalhos idênticos, coluna `Number` única, largura consistente, inteiros seguros e IDs finais únicos. Erros interrompem a geração.
+6. `src/plan_merge_processor.js` anexa as linhas em ordem, aplicando `(posição do plano - 1) × incremento` somente ao campo `Number`.
+7. `src/plan_merge_writer.js` gera o CSV com cabeçalho único, separador, aspas, quebra de linha, codificação e nome configuráveis.
+8. `src/app.js` oferece o link de download e exibe a contagem e o log após uma geração válida. O processamento permanece no navegador.

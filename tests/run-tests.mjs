@@ -4,6 +4,10 @@ import { buildConsolidatedRows, buildMvvPlanRows, buildPitdevFieldOnlyRows, buil
 import { detectMvvWorkbookProfile, validateMvvPlanSource, validatePitdevPlanSource } from '../src/validator.js';
 import { getNumericFormatForHeader } from '../src/writer.js';
 import { normalizeHoleKey } from '../src/utils.js';
+import { parsePlanCsvText } from '../src/plan_merge_reader.js';
+import { validatePlanMergeSources } from '../src/plan_merge_validator.js';
+import { mergePlanRows } from '../src/plan_merge_processor.js';
+import { serializePlanCsv } from '../src/plan_merge_writer.js';
 
 const projectConfig = JSON.parse(readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
 const pitdevFieldPositions = { id: 0, y: 1, x: 2, z: 3 };
@@ -510,4 +514,91 @@ test('compact interface keeps downloads hidden until a workbook exists', () => {
   assert.match(styles, /\.visually-hidden-input\s*\{/);
   assert.match(styles, /\.secondary-actions__body\s*\{\s*display: grid;/);
   assert.match(styles, /\.summary-panel\[hidden\]\s*\{/);
+});
+
+test('plan CSV parser supports escaped quotes, quoted delimiters and embedded line breaks', () => {
+  const parsed = parsePlanCsvText(
+    '\uFEFFNumber, Label, Comment\r\n10, , "rock, \"\"granite\"\" hole"\r\n11, , "first line\r\nsecond line"\r\n',
+    projectConfig.plan_merge.input,
+  );
+
+  assert.deepEqual(parsed.headers, ['Number', 'Label', 'Comment']);
+  assert.deepEqual(parsed.rows.map((row) => row.values), [
+    ['10', '', 'rock, "granite" hole'],
+    ['11', '', 'first line\r\nsecond line'],
+  ]);
+});
+
+test('merging plans applies the configured offset only to Number and preserves CSV values and order', () => {
+  const plans = [
+    { fileName: 'one.csv', headers: ['Number', 'Label', 'Length'], rows: [{ recordNumber: 2, values: ['10', '', '5.200'] }] },
+    { fileName: 'two.csv', headers: ['Number', 'Label', 'Length'], rows: [{ recordNumber: 2, values: ['10', 'B', '4.700'] }] },
+    { fileName: 'three.csv', headers: ['Number', 'Label', 'Length'], rows: [{ recordNumber: 2, values: ['10', 'C', '0.600'] }] },
+  ];
+  const validation = validatePlanMergeSources(plans, projectConfig);
+  const merged = mergePlanRows(plans, validation, projectConfig);
+
+  assert.deepEqual(merged.headers, plans[0].headers);
+  assert.deepEqual(merged.rows, [
+    ['10', '', '5.200'],
+    ['10010', 'B', '4.700'],
+    ['20010', 'C', '0.600'],
+  ]);
+  assert.deepEqual(merged.summary.plans.map(({ offset, rowCount }) => ({ offset, rowCount })), [
+    { offset: 0, rowCount: 1 },
+    { offset: 10000, rowCount: 1 },
+    { offset: 20000, rowCount: 1 },
+  ]);
+
+  const csv = serializePlanCsv(merged.headers, merged.rows, projectConfig.plan_merge.output);
+  assert.equal(csv.startsWith('Number, Label, Length\r\n'), true);
+  assert.equal(csv.endsWith('\r\n'), true);
+  assert.equal(csv.includes('5.200'), true);
+  const exported = parsePlanCsvText(csv, projectConfig.plan_merge.input);
+  assert.deepEqual(exported.headers, merged.headers);
+  assert.deepEqual(exported.rows.map((row) => row.values), merged.rows);
+});
+
+test('plan CSV validation rejects incompatible headers, malformed IDs and collisions', () => {
+  const validPlan = (fileName, number) => ({
+    fileName,
+    headers: ['Number', 'Label'],
+    rows: [{ recordNumber: 2, values: [String(number), ''] }],
+  });
+
+  assert.throws(
+    () => validatePlanMergeSources([validPlan('one.csv', 1), { ...validPlan('two.csv', 2), headers: ['Number', 'Other'] }], projectConfig),
+    (error) => error.code === 'plan_merge_header_mismatch',
+  );
+  assert.throws(
+    () => validatePlanMergeSources([validPlan('one.csv', '1.2'), validPlan('two.csv', 2)], projectConfig),
+    (error) => error.code === 'plan_merge_invalid_number',
+  );
+  assert.throws(
+    () => validatePlanMergeSources([validPlan('one.csv', 10010), validPlan('two.csv', 10)], projectConfig),
+    (error) => error.code === 'plan_merge_duplicate_number' && error.details.adjustedNumber === 10010,
+  );
+});
+
+test('CSV plan merge UI and configuration expose ordered multi-file import and the download contract', () => {
+  const indexHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const cacheToken = '20261001-csv-plan-merge-1';
+
+  assert.equal(projectConfig.files.plan_merge.accept, '.csv');
+  assert.equal(projectConfig.plan_merge.number_header, 'Number');
+  assert.equal(projectConfig.plan_merge.increment, 10000);
+  assert.equal(projectConfig.plan_merge.min_plan_count, 2);
+  assert.equal(projectConfig.plan_merge.output.separator, ', ');
+  assert.equal(projectConfig.plan_merge.output.line_ending, '\r\n');
+  assert.equal(projectConfig.plan_merge.output.utf8_bom, false);
+  assert.equal(projectConfig.output.plan_merge_file_name, 'PLANOS_DE_FUROS_COMBINADOS.csv');
+  for (const language of Object.values(projectConfig.ui.languages)) {
+    assert.equal(typeof language.plan_merge_title, 'string');
+    assert.equal(typeof language.plan_merge_order_hint, 'string');
+    assert.equal(typeof language.errors.plan_merge_duplicate_number, 'string');
+  }
+  assert.match(indexHtml, /id="planMergeFiles"[^>]*multiple/);
+  assert.match(indexHtml, /id="planMergeList"/);
+  assert.match(indexHtml, /id="planMergeDownloadLink" class="secondary" hidden/);
+  assert.match(indexHtml, new RegExp(cacheToken));
 });

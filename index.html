@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260921-source-profile-1" />
+    <link rel="stylesheet" href="./styles.css?v=20261001-csv-plan-merge-1" />
     <link rel="icon" href="./assets/openblast-favicon-white.svg" type="image/svg+xml" />
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
   </head>
@@ -139,6 +139,49 @@
         </aside>
       </main>
 
+      <details class="panel plan-merge-panel">
+        <summary class="pitdev-summary plan-merge-summary">
+          <div class="pitdev-summary-main">
+            <span class="section-code">CSV</span>
+            <h2 id="planMergeTitle">Juntar planos de furos</h2>
+            <p id="planMergeHint">Combine planos CSV e escolha a ordem de cada um.</p>
+          </div>
+        </summary>
+        <div class="pitdev-content plan-merge-content">
+          <label class="dropzone plan-merge-dropzone" id="planMergeDropzone" for="planMergeFiles">
+            <input id="planMergeFiles" class="visually-hidden-input" type="file" accept=".csv" multiple aria-labelledby="planMergeFileLabel planMergeFileName" aria-describedby="planMergeFileHint" />
+            <span id="planMergeFileLabel" class="dropzone-label">Planos CSV</span>
+            <strong id="planMergeFileName">Nenhum arquivo selecionado</strong>
+            <small id="planMergeFileHint">Selecione ou arraste dois ou mais arquivos CSV.</small>
+          </label>
+
+          <div class="plan-merge-order">
+            <div class="plan-merge-order-heading">
+              <h3 id="planMergeOrderTitle">Ordem dos planos</h3>
+              <p id="planMergeOrderHint">Use os controles para definir Plano 1, Plano 2 e seguintes. Só a coluna Number muda.</p>
+            </div>
+            <ol id="planMergeList" class="plan-merge-list" aria-labelledby="planMergeOrderTitle"></ol>
+          </div>
+
+          <div class="actions plan-merge-actions">
+            <button id="planMergeGenerateBtn" class="primary" type="button" disabled>Juntar planos</button>
+            <a id="planMergeDownloadLink" class="secondary" hidden>Baixar PLANOS_DE_FUROS_COMBINADOS.csv</a>
+          </div>
+          <p id="planMergeSummary" class="plan-merge-result" hidden></p>
+          <div class="status" id="planMergeStatusBox" data-tone="idle" role="status" aria-live="polite" aria-busy="false">
+            <span class="status-dot"></span>
+            <p id="planMergeStatusText">Selecione pelo menos dois arquivos CSV.</p>
+          </div>
+          <details class="log-block plan-merge-log-block">
+            <summary class="log-head">
+              <span id="planMergeLogTitle">Log da consolidação</span>
+              <span id="planMergeLogBadge">JSON</span>
+            </summary>
+            <pre id="planMergeLogOutput">Aguardando arquivos...</pre>
+          </details>
+        </div>
+      </details>
+
       <details class="panel pitdev-panel">
         <summary class="pitdev-summary">
           <div class="pitdev-summary-main">
@@ -205,6 +248,6 @@
       </details>
     </div>
 
-    <script type="module" src="./main.js?v=20260921-source-profile-1"></script>
+    <script type="module" src="./main.js?v=20261001-csv-plan-merge-1"></script>
   </body>
 </html>

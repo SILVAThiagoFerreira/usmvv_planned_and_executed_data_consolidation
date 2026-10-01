@@ -874,3 +874,166 @@ button.secondary,
     transition-duration: 0.01ms !important;
   }
 }
+
+.plan-merge-panel {
+  margin-top: 14px;
+  padding: 0;
+}
+
+.plan-merge-panel[open] .plan-merge-summary::after {
+  content: "−";
+}
+
+.plan-merge-content {
+  display: grid;
+  gap: 12px;
+}
+
+.plan-merge-dropzone {
+  min-height: 104px;
+}
+
+.plan-merge-order {
+  min-width: 0;
+}
+
+.plan-merge-order-heading h3 {
+  font-size: 0.82rem;
+}
+
+.plan-merge-order-heading p {
+  max-width: 72ch;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.plan-merge-list {
+  display: grid;
+  gap: 5px;
+  margin: 9px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-merge-list:empty {
+  display: none;
+}
+
+.plan-merge-item {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.42fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  padding: 8px 9px;
+  background: var(--white);
+}
+
+.plan-merge-item-order {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.plan-merge-item-order strong {
+  color: var(--ink);
+  font-size: 0.76rem;
+}
+
+.plan-merge-item-order small {
+  color: var(--muted);
+  font: 0.65rem "IBM Plex Mono", Consolas, monospace;
+}
+
+.plan-merge-item-name {
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 0.79rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-merge-item-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.plan-merge-item-controls button {
+  min-width: 30px;
+  min-height: 29px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 3px 7px;
+  color: var(--ink-soft);
+  background: var(--white);
+  font: 0.82rem "IBM Plex Sans", Arial, sans-serif;
+  cursor: pointer;
+}
+
+.plan-merge-item-controls button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.plan-merge-item-controls button:disabled {
+  color: #a2abb1;
+  cursor: not-allowed;
+}
+
+.plan-merge-item-controls button:focus-visible,
+.plan-merge-summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.plan-merge-actions {
+  margin-top: 0;
+}
+
+.plan-merge-result {
+  border-left: 3px solid var(--success);
+  padding: 7px 9px;
+  color: var(--ink-soft);
+  background: var(--surface);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.plan-merge-log-block {
+  margin-top: 0;
+}
+
+@media (max-width: 680px) {
+  .plan-merge-item {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 10px;
+    padding: 8px;
+  }
+
+  .plan-merge-item-order {
+    grid-column: 1;
+  }
+
+  .plan-merge-item-name {
+    grid-column: 1;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .plan-merge-item-controls {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .plan-merge-actions,
+  .plan-merge-actions .primary,
+  .plan-merge-actions a.secondary {
+    width: 100%;
+  }
+}

@@ -14,6 +14,8 @@ Portar a consolidacao MVV x RD para uma aplicacao estaticamente hospedavel no Gi
 - O-PitDev inicia recolhido, mas mantem upload, processamento, status, resumo e download funcionais.
 - O-PitDev permite organizar somente o levantamento, sem exigir plano planejado.
 - A organização do planejado identifica o perfil do workbook antes de processar; `REG43` sem o contrato MVV completo deve ser rejeitado com as colunas ausentes e sem gerar XLSX incompleto.
+- A página também deve permitir juntar dois ou mais planos `.csv`, sem limite definido, com ordem escolhida pelo usuário e acréscimos de `10.000` somente na coluna `Number` a partir do Plano 2.
+- O CSV combinado deve preservar o cabeçalho, a ordem das linhas e todas as demais colunas, validar fontes compatíveis e ficar disponível em download após uma geração válida.
 
 ## Entrega O-PitDev
 

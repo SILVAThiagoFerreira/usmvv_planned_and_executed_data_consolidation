@@ -1,5 +1,6 @@
-import { loadConfig } from './config.js?v=20260921-source-profile-1';
+import { loadConfig } from './config.js?v=20261001-csv-plan-merge-1';
 import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20260921-source-profile-1';
+import { runPlanMergePipeline } from './plan_merge_pipeline.js?v=20261001-csv-plan-merge-1';
 
 function qs(id) {
   const element = document.getElementById(id);
@@ -186,6 +187,34 @@ function wireDropzone(dropzone, input, onFile) {
   });
 }
 
+function wireMultiFileDropzone(dropzone, input, onFiles) {
+  const setActive = (active) => dropzone.classList.toggle('is-active', active);
+
+  dropzone.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    setActive(true);
+  });
+  dropzone.addEventListener('dragleave', () => setActive(false));
+  dropzone.addEventListener('drop', (event) => {
+    event.preventDefault();
+    setActive(false);
+    const files = Array.from(event.dataTransfer?.files || []);
+    if (files.length) onFiles(files);
+  });
+  input.addEventListener('change', () => {
+    const files = Array.from(input.files || []);
+    if (files.length) onFiles(files);
+    input.value = '';
+  });
+}
+
+function interpolateTemplate(template, values) {
+  return Object.entries(values).reduce(
+    (text, [key, value]) => text.split(`{${key}}`).join(String(value)),
+    template,
+  );
+}
+
 export async function bootstrapApp() {
   const config = await loadConfig();
   const defaultLanguage = config.ui.default_language || 'pt';
@@ -280,6 +309,25 @@ export async function bootstrapApp() {
   const pitdevOptionsError = qs('pitdevOptionsError');
   const secondaryActions = qs('secondaryActions');
   const secondaryActionsTitle = qs('secondaryActionsTitle');
+  const planMergePanel = document.querySelector('.plan-merge-panel');
+  const planMergeDropzone = qs('planMergeDropzone');
+  const planMergeFilesInput = qs('planMergeFiles');
+  const planMergeFileLabel = qs('planMergeFileLabel');
+  const planMergeFileName = qs('planMergeFileName');
+  const planMergeFileHint = qs('planMergeFileHint');
+  const planMergeTitle = qs('planMergeTitle');
+  const planMergeHint = qs('planMergeHint');
+  const planMergeOrderTitle = qs('planMergeOrderTitle');
+  const planMergeOrderHint = qs('planMergeOrderHint');
+  const planMergeList = qs('planMergeList');
+  const planMergeGenerateBtn = qs('planMergeGenerateBtn');
+  const planMergeDownloadLink = qs('planMergeDownloadLink');
+  const planMergeSummary = qs('planMergeSummary');
+  const planMergeStatusBox = qs('planMergeStatusBox');
+  const planMergeStatusText = qs('planMergeStatusText');
+  const planMergeLogTitle = qs('planMergeLogTitle');
+  const planMergeLogBadge = qs('planMergeLogBadge');
+  const planMergeLogOutput = qs('planMergeLogOutput');
   const pitdevToeElevationInput = qs('pitdevToeElevationInput');
   const pitdevSubdrillingValueInput = qs('pitdevSubdrillingValueInput');
 
@@ -302,6 +350,12 @@ export async function bootstrapApp() {
     pitdevPhase: 'idle',
     pitdevErrorMessage: null,
     pitdevAuxiliaryOptions: null,
+    planMergeFiles: [],
+    planMergeDownloadUrl: null,
+    planMergePhase: 'idle',
+    planMergeErrorMessage: null,
+    planMergeSummary: null,
+    planMergeOutputFileName: config.output.plan_merge_file_name,
   };
 
   const currentUi = () => getLanguagePack(config, state.language);
@@ -435,6 +489,142 @@ export async function bootstrapApp() {
     pitdevFieldOnlyBtn.disabled = !hasField || state.pitdevPhase === 'working';
   };
 
+  const getLocalizedInteger = (value) => new Intl.NumberFormat(currentUi().document_lang, { maximumFractionDigits: 0 }).format(value);
+
+  const updatePlanMergeList = () => {
+    const ui = currentUi();
+    const offsetLabel = (index) => index === 0
+      ? ui.plan_merge_offset_none
+      : interpolateTemplate(ui.plan_merge_offset_applied, { offset: getLocalizedInteger(index * config.plan_merge.increment) });
+
+    planMergeList.replaceChildren(...state.planMergeFiles.map((file, index) => {
+      const item = document.createElement('li');
+      item.className = 'plan-merge-item';
+
+      const order = document.createElement('span');
+      order.className = 'plan-merge-item-order';
+      const planLabel = document.createElement('strong');
+      planLabel.textContent = `${ui.plan_merge_plan_prefix} ${index + 1}`;
+      const numberOffset = document.createElement('small');
+      numberOffset.textContent = offsetLabel(index);
+      order.append(planLabel, numberOffset);
+
+      const fileName = document.createElement('span');
+      fileName.className = 'plan-merge-item-name';
+      fileName.textContent = file.name;
+
+      const controls = document.createElement('span');
+      controls.className = 'plan-merge-item-controls';
+      const moveUp = document.createElement('button');
+      moveUp.type = 'button';
+      moveUp.textContent = '↑';
+      moveUp.setAttribute('aria-label', interpolateTemplate(ui.plan_merge_move_up, { planNumber: index + 1, fileName: file.name }));
+      moveUp.disabled = index === 0 || state.planMergePhase === 'working';
+      moveUp.addEventListener('click', () => movePlanMergeFile(index, -1));
+
+      const moveDown = document.createElement('button');
+      moveDown.type = 'button';
+      moveDown.textContent = '↓';
+      moveDown.setAttribute('aria-label', interpolateTemplate(ui.plan_merge_move_down, { planNumber: index + 1, fileName: file.name }));
+      moveDown.disabled = index === state.planMergeFiles.length - 1 || state.planMergePhase === 'working';
+      moveDown.addEventListener('click', () => movePlanMergeFile(index, 1));
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.textContent = '×';
+      remove.setAttribute('aria-label', interpolateTemplate(ui.plan_merge_remove, { planNumber: index + 1, fileName: file.name }));
+      remove.disabled = state.planMergePhase === 'working';
+      remove.addEventListener('click', () => removePlanMergeFile(index));
+
+      controls.append(moveUp, moveDown, remove);
+      item.append(order, fileName, controls);
+      return item;
+    }));
+
+    const count = state.planMergeFiles.length;
+    planMergeFileName.textContent = count === 0
+      ? ui.plan_merge_no_files
+      : interpolateTemplate(count === 1 ? ui.plan_merge_file_count_one : ui.plan_merge_file_count_other, { count: getLocalizedInteger(count) });
+  };
+
+  const updatePlanMergeStatus = () => {
+    const ui = currentUi();
+    const count = state.planMergeFiles.length;
+    let tone = 'idle';
+    let text = ui.plan_merge_status_idle;
+
+    if (state.planMergePhase === 'working') {
+      tone = 'working';
+      text = ui.plan_merge_status_working;
+    } else if (state.planMergePhase === 'error') {
+      tone = 'error';
+      text = state.planMergeErrorMessage || ui.plan_merge_status_error;
+    } else if (state.planMergePhase === 'done') {
+      tone = 'done';
+      text = ui.plan_merge_status_done;
+    } else if (count === 1) {
+      tone = 'ready';
+      text = ui.plan_merge_status_add_more;
+    } else if (count >= config.plan_merge.min_plan_count) {
+      tone = 'ready';
+      text = interpolateTemplate(ui.plan_merge_status_ready, { count: getLocalizedInteger(count) });
+    }
+
+    setStatus(planMergeStatusBox, planMergeStatusText, tone, text);
+    planMergeGenerateBtn.disabled = count < config.plan_merge.min_plan_count || state.planMergePhase === 'working';
+    planMergeFilesInput.disabled = state.planMergePhase === 'working';
+    planMergeSummary.hidden = !state.planMergeSummary;
+    if (state.planMergeSummary) {
+      planMergeSummary.textContent = interpolateTemplate(ui.plan_merge_summary_template, {
+        planCount: getLocalizedInteger(state.planMergeSummary.planCount),
+        rowCount: getLocalizedInteger(state.planMergeSummary.rowCount),
+        increment: getLocalizedInteger(state.planMergeSummary.increment),
+      });
+      planMergeLogOutput.textContent = JSON.stringify({ language: state.language, ...state.planMergeSummary }, null, 2);
+    } else if (state.planMergePhase === 'working') {
+      planMergeLogOutput.textContent = ui.plan_merge_log_processing;
+    } else if (state.planMergePhase === 'error') {
+      planMergeLogOutput.textContent = state.planMergeErrorMessage || ui.plan_merge_status_error;
+    } else {
+      planMergeLogOutput.textContent = ui.plan_merge_log_waiting;
+    }
+  };
+
+  const clearPlanMergeOutput = () => {
+    if (state.planMergeDownloadUrl) {
+      URL.revokeObjectURL(state.planMergeDownloadUrl);
+      state.planMergeDownloadUrl = null;
+    }
+    state.planMergeSummary = null;
+    state.planMergeErrorMessage = null;
+    state.planMergeOutputFileName = config.output.plan_merge_file_name;
+    planMergeDownloadLink.hidden = true;
+    planMergeSummary.hidden = true;
+  };
+
+  const movePlanMergeFile = (index, direction) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= state.planMergeFiles.length) return;
+    const files = [...state.planMergeFiles];
+    [files[index], files[nextIndex]] = [files[nextIndex], files[index]];
+    state.planMergeFiles = files;
+    clearPlanMergeOutput();
+    state.planMergePhase = files.length >= config.plan_merge.min_plan_count ? 'ready' : 'idle';
+    renderPlanMergeState();
+  };
+
+  const removePlanMergeFile = (index) => {
+    state.planMergeFiles = state.planMergeFiles.filter((_, currentIndex) => currentIndex !== index);
+    clearPlanMergeOutput();
+    state.planMergePhase = state.planMergeFiles.length >= config.plan_merge.min_plan_count ? 'ready' : 'idle';
+    renderPlanMergeState();
+  };
+
+  const renderPlanMergeState = () => {
+    updatePlanMergeList();
+    updatePlanMergeStatus();
+  };
+
   const updateLog = () => {
     const ui = currentUi();
     if ((state.phase === 'done' || state.phase === 'mvv_done' || state.phase === 'rd_done') && state.summary) {
@@ -481,6 +671,16 @@ export async function bootstrapApp() {
     secondaryActionsTitle.textContent = ui.secondary_actions_title;
     pitdevDetailsTitle.textContent = ui.details_title;
     pitdevDetailsBadge.textContent = ui.details_badge;
+    planMergeTitle.textContent = ui.plan_merge_title;
+    planMergeHint.textContent = ui.plan_merge_hint;
+    planMergeFileLabel.textContent = ui.plan_merge_file_label;
+    planMergeFileHint.textContent = ui.plan_merge_file_hint;
+    planMergeOrderTitle.textContent = ui.plan_merge_order_title;
+    planMergeOrderHint.textContent = ui.plan_merge_order_hint;
+    planMergeGenerateBtn.textContent = ui.plan_merge_action;
+    planMergeDownloadLink.textContent = `${ui.plan_merge_download_prefix} ${state.planMergeOutputFileName}`;
+    planMergeLogTitle.textContent = ui.plan_merge_log_title;
+    planMergeLogBadge.textContent = ui.details_badge;
     mvvFileName.textContent = state.mvv ? state.mvv.name : ui.no_file_selected;
     rdFileName.textContent = state.rd ? state.rd.name : ui.no_file_selected;
     pitdevTitle.textContent = ui.pitdev_title;
@@ -560,6 +760,8 @@ export async function bootstrapApp() {
 
     updateStatus();
     updatePitdevStatus();
+    updatePlanMergeList();
+    updatePlanMergeStatus();
     updateLog();
   };
 
@@ -622,6 +824,48 @@ export async function bootstrapApp() {
 
   wireDropzone(pitdevFieldDropzone, pitdevFieldFile, (file) => setPitdevFile('pitdevField', file));
   wireDropzone(pitdevPlanDropzone, pitdevPlanFile, (file) => setPitdevFile('pitdevPlan', file));
+
+  const addPlanMergeFiles = (files) => {
+    if (!files.length) return;
+    state.planMergeFiles = [...state.planMergeFiles, ...files];
+    clearPlanMergeOutput();
+    state.planMergePhase = state.planMergeFiles.length >= config.plan_merge.min_plan_count ? 'ready' : 'idle';
+    renderPlanMergeState();
+  };
+
+  wireMultiFileDropzone(planMergeDropzone, planMergeFilesInput, addPlanMergeFiles);
+  planMergePanel.addEventListener('toggle', renderLanguage);
+
+  planMergeGenerateBtn.addEventListener('click', async () => {
+    if (state.planMergeFiles.length < config.plan_merge.min_plan_count) return;
+
+    try {
+      clearPlanMergeOutput();
+      state.planMergePhase = 'working';
+      renderPlanMergeState();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const result = await runPlanMergePipeline({ files: state.planMergeFiles, config });
+      const blob = new Blob([result.csv], { type: config.plan_merge.output.mime_type });
+      state.planMergeDownloadUrl = URL.createObjectURL(blob);
+      state.planMergeOutputFileName = config.output.plan_merge_file_name;
+      planMergeDownloadLink.href = state.planMergeDownloadUrl;
+      planMergeDownloadLink.download = state.planMergeOutputFileName;
+      state.planMergeSummary = result.summary;
+      state.planMergePhase = 'done';
+      state.planMergeErrorMessage = null;
+      planMergeDownloadLink.hidden = false;
+      renderLanguage();
+    } catch (error) {
+      const message = formatPipelineError(error, currentUi());
+      state.planMergePhase = 'error';
+      state.planMergeErrorMessage = message;
+      state.planMergeSummary = null;
+      planMergeDownloadLink.hidden = true;
+      renderPlanMergeState();
+      console.error(error);
+    }
+  });
 
   pitdevFieldOnlyBtn.addEventListener('click', async () => {
     if (!state.pitdevField) return;

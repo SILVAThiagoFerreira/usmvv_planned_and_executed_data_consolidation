@@ -153,3 +153,23 @@ Arquivo gerado por `Organizar somente o levantado`, sem leitura do plano planeja
 - A aba de dados é `LEVANTAMENTO_O-PITDEV`.
 - A aba de rastreabilidade é `LOG_LEVANTAMENTO_O-PITDEV`.
 - O arquivo é `LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx`.
+
+## Planos de perfuração CSV
+
+Cada CSV contém um cabeçalho e os campos exportados pelo software de planejamento. Os nomes, a ordem e os valores são mantidos conforme a origem. `Number` é o único campo interpretado numericamente.
+
+| Campo | Tipo na origem | Regra |
+| --- | --- | --- |
+| Cabeçalho | texto | Deve ser idêntico em todos os arquivos, na mesma ordem, e incluir exatamente uma coluna `Number`. |
+| `Number` | inteiro em texto | No Plano 1 permanece igual; nos demais recebe `(posição - 1) × incremento configurado`. |
+| Demais colunas | texto CSV | Permanecem com o mesmo valor e na mesma ordem, incluindo células vazias, decimais e identificadores. |
+
+Os arquivos precisam ter pelo menos uma linha de dados, largura consistente com o cabeçalho e valores inteiros seguros em `Number`. Depois do acréscimo, `Number` deve ser único em todo o resultado. Registros ficam agrupados na ordem selecionada e mantêm sua ordem original dentro de cada arquivo.
+
+### Formato do CSV combinado
+
+- Uma única linha de cabeçalho, idêntica aos arquivos de origem.
+- Registros anexados na ordem Plano 1, Plano 2, Plano 3, etc.
+- Separador de campos `, `, aspas duplas quando necessárias, quebras de linha CRLF e sem BOM UTF-8, conforme `config.json`.
+- O arquivo é `PLANOS_DE_FUROS_COMBINADOS.csv` por padrão; o nome fica em `output.plan_merge_file_name`.
+- Metadados da importação, incremento, ordem e contagens ficam disponíveis no log da interface; nenhum arquivo é enviado a servidor.
