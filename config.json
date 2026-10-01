@@ -403,7 +403,7 @@
         "pitdev_action": "Consolidar O-PitDev",
         "pitdev_field_only_action": "Organizar somente o levantado",
         "pitdev_field_only_hint": "Gera ID, Y, X e Z na ordem do CSV.",
-        "plan_merge_title": "Juntar planos de furos",
+        "plan_merge_title": "Juntar projetos de desmonte",
         "plan_merge_hint": "Combine planos CSV de perfuração na ordem escolhida.",
         "plan_merge_file_label": "Planos CSV",
         "plan_merge_file_hint": "Selecione ou arraste dois ou mais arquivos CSV com a coluna Number.",

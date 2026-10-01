@@ -179,7 +179,7 @@ IDs do levantamento ausentes no plano são furos auxiliares. A interface solicit
 - A saída possui `ID`, `Y`, `X` e `Z` na aba `LEVANTAMENTO_O-PITDEV` e o log de origem na aba `LOG_LEVANTAMENTO_O-PITDEV`.
 - O arquivo gerado é `LEVANTAMENTO_O-PITDEV_ORGANIZADO.xlsx`.
 
-## Juntar planos de furos em CSV
+## Juntar projetos de desmonte em CSV
 
 - O fluxo funciona separado dos fluxos MVV/RD e O-PitDev e processa os arquivos somente no navegador.
 - O usuário pode importar dois ou mais arquivos `.csv`, sem limite definido pelo aplicativo. Novos arquivos entram no fim da lista; botões acessíveis de mover para cima ou para baixo definem explicitamente a ordem `Plano 1`, `Plano 2` e seguintes. Cada arquivo pode ser removido antes da geração.

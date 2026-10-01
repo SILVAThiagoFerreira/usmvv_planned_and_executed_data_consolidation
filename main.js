@@ -1,4 +1,4 @@
-import { bootstrapApp } from './src/app.js?v=20261001-csv-plan-merge-1';
+import { bootstrapApp } from './src/app.js?v=20261001-csv-plan-merge-2';
 
 window.addEventListener('DOMContentLoaded', async () => {
   try {

@@ -582,7 +582,7 @@ test('plan CSV validation rejects incompatible headers, malformed IDs and collis
 
 test('CSV plan merge UI and configuration expose ordered multi-file import and the download contract', () => {
   const indexHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-  const cacheToken = '20261001-csv-plan-merge-1';
+  const cacheToken = '20261001-csv-plan-merge-2';
 
   assert.equal(projectConfig.files.plan_merge.accept, '.csv');
   assert.equal(projectConfig.plan_merge.number_header, 'Number');
@@ -592,12 +592,14 @@ test('CSV plan merge UI and configuration expose ordered multi-file import and t
   assert.equal(projectConfig.plan_merge.output.line_ending, '\r\n');
   assert.equal(projectConfig.plan_merge.output.utf8_bom, false);
   assert.equal(projectConfig.output.plan_merge_file_name, 'PLANOS_DE_FUROS_COMBINADOS.csv');
+  assert.equal(projectConfig.ui.languages.pt.plan_merge_title, 'Juntar projetos de desmonte');
   for (const language of Object.values(projectConfig.ui.languages)) {
     assert.equal(typeof language.plan_merge_title, 'string');
     assert.equal(typeof language.plan_merge_order_hint, 'string');
     assert.equal(typeof language.errors.plan_merge_duplicate_number, 'string');
   }
   assert.match(indexHtml, /id="planMergeFiles"[^>]*multiple/);
+  assert.match(indexHtml, /id="planMergeTitle">Juntar projetos de desmonte<\/h2>/);
   assert.match(indexHtml, /id="planMergeList"/);
   assert.match(indexHtml, /id="planMergeDownloadLink" class="secondary" hidden/);
   assert.match(indexHtml, new RegExp(cacheToken));
