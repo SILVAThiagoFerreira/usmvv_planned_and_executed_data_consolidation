@@ -122,6 +122,40 @@ test('buildConsolidatedRows falls back to MVV values', () => {
   assert.deepEqual(summary.missingHoles, ['2']);
 });
 
+test('buildConsolidatedRows appends RD-only holes and does not duplicate planned IDs', () => {
+  const mvvRows = [
+    { ID: 1, Type: 'TypeA', Descricao: 'A', Diameter: 4, 'X Collar': 100, 'Y Collar': 200, 'X Toe': 110, 'Y Toe': 210, 'Z Toe': 50, 'Z Collar': 60, Depth: 12, 'Sub Drill': 1, Azimuth: 90, Dip: 15, holeKey: '1' },
+    { ID: 3, Type: 'TypeC', Descricao: 'C', Diameter: 6, 'X Collar': 102, 'Y Collar': 202, 'X Toe': 112, 'Y Toe': 212, 'Z Toe': 52, 'Z Collar': 62, Depth: 14, 'Sub Drill': 1, Azimuth: 100, Dip: 17, holeKey: '3' },
+  ];
+  const rdRows = [
+    { ID_RD: 'E-3', TIPO_RD: 'E-', Y_RD: 203, X_RD: 103, Z_RD: 63, holeKey: '3' },
+    { ID_RD: 'E-4', TIPO_RD: 'E-', Y_RD: 204, X_RD: 104, Z_RD: 64, holeKey: '4' },
+    { ID_RD: 'E-2', TIPO_RD: 'E-', Y_RD: 202, X_RD: 102, Z_RD: 62, holeKey: '2' },
+    { ID_RD: 'E-1', TIPO_RD: 'E-', Y_RD: 201, X_RD: 101, Z_RD: 61, holeKey: '1' },
+    { ID_RD: 'L-4', TIPO_RD: 'L-', Y_RD: 14, X_RD: 24, Z_RD: 34, holeKey: '4' },
+    { ID_RD: 'L-1', TIPO_RD: 'L-', Y_RD: 11, X_RD: 21, Z_RD: 31, holeKey: '1' },
+  ];
+  const { selected, dualPrefixCount } = deduplicateRdRows(rdRows, config);
+  assert.equal(selected.get('4').ID_RD, 'L-4');
+
+  const { consolidatedRows, summary } = buildConsolidatedRows(mvvRows, selected, rdRows.length, dualPrefixCount);
+
+  assert.deepEqual(consolidatedRows.map((row) => row.ID_FINAL), ['L-1', 'E-3', 'E-2', 'L-4']);
+  assert.equal(consolidatedRows.length, mvvRows.length + 2);
+  assert.equal(consolidatedRows[2].ID, null);
+  assert.equal(consolidatedRows[2].Type, null);
+  assert.equal(consolidatedRows[2].ID_RD, 'E-2');
+  assert.equal(consolidatedRows[2].Y_FINAL, 202);
+  assert.equal(consolidatedRows[2].X_FINAL, 102);
+  assert.equal(consolidatedRows[2].Z_COLLAR_FINAL, 62);
+  assert.equal(consolidatedRows[2].PROFUNDIDADE_FINAL, null);
+  assert.equal(consolidatedRows[3].ID_RD, 'L-4');
+  assert.equal(consolidatedRows.some((row) => row.ID_FINAL === 'E-4'), false);
+  assert.equal(consolidatedRows.filter((row) => row.ID_FINAL === 'E-3').length, 1);
+  assert.equal(summary.rdOnlyIncludedCount, 2);
+  assert.deepEqual(summary.rdOnlyHoles, ['2', '4']);
+});
+
 test('profundidade final uses a dedicated 2-decimal format', () => {
   const workbookConfig = JSON.parse(readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
   assert.equal(getNumericFormatForHeader('PROFUNDIDADE_FINAL', workbookConfig), '0.00');
@@ -165,7 +199,9 @@ test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.ui.languages.pt.toe_elevation_label, 'Cota do pé (m)');
   assert.equal(projectConfig.ui.languages.pt.subdrilling_question, 'Terá subfuração?');
   assert.equal(projectConfig.ui.languages.pt.metrics.toe_elevation, 'Cota do pé');
+  assert.equal(projectConfig.ui.languages.pt.metrics.rd_only_included_count, 'RD sem plano');
   assert.equal(projectConfig.ui.languages.pt.metrics.subdrilling, 'Subfuração');
+  assert.equal(projectConfig.output.labels.rd_only_included_count, 'Quantidade de furos sem referência planejada incluídos');
   assert.equal(projectConfig.ui.languages.en.toe_elevation_label, 'Toe elevation (m)');
   assert.equal(projectConfig.ui.languages.en.metrics.toe_elevation, 'Toe elevation');
   assert.equal(projectConfig.ui.languages.en.metrics.subdrilling, 'Subdrilling');

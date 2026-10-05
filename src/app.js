@@ -1,5 +1,5 @@
-import { loadConfig } from './config.js?v=20261001-csv-plan-merge-2';
-import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20260921-source-profile-1';
+import { loadConfig } from './config.js?v=20261005-unplanned-rd-1';
+import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20261005-unplanned-rd-1';
 import { runPlanMergePipeline } from './plan_merge_pipeline.js?v=20261001-csv-plan-merge-2';
 
 function qs(id) {
@@ -80,6 +80,7 @@ function renderSummary(summaryCards, languagePack, summary) {
       [languagePack.metrics.rd_unique_count, summary.rdUniqueCount],
       [languagePack.metrics.rd_matched_count, summary.rdMatchedCount],
       [languagePack.metrics.rd_missing_count, summary.rdMissingCount],
+      [languagePack.metrics.rd_only_included_count, summary.rdOnlyIncludedCount],
       [languagePack.metrics.dual_prefix_count, summary.dualPrefixCount],
     ];
   }

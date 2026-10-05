@@ -8,6 +8,7 @@ Portar a consolidacao MVV x RD para uma aplicacao estaticamente hospedavel no Gi
 - Processamento client-side.
 - Download do workbook final.
 - Validacao e log visiveis ao usuario.
+- No consolidado MVV × RD, preservar a ordem MVV e acrescentar furos levantados ou executados sem referência planejada; quando `L-` e `E-` compartilham esse número, manter somente `L-`, e não acrescentar outra linha para IDs já planejados.
 - No fluxo de executado, escolha de exportação com profundidade ou somente com `ID`, `Y`, `X` e `Z`.
 - Deduplicação do executado com prioridade para o `L-` levantado sobre o `E-` executado no mesmo número de furo.
 - Interface compacta: uma unica marca, ação principal clara, saídas isoladas recolhidas, resumo sob demanda, download oculto ate a geracao e log tecnico expansivel.

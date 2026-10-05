@@ -148,6 +148,7 @@ function addLogSheet(workbook, summary, config, metadata) {
     [config.output.labels.rd_unique_count, summary.rdUniqueCount],
     [config.output.labels.rd_matched_count, summary.rdMatchedCount],
     [config.output.labels.rd_missing_count, summary.rdMissingCount],
+    [config.output.labels.rd_only_included_count, summary.rdOnlyIncludedCount],
     [config.output.labels.dual_prefix_count, summary.dualPrefixCount],
   ];
 
@@ -193,7 +194,7 @@ function addLogSheet(workbook, summary, config, metadata) {
     sheet.getColumn(column).width = column === 'B' || column === 'E' ? 24 : 48;
   });
 
-  sheet.autoFilter = 'A1:B7';
+  sheet.autoFilter = 'A1:B8';
 }
 
 export async function createWorkbookBuffer({ config, consolidatedRows, rdTreatedRows, summary, metadata }) {

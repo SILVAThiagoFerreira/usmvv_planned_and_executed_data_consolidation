@@ -117,6 +117,10 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - `PROFUNDIDADE_FINAL` usa `Z_RD - Z Toe` quando RD existir.
 - Sem RD, `PROFUNDIDADE_FINAL` usa `Depth` da MVV.
 - `PROFUNDIDADE_FINAL` e formatada com 2 casas decimais no workbook final.
+- A saída mantém todas as linhas MVV na ordem de origem e, depois delas, acrescenta os furos únicos levantados (`L-`) ou executados (`E-`) cujo identificador normalizado não existe na MVV, em ordem numérica de furo.
+- Nas linhas sem referência planejada, os campos MVV ficam vazios; os campos RD e finais usam o registro RD selecionado, e `PROFUNDIDADE_FINAL` fica vazio porque não existe `Z Toe` planejado para o cálculo.
+- Um registro RD com referência MVV permanece somente na linha planejada correspondente; nenhum registro duplicado é acrescentado. Se houver `L-` e `E-` para o mesmo número, o `L-` é selecionado; nenhum segundo registro é acrescentado para o `E-`.
+- O resumo e o log registram a quantidade e os IDs RD sem referência planejada que foram acrescentados.
 - No fluxo RD-only, `Profundidade` e calculada por `Z (cota de topo) - cota do pé + subfuração` para cada linha.
 - No fluxo RD-only sem profundidade, a organização mantém somente `ID`, `Y`, `X` e `Z`, sem calcular ou exportar `Profundidade`.
 - No fluxo RD-only, `ID` usa o numero do furo sem prefixo e sem caracteres nao numericos.

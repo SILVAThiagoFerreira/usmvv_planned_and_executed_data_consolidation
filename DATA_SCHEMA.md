@@ -76,7 +76,11 @@ Antes de qualquer formato de exportação, os registros são reduzidos a um por 
 
 ## Consolidado final
 
-- MVV lado a lado com RD.
+- A aba mantém primeiro todas as linhas MVV na ordem de origem, com dados RD quando houver correspondência.
+- Depois das linhas MVV, inclui uma linha para cada furo único levantado (`L-`) ou executado (`E-`) cujo número normalizado não exista no plano. A lista segue a ordem numérica do número de furo.
+- Nas linhas sem plano, todas as colunas planejadas ficam vazias. `ID_RD`, `TIPO_RD`, `Y_RD`, `X_RD` e `Z_RD` preservam a fonte selecionada; `ID_FINAL`, `Y_FINAL`, `X_FINAL` e `Z_COLLAR_FINAL` usam o ID e as coordenadas RD. `PROFUNDIDADE_FINAL` fica vazia porque não existe `Z Toe` planejado para calcular a diferença.
+- A seleção da fonte RD mantém `L-` sobre `E-` para um mesmo número. Um levantamento ou executado que corresponde a uma linha MVV fica somente naquela linha e não gera uma segunda linha.
+- O log `LOG_VALIDACAO` registra a quantidade de linhas acrescentadas e lista os IDs RD sem referência planejada.
 - Colunas finais: `ID_FINAL`, `Y_FINAL`, `X_FINAL`, `Z_COLLAR_FINAL`, `PROFUNDIDADE_FINAL`.
 
 ## Plano MVV organizado

@@ -11,6 +11,8 @@ Tambem permite anexar somente o arquivo executado para baixar `RD_EXECUTADO_ORGA
 3. Clique em `Consolidar MVV + RD`. Para uma saída isolada, abra `Outras saídas` e escolha o fluxo planejado ou executado.
 4. Baixe o workbook quando o link aparecer; o log tecnico fica disponivel no painel `Resumo`.
 
+Na consolidação MVV × RD, as linhas planejadas permanecem primeiro e na ordem do projeto. Ao final, são incluídos os furos únicos levantados (`L-`) ou executados (`E-`) sem referência planejada, com os campos planejados vazios e as coordenadas do registro RD selecionado. Quando existem `L-` e `E-` para o mesmo número, o levantamento `L-` tem preferência. Um levantamento ou executado com referência no projeto fica somente na linha MVV correspondente, sem gerar uma linha adicional; a profundidade final de um furo sem plano fica vazia porque não há `Z Toe` para o cálculo.
+
 Para organizar somente o dado planejado, anexe `PLANEJADO.xlsx`, abra `Outras saídas`, clique em `Organizar planejado` e baixe o workbook gerado.
 Para organizar somente o executado, anexe `REALIZADO.txt`, abra `Outras saídas` e clique em `Organizar executado`. Escolha `Com profundidade` para informar a cota do pé e, se necessário, a subfuração; a profundidade será calculada pela diferença entre a cota de topo do arquivo, a cota do pé e a subfuração. Escolha `Sem profundidade (somente colunas)` para gerar apenas `ID`, `Y`, `X` e `Z`, sem solicitar parâmetros de profundidade. Quando o mesmo número de furo aparecer mais de uma vez, o registro `L-` (levantado) permanece; o registro `E-` (executado) só é mantido quando não existe levantamento correspondente.
 
@@ -40,6 +42,7 @@ O arquivo planejado é validado pelo conjunto de abas e colunas, não apenas pel
 - A deduplicação do executado mantém `L-` sobre `E-` para o mesmo número de furo e conserva `E-` apenas quando não há levantamento correspondente.
 - Links de download aparecem somente depois de uma geracao valida.
 - Workbook final com `CONSOLIDADO_FINAL`, `RD_TRATADA` e `LOG_VALIDACAO`.
+- A consolidação inclui ao final os furos únicos da RD que não existem no planejado e identifica a quantidade/IDs incluídos no resumo e no log.
 - Exportacao MVV-only com a aba `PLANO_MVV` e somente as colunas configuradas.
 
 ## Execucao local

@@ -9,7 +9,7 @@
 5. `src/reader.js` le os arquivos.
 6. `src/reader.js` registra as abas disponíveis; `src/validator.js` identifica perfis legados configurados antes de validar colunas e tipos.
 7. Em `Dip`, vazio ou `-` e aceito como `0`; um perfil incompatível, como `REG43` sem o contrato MVV completo, interrompe o fluxo e não permite saída parcial.
-8. `src/processor.js` normaliza, deduplica e consolida, preservando `Dip = 0` quando a origem veio vazia ou com `-`.
+8. `src/processor.js` normaliza e deduplica a RD, consolida as linhas da MVV na ordem original e acrescenta ao final os furos únicos da RD sem referência planejada. As linhas acrescentadas mantêm as colunas planejadas vazias e deixam a profundidade final vazia, preservando `Dip = 0` quando a origem veio vazia ou com `-`.
 9. `src/writer.js` monta o workbook final somente após a validação.
 10. `src/app.js` dispara o download, mostra o resumo somente após uma saída ou erro e controla os estados visuais dos detalhes.
 

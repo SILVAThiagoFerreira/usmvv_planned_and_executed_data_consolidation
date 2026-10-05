@@ -1,4 +1,4 @@
-import { asText, isBlank } from './utils.js?v=20260921-source-profile-1';
+import { asText, isBlank } from './utils.js?v=20261005-unplanned-rd-1';
 
 function getExcelJS() {
   if (!globalThis.ExcelJS || !globalThis.ExcelJS.Workbook) {

@@ -1,4 +1,4 @@
-import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js?v=20260921-source-profile-1';
+import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js?v=20261005-unplanned-rd-1';
 
 export function buildMvvRows(rawMvv, config, validation) {
   const indexMap = validation.indexMap;
@@ -222,15 +222,54 @@ export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefi
     });
   }
 
+  const rdOnlyRows = [...rdSelected.values()]
+    .filter((rdRow) => !mvvKeys.has(rdRow.holeKey))
+    .sort((a, b) => compareHoleKeys(a.holeKey, b.holeKey));
+
+  for (const rdRow of rdOnlyRows) {
+    consolidatedRows.push({
+      ID: null,
+      Type: null,
+      Descricao: null,
+      Diameter: null,
+      'X Collar': null,
+      'Y Collar': null,
+      'X Toe': null,
+      'Y Toe': null,
+      'Z Toe': null,
+      'Z Collar': null,
+      Depth: null,
+      'Sub Drill': null,
+      Azimuth: null,
+      Dip: null,
+      ID_RD: rdRow.ID_RD,
+      TIPO_RD: rdRow.TIPO_RD,
+      Y_RD: rdRow.Y_RD,
+      X_RD: rdRow.X_RD,
+      Z_RD: rdRow.Z_RD,
+      ID_FINAL: rdRow.ID_RD,
+      Y_FINAL: rdRow.Y_RD,
+      X_FINAL: rdRow.X_RD,
+      Z_COLLAR_FINAL: rdRow.Z_RD,
+      PROFUNDIDADE_FINAL: null,
+      'Diâmetro': null,
+      'Azimute': null,
+      'Ângulo planejado': null,
+      'Ângulo do talude': null,
+      'Profundidade': null,
+    });
+  }
+
   const summary = {
     mvvCount: mvvRows.length,
     rdRawCount,
     rdUniqueCount: rdSelected.size,
     rdMatchedCount: mvvRows.length - missingHoles.length,
     rdMissingCount: missingHoles.length,
+    rdOnlyIncludedCount: rdOnlyRows.length,
     dualPrefixCount,
     missingHoles,
-    rdOnlyHoles: [...rdSelected.keys()].filter((key) => !mvvKeys.has(key)).sort(compareHoleKeys),
+    rdOnlyHoles: rdOnlyRows.map((row) => row.holeKey),
     discardedRdCount: rdRawCount - rdSelected.size,
   };
 

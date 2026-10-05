@@ -42,6 +42,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--base-url", required=True)
     parser.add_argument("--mvv", default=str(Path(__file__).resolve().parents[2] / "input" / "MVV.xlsx"))
     parser.add_argument("--rd", default=str(Path(__file__).resolve().parents[2] / "input" / "RD.txt"))
+    parser.add_argument("--expected-rd-only-count", type=int)
+    parser.add_argument("--expected-rd-only-id")
     parser.add_argument("--pitdev-field", required=True)
     parser.add_argument("--pitdev-plan", required=True)
     return parser.parse_args()
@@ -150,7 +152,7 @@ def main() -> int:
             page.get_by_role("link", name="Baixar RD_EXECUTADO_ORGANIZADO.xlsx").click()
         rd_only_with_depth_download_info.value.save_as(str(rd_only_with_depth_download_path))
 
-        page.locator(".pitdev-summary").click()
+        page.locator(".pitdev-panel > summary").click()
         page.set_input_files("#pitdevFieldFile", args.pitdev_field)
         page.wait_for_function("document.querySelector('#pitdevFieldOnlyBtn')?.disabled === false")
         page.wait_for_function("document.querySelector('#pitdevGenerateBtn')?.disabled === true")
@@ -182,6 +184,37 @@ def main() -> int:
 
     wb = load_workbook(download_path, data_only=True)
     assert wb.sheetnames == ["CONSOLIDADO_FINAL", "RD_TRATADA", "LOG_VALIDACAO"]
+    consolidated_ws = wb["CONSOLIDADO_FINAL"]
+    consolidation_log = wb["LOG_VALIDACAO"]
+    consolidated_headers = {cell.value: cell.column for cell in consolidated_ws[1]}
+    mvv_count = consolidation_log["B2"].value
+    rd_only_included_count = consolidation_log["B7"].value
+    if args.expected_rd_only_count is not None:
+        assert rd_only_included_count == args.expected_rd_only_count
+    if args.expected_rd_only_id is not None:
+        extra_ids = [
+            consolidated_ws.cell(row_number, consolidated_headers["ID_RD"]).value
+            for row_number in range(mvv_count + 2, consolidated_ws.max_row + 1)
+        ]
+        assert extra_ids == [args.expected_rd_only_id]
+        treated_ids = {row[0].value for row in wb["RD_TRATADA"].iter_rows(min_row=2) if row[0].value is not None}
+        assert args.expected_rd_only_id in treated_ids
+        if args.expected_rd_only_id.startswith("L-"):
+            assert f"E-{args.expected_rd_only_id[2:]}" not in treated_ids
+    assert consolidated_ws.max_row == mvv_count + rd_only_included_count + 1
+    assert rd_only_included_count == sum(
+        1 for row in range(10, consolidation_log.max_row + 1)
+        if consolidation_log.cell(row=row, column=4).value not in (None, "")
+    )
+    for row_number in range(mvv_count + 2, consolidated_ws.max_row + 1):
+        assert consolidated_ws.cell(row_number, consolidated_headers["ID"]).value is None
+        assert consolidated_ws.cell(row_number, consolidated_headers["ID_RD"]).value is not None
+        assert (
+            consolidated_ws.cell(row_number, consolidated_headers["ID_FINAL"]).value
+            == consolidated_ws.cell(row_number, consolidated_headers["ID_RD"]).value
+        )
+        assert consolidated_ws.cell(row_number, consolidated_headers["PROFUNDIDADE_FINAL"]).value is None
+    wb.close()
     download_path.unlink(missing_ok=True)
 
     mvv_only_wb = load_workbook(mvv_only_download_path, data_only=True)
