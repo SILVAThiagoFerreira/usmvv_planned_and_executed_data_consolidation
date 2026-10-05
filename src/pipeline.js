@@ -1,9 +1,9 @@
-import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js?v=20261005-unplanned-rd-1';
-import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js?v=20261005-unplanned-rd-1';
-import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows, resolveRdOnlyExportMode, suggestPitdevToeElevation } from './processor.js?v=20261005-unplanned-rd-1';
-import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js?v=20261005-unplanned-rd-1';
+import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js?v=20261005-added-depth-3';
+import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js?v=20261005-added-depth-3';
+import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows, resolveRdOnlyExportMode, suggestPitdevToeElevation } from './processor.js?v=20261005-added-depth-3';
+import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js?v=20261005-added-depth-3';
 
-export async function runPipeline({ config, mvvFile, rdFile }) {
+export async function runPipeline({ config, mvvFile, rdFile, unplannedDepthOptions = null }) {
   const rawMvv = await readMvvFile(mvvFile, config);
   const rawRd = await readRdFile(rdFile, config);
 
@@ -13,7 +13,7 @@ export async function runPipeline({ config, mvvFile, rdFile }) {
   const mvvRows = buildMvvRows(rawMvv, config, mvvValidation);
   const rdRows = buildRdRows(rawRd, config);
   const { treatedRows, selected, dualPrefixCount } = deduplicateRdRows(rdRows, config);
-  const { consolidatedRows, summary } = buildConsolidatedRows(mvvRows, selected, rdValidation.rowCount, dualPrefixCount);
+  const { consolidatedRows, summary } = buildConsolidatedRows(mvvRows, selected, rdValidation.rowCount, dualPrefixCount, config, unplannedDepthOptions);
   const enrichedSummary = {
     ...summary,
     mode: 'consolidated',

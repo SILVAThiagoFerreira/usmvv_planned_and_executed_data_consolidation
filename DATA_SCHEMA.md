@@ -29,7 +29,7 @@ Quando o perfil é detectado no fluxo MVV ou MVV-only, a validação encerra o p
 
 | Campo | Tipo | Obrigatorio | Significado |
 | --- | --- | --- | --- |
-| ID_RD | texto | sim | `L_` ou `E-` + numero do furo |
+| ID_RD | texto | sim | `L-`, `L_` ou `E-` + numero do furo |
 | vazio | vazio | sim | Segundo campo vazio |
 | Y_RD | numero | sim | Coordenada Y |
 | X_RD | numero | sim | Coordenada X |
@@ -40,7 +40,7 @@ Quando o perfil é detectado no fluxo MVV ou MVV-only, a validação encerra o p
 | Coluna | Tipo | Obrigatorio | Significado |
 | --- | --- | --- | --- |
 | ID_RD | texto | sim | ID selecionado |
-| TIPO_RD | texto | sim | `E-` ou `L_` |
+| TIPO_RD | texto | sim | `E-`, `L-` ou `L_` |
 | Y_RD | numero | sim | Y selecionado |
 | X_RD | numero | sim | X selecionado |
 | Z_RD | numero | sim | Z selecionado |
@@ -72,14 +72,15 @@ Nesse modo, a cota do pé e a subfuração não são lidas nem usadas.
 
 ### Deduplicação da RD-only
 
-Antes de qualquer formato de exportação, os registros são reduzidos a um por número de furo. Quando existem `L-` e `E-` para o mesmo número, permanece o `L-`; o `E-` só é exportado quando não há levantamento correspondente. Registros repetidos do mesmo prefixo seguem a regra configurada de manter o primeiro registro válido.
+Antes de qualquer formato de exportação, os registros são reduzidos a um por número de furo. Quando existem `L-` ou `L_` e `E-` para o mesmo número, permanece o levantamento; o `E-` só é exportado quando não há levantamento correspondente. Registros repetidos do mesmo prefixo seguem a regra configurada de manter o primeiro registro válido.
 
 ## Consolidado final
 
 - A aba mantém primeiro todas as linhas MVV na ordem de origem, com dados RD quando houver correspondência.
-- Depois das linhas MVV, inclui uma linha para cada furo único levantado (`L-`) ou executado (`E-`) cujo número normalizado não exista no plano. A lista segue a ordem numérica do número de furo.
-- Nas linhas sem plano, todas as colunas planejadas ficam vazias. `ID_RD`, `TIPO_RD`, `Y_RD`, `X_RD` e `Z_RD` preservam a fonte selecionada; `ID_FINAL`, `Y_FINAL`, `X_FINAL` e `Z_COLLAR_FINAL` usam o ID e as coordenadas RD. `PROFUNDIDADE_FINAL` fica vazia porque não existe `Z Toe` planejado para calcular a diferença.
-- A seleção da fonte RD mantém `L-` sobre `E-` para um mesmo número. Um levantamento ou executado que corresponde a uma linha MVV fica somente naquela linha e não gera uma segunda linha.
+- Depois das linhas MVV, inclui uma linha para cada furo único levantado (`L-` ou `L_`) ou executado (`E-`) cujo número normalizado não exista no plano. A lista segue a ordem numérica do número de furo.
+- Nas linhas sem referência planejada, `ID` recebe o número de `ID_RD` sem prefixo e sem traço, como valor numérico; `Descricao` recebe `Added`; `X Collar`, `Y Collar` e `Z Collar` recebem `X_RD`, `Y_RD` e `Z_RD` do registro selecionado.
+- `ID_RD`, `TIPO_RD`, `Y_RD`, `X_RD` e `Z_RD` preservam os dados RD originais; `ID_FINAL`, `Y_FINAL`, `X_FINAL` e `Z_COLLAR_FINAL` mantêm as colunas finais de consolidação. Como a fonte RD não contém `Depth`, quando existem linhas extras a interface solicita cota do pé e subfuração, sugere a moda de `Z Toe` planejado e permite editar. O cálculo `Z_RD - cota do pé + subfuração` preenche `Z Toe`, `Sub Drill`, `Depth`, `Profundidade` e `PROFUNDIDADE_FINAL`. `X Toe`, `Y Toe`, `Type`, `Diameter`, `Azimuth` e `Dip` ficam vazios porque não existem na fonte RD.
+- A seleção da fonte RD mantém `L-` e `L_` sobre `E-` para um mesmo número. Um levantamento ou executado que corresponde a uma linha MVV fica somente naquela linha e não gera uma segunda linha.
 - O log `LOG_VALIDACAO` registra a quantidade de linhas acrescentadas e lista os IDs RD sem referência planejada.
 - Colunas finais: `ID_FINAL`, `Y_FINAL`, `X_FINAL`, `Z_COLLAR_FINAL`, `PROFUNDIDADE_FINAL`.
 

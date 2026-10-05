@@ -162,6 +162,11 @@ function addLogSheet(workbook, summary, config, metadata) {
     ['Generated at', metadata.generatedAt],
     ['Config', metadata.configPath],
     ['Output', metadata.outputPath],
+    ...(summary.unplannedDepthOptions ? [
+      [config.output.labels.unplanned_depth_toe_elevation, summary.unplannedDepthOptions.toeElevation],
+      [config.output.labels.unplanned_depth_subdrilling, summary.unplannedDepthOptions.subdrilling],
+      [config.output.labels.unplanned_depth_formula, summary.unplannedDepthOptions.formula],
+    ] : []),
   ];
 
   metadataRows.forEach(([label, value], idx) => {
@@ -193,6 +198,11 @@ function addLogSheet(workbook, summary, config, metadata) {
   ['A', 'B', 'D', 'E'].forEach((column) => {
     sheet.getColumn(column).width = column === 'B' || column === 'E' ? 24 : 48;
   });
+
+  if (summary.unplannedDepthOptions) {
+    sheet.getColumn('E').width = config.formatting.max_width;
+    sheet.getColumn('E').alignment = { vertical: 'top', wrapText: true };
+  }
 
   sheet.autoFilter = 'A1:B8';
 }

@@ -1,5 +1,5 @@
-import { loadConfig } from './config.js?v=20261005-unplanned-rd-1';
-import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20261005-unplanned-rd-1';
+import { loadConfig } from './config.js?v=20261005-added-depth-3';
+import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20261005-added-depth-3';
 import { runPlanMergePipeline } from './plan_merge_pipeline.js?v=20261001-csv-plan-merge-2';
 
 function qs(id) {
@@ -83,6 +83,12 @@ function renderSummary(summaryCards, languagePack, summary) {
       [languagePack.metrics.rd_only_included_count, summary.rdOnlyIncludedCount],
       [languagePack.metrics.dual_prefix_count, summary.dualPrefixCount],
     ];
+    if (summary.unplannedDepthOptions) {
+      metrics.push(
+        [languagePack.unplanned_toe_elevation_label, `${formatNumberForUi(summary.unplannedDepthOptions.toeElevation)} m`],
+        [languagePack.unplanned_subdrilling_label, `${formatNumberForUi(summary.unplannedDepthOptions.subdrilling)} m`],
+      );
+    }
   }
 
   summaryCards.innerHTML = metrics
@@ -274,6 +280,20 @@ export async function bootstrapApp() {
   const toeElevationInput = qs('toeElevationInput');
   const subdrillingValueInput = qs('subdrillingValueInput');
   const executedOptionsError = qs('executedOptionsError');
+  const unplannedOptions = qs('unplannedOptions');
+  const unplannedOptionsKicker = qs('unplannedOptionsKicker');
+  const unplannedOptionsTitle = qs('unplannedOptionsTitle');
+  const unplannedOptionsHint = qs('unplannedOptionsHint');
+  const unplannedToeSuggestion = qs('unplannedToeSuggestion');
+  const unplannedToeElevationLabel = qs('unplannedToeElevationLabel');
+  const unplannedSubdrillingLabel = qs('unplannedSubdrillingLabel');
+  const unplannedDepthFormula = qs('unplannedDepthFormula');
+  const unplannedOptionsSubmit = qs('unplannedOptionsSubmit');
+  const unplannedOptionsCancel = qs('unplannedOptionsCancel');
+  const unplannedOptionsClose = qs('unplannedOptionsClose');
+  const unplannedToeElevationInput = qs('unplannedToeElevationInput');
+  const unplannedSubdrillingInput = qs('unplannedSubdrillingInput');
+  const unplannedOptionsError = qs('unplannedOptionsError');
   const pitdevTitle = qs('pitdevTitle');
   const pitdevHint = qs('pitdevHint');
   const pitdevFieldFile = qs('pitdevFieldFile');
@@ -346,6 +366,8 @@ export async function bootstrapApp() {
     phase: 'idle',
     errorMessage: null,
     summary: null,
+    unplannedDepthOptions: null,
+    unplannedPreviewSummary: null,
     pitdevSummary: null,
     pitdevMetadata: null,
     pitdevPhase: 'idle',
@@ -731,6 +753,24 @@ export async function bootstrapApp() {
     pitdevFormula.textContent = ui.pitdev_formula;
     pitdevOptionsSubmit.textContent = ui.pitdev_options_submit;
     pitdevOptionsError.textContent = ui.pitdev_options_invalid;
+    unplannedOptionsKicker.textContent = ui.unplanned_options_kicker;
+    unplannedOptionsTitle.textContent = ui.unplanned_options_title;
+    unplannedOptionsHint.textContent = ui.unplanned_options_hint;
+    unplannedToeElevationLabel.textContent = ui.unplanned_toe_elevation_label;
+    unplannedSubdrillingLabel.textContent = ui.unplanned_subdrilling_label;
+    unplannedDepthFormula.textContent = ui.unplanned_depth_formula;
+    unplannedOptionsSubmit.textContent = ui.unplanned_options_submit;
+    unplannedOptionsCancel.textContent = ui.cancel_action;
+    if (state.unplannedPreviewSummary?.unplannedToeSuggestion) {
+      unplannedToeSuggestion.textContent = formatPitdevToeSuggestion(
+        ui.unplanned_toe_suggestion,
+        state.unplannedPreviewSummary.unplannedToeSuggestion,
+      );
+      unplannedToeSuggestion.hidden = false;
+    } else {
+      unplannedToeSuggestion.textContent = '';
+      unplannedToeSuggestion.hidden = true;
+    }
     secondaryActions.setAttribute('aria-label', ui.secondary_actions_label);
     updateExecutedModeUi();
 
@@ -805,6 +845,12 @@ export async function bootstrapApp() {
   const setFile = (kind, file) => {
     state[kind] = file;
     state.phase = state.mvv && state.rd ? 'ready' : 'idle';
+    state.unplannedDepthOptions = null;
+    state.unplannedPreviewSummary = null;
+    unplannedOptions.hidden = true;
+    unplannedOptionsError.hidden = true;
+    unplannedToeElevationInput.value = '';
+    unplannedSubdrillingInput.value = formatNumberForUi(config.matching.unplanned_import.default_subdrilling);
     clearGeneratedOutput();
     renderLanguage();
   };
@@ -914,7 +960,28 @@ export async function bootstrapApp() {
       updateLog();
 
       await new Promise((resolve) => setTimeout(resolve, 0));
-      const result = await runPipeline({ config, mvvFile: state.mvv, rdFile: state.rd });
+      let result;
+      if (state.unplannedDepthOptions) {
+        result = await runPipeline({
+          config,
+          mvvFile: state.mvv,
+          rdFile: state.rd,
+          unplannedDepthOptions: state.unplannedDepthOptions,
+        });
+      } else {
+        result = await runPipeline({ config, mvvFile: state.mvv, rdFile: state.rd });
+        if (result.summary.rdOnlyIncludedCount > 0) {
+          state.unplannedPreviewSummary = result.summary;
+          unplannedToeElevationInput.value = formatNumberForUi(result.summary.unplannedToeSuggestion?.value);
+          unplannedSubdrillingInput.value = formatNumberForUi(config.matching.unplanned_import.default_subdrilling);
+          unplannedOptionsError.hidden = true;
+          unplannedOptions.hidden = false;
+          state.phase = 'ready';
+          renderLanguage();
+          unplannedToeElevationInput.focus();
+          return;
+        }
+      }
 
       const blob = new Blob([result.buffer], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -926,9 +993,21 @@ export async function bootstrapApp() {
       state.summary = result.summary;
       state.phase = 'done';
       state.errorMessage = null;
+      state.unplannedPreviewSummary = null;
+      state.unplannedDepthOptions = null;
+      unplannedOptions.hidden = true;
       renderLanguage();
     } catch (error) {
       const message = formatPipelineError(error, currentUi());
+      if (state.unplannedDepthOptions) {
+        unplannedOptionsError.textContent = message;
+        unplannedOptionsError.hidden = false;
+        unplannedOptions.hidden = false;
+        state.phase = 'ready';
+        state.errorMessage = null;
+        updateStatus();
+        return;
+      }
       state.phase = 'error';
       state.errorMessage = message;
       state.summary = null;
@@ -941,6 +1020,29 @@ export async function bootstrapApp() {
       updateStatus();
       updateLog();
     }
+  });
+
+  const cancelUnplannedOptions = () => {
+    state.unplannedDepthOptions = null;
+    state.unplannedPreviewSummary = null;
+    unplannedOptionsError.hidden = true;
+    unplannedOptions.hidden = true;
+    updateStatus();
+  };
+  unplannedOptionsCancel.addEventListener('click', cancelUnplannedOptions);
+  unplannedOptionsClose.addEventListener('click', cancelUnplannedOptions);
+  unplannedOptions.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const toeElevation = parseNumberInput(unplannedToeElevationInput.value);
+    const subdrilling = parseNumberInput(unplannedSubdrillingInput.value);
+    if (toeElevation === null || toeElevation <= 0 || subdrilling === null || subdrilling < 0) {
+      unplannedOptionsError.textContent = currentUi().unplanned_options_invalid;
+      unplannedOptionsError.hidden = false;
+      return;
+    }
+    unplannedOptionsError.hidden = true;
+    state.unplannedDepthOptions = { toeElevation, subdrilling };
+    generateBtn.click();
   });
 
   mvvOnlyBtn.addEventListener('click', async () => {

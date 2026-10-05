@@ -114,6 +114,34 @@
             <p id="executedOptionsError" class="form-error" role="alert" hidden></p>
           </form>
 
+          <form id="unplannedOptions" class="executed-options" hidden>
+            <div class="options-heading">
+              <div>
+                <span id="unplannedOptionsKicker" class="options-kicker">Furos Added</span>
+                <h3 id="unplannedOptionsTitle">Dados para calcular a profundidade</h3>
+              </div>
+              <button id="unplannedOptionsClose" class="options-close" type="button" aria-label="Cancelar">&times;</button>
+            </div>
+            <p id="unplannedOptionsHint">Informe a cota do p&eacute; e a subfura&ccedil;&atilde;o usada nos furos Added.</p>
+            <p id="unplannedToeSuggestion" class="pitdev-toe-suggestion" hidden></p>
+            <div class="options-grid">
+              <label class="field">
+                <span id="unplannedToeElevationLabel">Cota do p&eacute; (m)</span>
+                <input id="unplannedToeElevationInput" type="number" min="0.001" step="any" required />
+              </label>
+              <label class="field">
+                <span id="unplannedSubdrillingLabel">Subfura&ccedil;&atilde;o (m)</span>
+                <input id="unplannedSubdrillingInput" type="number" min="0" step="any" required />
+              </label>
+            </div>
+            <p id="unplannedDepthFormula" class="formula">Profundidade = Z_RD &minus; cota do p&eacute; + subfura&ccedil;&atilde;o</p>
+            <div class="options-actions">
+              <button id="unplannedOptionsCancel" class="secondary" type="button">Cancelar</button>
+              <button id="unplannedOptionsSubmit" class="primary" type="submit">Calcular e continuar</button>
+            </div>
+            <p id="unplannedOptionsError" class="form-error" role="alert" hidden></p>
+          </form>
+
           <div class="status" id="statusBox" data-tone="idle" role="status" aria-live="polite" aria-busy="false">
             <span class="status-dot"></span>
             <p id="statusText">Anexe o planejado para começar.</p>
@@ -248,6 +276,6 @@
       </details>
     </div>
 
-    <script type="module" src="./main.js?v=20261005-unplanned-rd-1"></script>
+    <script type="module" src="./main.js?v=20261005-added-depth-3"></script>
   </body>
 </html>

@@ -9,7 +9,7 @@
 5. `src/reader.js` le os arquivos.
 6. `src/reader.js` registra as abas disponíveis; `src/validator.js` identifica perfis legados configurados antes de validar colunas e tipos.
 7. Em `Dip`, vazio ou `-` e aceito como `0`; um perfil incompatível, como `REG43` sem o contrato MVV completo, interrompe o fluxo e não permite saída parcial.
-8. `src/processor.js` normaliza e deduplica a RD, consolida as linhas da MVV na ordem original e acrescenta ao final os furos únicos da RD sem referência planejada. As linhas acrescentadas mantêm as colunas planejadas vazias e deixam a profundidade final vazia, preservando `Dip = 0` quando a origem veio vazia ou com `-`.
+8. `src/processor.js` normaliza e deduplica a RD, consolida as linhas da MVV na ordem original e acrescenta ao final os furos únicos da RD sem referência planejada. Nas linhas extras, grava o ID numérico sem prefixo, a descrição `Added` e as coordenadas RD em `X Collar`, `Y Collar` e `Z Collar`. Se houver linhas extras, `src/app.js` solicita cota do pé e subfuração e sugere a moda de `Z Toe` planejado; o processador usa `Z_RD - cota do pé + subfuração` para preencher os campos de profundidade e mantém vazios os dados técnicos sem fonte.
 9. `src/writer.js` monta o workbook final somente após a validação.
 10. `src/app.js` dispara o download, mostra o resumo somente após uma saída ou erro e controla os estados visuais dos detalhes.
 
@@ -31,7 +31,7 @@
 3. No modo com profundidade, `src/app.js` solicita a cota do pé e pergunta se haverá subfuração; no modo sem profundidade, esses parâmetros ficam ocultos.
 4. `src/reader.js` le a RD.
 5. `src/validator.js` valida a estrutura da RD.
-6. `src/processor.js` deduplica a RD, mantendo `L-` sobre `E-`, normaliza `ID` para numero e, somente no modo com profundidade, calcula `Z - cota do pé + subfuração`.
+6. `src/processor.js` deduplica a RD, mantendo `L-` ou `L_` sobre `E-`, normaliza `ID` para numero e calcula os campos de profundidade dos furos Added com a cota do pé informada.
 7. `src/writer.js` gera `RD_EXECUTADO_ORGANIZADO.xlsx` com uma unica aba e as colunas configuradas para o modo escolhido.
 8. `src/app.js` libera o download e mostra o resumo.
 

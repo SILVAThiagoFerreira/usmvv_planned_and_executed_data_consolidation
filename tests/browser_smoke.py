@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import tempfile
 from collections import Counter
 from pathlib import Path
@@ -65,6 +66,7 @@ def main() -> int:
     ]
     expected_toe, expected_frequency, expected_valid_count = read_toe_suggestion(args.pitdev_plan)
     rd_only_input_path.write_text("E-1,,11,21,292\nL-1,,10,20,292\nE-2,,12,22,280\n", encoding="utf-8")
+    unplanned_depth_options = None
 
     for path in [download_path, mvv_only_download_path, rd_only_without_depth_download_path, rd_only_with_depth_download_path, pitdev_field_only_download_path, pitdev_download_path]:
         if path.exists():
@@ -123,6 +125,16 @@ def main() -> int:
         page.locator("#generateBtn").wait_for(state="visible")
         page.wait_for_function("!document.querySelector('#generateBtn')?.disabled")
         page.get_by_role("button", name="Consolidar MVV + RD").click()
+        page.wait_for_function(
+            "document.querySelector('#unplannedOptions')?.hidden === false || "
+            "document.querySelector('#statusText')?.textContent?.includes('Planilha gerada.')"
+        )
+        if not page.locator("#unplannedOptions").is_hidden():
+            toe_elevation = float(page.locator("#unplannedToeElevationInput").input_value())
+            subdrilling = 0.0
+            page.locator("#unplannedSubdrillingInput").fill(str(subdrilling))
+            page.locator("#unplannedOptionsSubmit").click()
+            unplanned_depth_options = (toe_elevation, subdrilling)
         page.wait_for_function("document.querySelector('#statusText')?.textContent?.includes('Planilha gerada.')")
         page.locator("#downloadLink").wait_for(state="visible")
         with page.expect_download() as download_info:
@@ -199,7 +211,7 @@ def main() -> int:
         assert extra_ids == [args.expected_rd_only_id]
         treated_ids = {row[0].value for row in wb["RD_TRATADA"].iter_rows(min_row=2) if row[0].value is not None}
         assert args.expected_rd_only_id in treated_ids
-        if args.expected_rd_only_id.startswith("L-"):
+        if args.expected_rd_only_id.startswith(("L-", "L_")):
             assert f"E-{args.expected_rd_only_id[2:]}" not in treated_ids
     assert consolidated_ws.max_row == mvv_count + rd_only_included_count + 1
     assert rd_only_included_count == sum(
@@ -207,13 +219,32 @@ def main() -> int:
         if consolidation_log.cell(row=row, column=4).value not in (None, "")
     )
     for row_number in range(mvv_count + 2, consolidated_ws.max_row + 1):
-        assert consolidated_ws.cell(row_number, consolidated_headers["ID"]).value is None
-        assert consolidated_ws.cell(row_number, consolidated_headers["ID_RD"]).value is not None
+        rd_id = consolidated_ws.cell(row_number, consolidated_headers["ID_RD"]).value
+        normalized_id = re.sub(r"^(?:L-|E-|L_)", "", str(rd_id))
+        assert consolidated_ws.cell(row_number, consolidated_headers["ID"]).value == int(normalized_id)
+        assert consolidated_ws.cell(row_number, consolidated_headers["Descricao"]).value == "Added"
+        assert consolidated_ws.cell(row_number, consolidated_headers["X Collar"]).value == consolidated_ws.cell(row_number, consolidated_headers["X_RD"]).value
+        assert consolidated_ws.cell(row_number, consolidated_headers["Y Collar"]).value == consolidated_ws.cell(row_number, consolidated_headers["Y_RD"]).value
+        assert consolidated_ws.cell(row_number, consolidated_headers["Z Collar"]).value == consolidated_ws.cell(row_number, consolidated_headers["Z_RD"]).value
+        assert rd_id is not None
         assert (
             consolidated_ws.cell(row_number, consolidated_headers["ID_FINAL"]).value
             == consolidated_ws.cell(row_number, consolidated_headers["ID_RD"]).value
         )
-        assert consolidated_ws.cell(row_number, consolidated_headers["PROFUNDIDADE_FINAL"]).value is None
+        if unplanned_depth_options is None:
+            assert consolidated_ws.cell(row_number, consolidated_headers["PROFUNDIDADE_FINAL"]).value is None
+        else:
+            toe_elevation, subdrilling = unplanned_depth_options
+            expected_depth = consolidated_ws.cell(row_number, consolidated_headers["Z_RD"]).value - toe_elevation + subdrilling
+            assert abs(consolidated_ws.cell(row_number, consolidated_headers["Depth"]).value - expected_depth) < 1e-6
+            assert abs(consolidated_ws.cell(row_number, consolidated_headers["Profundidade"]).value - expected_depth) < 1e-6
+            assert consolidated_ws.cell(row_number, consolidated_headers["Z Toe"]).value == toe_elevation
+            assert consolidated_ws.cell(row_number, consolidated_headers["Sub Drill"]).value == subdrilling
+            assert abs(consolidated_ws.cell(row_number, consolidated_headers["PROFUNDIDADE_FINAL"]).value - expected_depth) < 1e-6
+    if unplanned_depth_options is not None:
+        assert consolidation_log["E6"].value == unplanned_depth_options[0]
+        assert consolidation_log["E7"].value == unplanned_depth_options[1]
+        assert consolidation_log["E8"].value == "Z_RD - toeElevation + subdrilling"
     wb.close()
     download_path.unlink(missing_ok=True)
 

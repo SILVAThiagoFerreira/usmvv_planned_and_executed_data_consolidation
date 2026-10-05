@@ -1,4 +1,4 @@
-import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js?v=20261005-unplanned-rd-1';
+import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js?v=20261005-added-depth-3';
 
 function normalizeDescriptor(value) {
   return String(value ?? '')

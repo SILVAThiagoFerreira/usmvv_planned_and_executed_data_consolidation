@@ -1,4 +1,4 @@
-import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js?v=20261005-unplanned-rd-1';
+import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js?v=20261005-added-depth-3';
 
 export function buildMvvRows(rawMvv, config, validation) {
   const indexMap = validation.indexMap;
@@ -179,10 +179,16 @@ export function buildRdOnlyRows(rdTreatedRows, config, toeElevation, subdrilling
   });
 }
 
-export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefixCount) {
+export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefixCount, config, unplannedDepthOptions = null) {
   const mvvKeys = new Set(mvvRows.map((row) => row.holeKey));
   const missingHoles = [];
   const consolidatedRows = [];
+  const importFields = config.matching.unplanned_import;
+  const toeElevation = unplannedDepthOptions ? Number(unplannedDepthOptions.toeElevation) : null;
+  const subdrilling = unplannedDepthOptions ? Number(unplannedDepthOptions.subdrilling) : null;
+  if (unplannedDepthOptions && (!Number.isFinite(toeElevation) || toeElevation <= 0 || !Number.isFinite(subdrilling) || subdrilling < 0)) {
+    throw new Error('Invalid toe elevation or subdrilling for unplanned RD holes');
+  }
 
   for (const row of mvvRows) {
     const rdRow = rdSelected.get(row.holeKey) || null;
@@ -227,6 +233,16 @@ export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefi
     .sort((a, b) => compareHoleKeys(a.holeKey, b.holeKey));
 
   for (const rdRow of rdOnlyRows) {
+    const plannedId = normalizeIdValue(rdRow.holeKey);
+    if (typeof plannedId !== 'number' || !Number.isFinite(plannedId)) {
+      throw new Error(`RD line ${rdRow.sourceLine ?? '?'}: invalid numeric hole ID for unplanned row`);
+    }
+    const calculatedDepth = unplannedDepthOptions
+      ? Number(rdRow[importFields.source_elevation_field]) - toeElevation + subdrilling
+      : null;
+    if (unplannedDepthOptions && (!Number.isFinite(calculatedDepth) || calculatedDepth <= 0)) {
+      throw new Error(`RD line ${rdRow.sourceLine ?? '?'}: cannot calculate depth for unplanned row`);
+    }
     consolidatedRows.push({
       ID: null,
       Type: null,
@@ -257,6 +273,16 @@ export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefi
       'Ângulo planejado': null,
       'Ângulo do talude': null,
       'Profundidade': null,
+      [importFields.id_field]: plannedId,
+      [importFields.description_field]: importFields.description_value,
+      [importFields.x_collar_field]: rdRow[importFields.x_source_field],
+      [importFields.y_collar_field]: rdRow[importFields.y_source_field],
+      [importFields.z_collar_field]: rdRow[importFields.z_source_field],
+      [importFields.toe_field]: unplannedDepthOptions ? toeElevation : null,
+      [importFields.subdrilling_field]: unplannedDepthOptions ? subdrilling : null,
+      [importFields.depth_field]: calculatedDepth,
+      [importFields.secondary_depth_field]: calculatedDepth,
+      [importFields.final_depth_field]: calculatedDepth,
     });
   }
 
@@ -271,9 +297,43 @@ export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefi
     missingHoles,
     rdOnlyHoles: rdOnlyRows.map((row) => row.holeKey),
     discardedRdCount: rdRawCount - rdSelected.size,
+    ...(rdOnlyRows.length ? { unplannedToeSuggestion: suggestUnplannedToeElevation(mvvRows, config) } : {}),
+    ...(unplannedDepthOptions ? {
+      unplannedDepthOptions: {
+        toeElevation,
+        subdrilling,
+        formula: importFields.depth_formula,
+      },
+    } : {}),
   };
 
   return { consolidatedRows, summary };
+}
+
+function suggestUnplannedToeElevation(mvvRows, config) {
+  const suggestionConfig = config.matching.unplanned_import.toe_suggestion;
+  if (suggestionConfig.tie_break !== 'first_valid_in_document') {
+    throw new Error(`Invalid unplanned toe suggestion tie break: ${suggestionConfig.tie_break}`);
+  }
+  const field = suggestionConfig.source_field;
+  const frequencies = new Map();
+  let validCount = 0;
+  for (const row of mvvRows) {
+    if (row[field] === null || row[field] === undefined || row[field] === '') continue;
+    const value = Number(row[field]);
+    if (!Number.isFinite(value)) continue;
+    const current = frequencies.get(value);
+    if (current) current.frequency += 1;
+    else frequencies.set(value, { value, frequency: 1, firstIndex: validCount });
+    validCount += 1;
+  }
+  if (!frequencies.size) throw new Error(`No valid ${field} values to suggest a toe elevation`);
+  const selected = [...frequencies.values()].reduce((best, candidate) => {
+    if (!best || candidate.frequency > best.frequency) return candidate;
+    if (candidate.frequency === best.frequency && candidate.firstIndex < best.firstIndex) return candidate;
+    return best;
+  }, null);
+  return { value: selected.value, frequency: selected.frequency, validCount, sourceColumn: field };
 }
 
 export function suggestPitdevToeElevation(rawPlan, planValidation, config) {

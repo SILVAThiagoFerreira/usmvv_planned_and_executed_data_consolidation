@@ -1,4 +1,4 @@
-import { bootstrapApp } from './src/app.js?v=20261005-unplanned-rd-1';
+import { bootstrapApp } from './src/app.js?v=20261005-added-depth-3';
 
 window.addEventListener('DOMContentLoaded', async () => {
   try {

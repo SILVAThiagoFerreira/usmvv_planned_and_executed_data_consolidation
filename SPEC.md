@@ -32,8 +32,8 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - Os quatro seletores de arquivo e as ações de processamento permanecem focaveis por teclado, com nome e formato associados para tecnologia assistiva.
 - Os estados de processamento sao anunciados com `role`, `aria-live` e `aria-busy`; erros usam alerta explicito.
 - Parametros invalidos de furos auxiliares exibem mensagem no formulario e preservam os arquivos selecionados.
-- `L-` tem prioridade sobre `E-` e `L_` na RD.
-- Se houver ambos para o mesmo furo, `L-` e mantido na base tratada.
+- Os prefixos de levantamento `L-` e `L_` têm prioridade sobre `E-` na RD.
+- Se houver levantamento e executado para o mesmo furo, o registro `L` é mantido na base tratada.
 - Se nao houver RD para um furo, os campos finais usam MVV.
 - O workbook final e gerado como download.
 - A interface tambem permite anexar somente o arquivo planejado e gerar um plano planejado organizado, sem exigir realizado.
@@ -111,20 +111,21 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 
 - O identificador de comparacao e o numero do furo sem prefixo.
 - `L_157`, `L-157` e `E-157` mapeiam para `157`.
-- `E-` so e usado quando nao houver `L-` para o mesmo furo.
+- `E-` so e usado quando nao houver `L-` nem `L_` para o mesmo furo.
 - Em duplicidade com o mesmo prefixo, o primeiro registro valido e mantido.
 - A ordem final segue a MVV.
 - `PROFUNDIDADE_FINAL` usa `Z_RD - Z Toe` quando RD existir.
 - Sem RD, `PROFUNDIDADE_FINAL` usa `Depth` da MVV.
 - `PROFUNDIDADE_FINAL` e formatada com 2 casas decimais no workbook final.
-- A saída mantém todas as linhas MVV na ordem de origem e, depois delas, acrescenta os furos únicos levantados (`L-`) ou executados (`E-`) cujo identificador normalizado não existe na MVV, em ordem numérica de furo.
-- Nas linhas sem referência planejada, os campos MVV ficam vazios; os campos RD e finais usam o registro RD selecionado, e `PROFUNDIDADE_FINAL` fica vazio porque não existe `Z Toe` planejado para o cálculo.
-- Um registro RD com referência MVV permanece somente na linha planejada correspondente; nenhum registro duplicado é acrescentado. Se houver `L-` e `E-` para o mesmo número, o `L-` é selecionado; nenhum segundo registro é acrescentado para o `E-`.
+- A saída mantém todas as linhas MVV na ordem de origem e, depois delas, acrescenta os furos únicos levantados (`L-` ou `L_`) ou executados (`E-`) cujo identificador normalizado não existe na MVV, em ordem numérica de furo.
+- Nas linhas sem referência planejada, `ID` recebe o número de `ID_RD` sem prefixo nem traço, `Descricao` recebe `Added`, e `X Collar`, `Y Collar` e `Z Collar` espelham `X_RD`, `Y_RD` e `Z_RD` do registro selecionado.
+- Nas linhas sem referência planejada, `ID_RD`, `TIPO_RD`, `Y_RD`, `X_RD` e `Z_RD` preservam a fonte RD. Como RD não contém profundidade, a interface solicita cota do pé e subfuração, sugere a moda de `Z Toe` do plano e permite editar. A fórmula `Z_RD - cota do pé + subfuração` preenche `Z Toe`, `Sub Drill`, `Depth`, `Profundidade` e `PROFUNDIDADE_FINAL`. Campos sem origem nem regra de cálculo, como `X Toe`, `Y Toe`, `Type`, `Diameter`, `Azimuth` e `Dip`, ficam vazios.
+- Um registro RD com referência MVV permanece somente na linha planejada correspondente; nenhum registro duplicado é acrescentado. Se houver `L-` ou `L_` e `E-` para o mesmo número, o registro `L` é selecionado; nenhum segundo registro é acrescentado para o `E-`.
 - O resumo e o log registram a quantidade e os IDs RD sem referência planejada que foram acrescentados.
 - No fluxo RD-only, `Profundidade` e calculada por `Z (cota de topo) - cota do pé + subfuração` para cada linha.
 - No fluxo RD-only sem profundidade, a organização mantém somente `ID`, `Y`, `X` e `Z`, sem calcular ou exportar `Profundidade`.
 - No fluxo RD-only, `ID` usa o numero do furo sem prefixo e sem caracteres nao numericos.
-- Para números de furo duplicados, `L-` (levantado) tem prioridade; `E-` (executado) só permanece quando não existe um registro `L-` para o mesmo número.
+- Para números de furo duplicados, `L-` ou `L_` (levantado) tem prioridade; `E-` (executado) só permanece quando não existe um registro `L` para o mesmo número.
 
 ## Validacao
 

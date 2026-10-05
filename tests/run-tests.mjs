@@ -14,9 +14,29 @@ const pitdevFieldPositions = { id: 0, y: 1, x: 2, z: 3 };
 
 const config = {
   matching: {
-    prefix_priority: ['L-', 'E-', 'L_'],
+    prefix_priority: ['L-', 'L_', 'E-'],
     strip_prefixes: ['L-', 'E-', 'L_'],
     prefer_first_within_same_prefix: true,
+    unplanned_import: {
+      id_field: 'ID',
+      description_field: 'Descricao',
+      description_value: 'Added',
+      x_collar_field: 'X Collar',
+      x_source_field: 'X_RD',
+      y_collar_field: 'Y Collar',
+      y_source_field: 'Y_RD',
+      z_collar_field: 'Z Collar',
+      z_source_field: 'Z_RD',
+      toe_field: 'Z Toe',
+      subdrilling_field: 'Sub Drill',
+      depth_field: 'Depth',
+      secondary_depth_field: 'Profundidade',
+      final_depth_field: 'PROFUNDIDADE_FINAL',
+      source_elevation_field: 'Z_RD',
+      depth_formula: 'Z_RD - toeElevation + subdrilling',
+      default_subdrilling: 0,
+      toe_suggestion: { source_field: 'Z Toe', tie_break: 'first_valid_in_document' },
+    },
   },
   columns: {
     mvv: ['ID', 'Type', 'Descricao', 'Diameter', 'X Collar', 'Y Collar', 'X Toe', 'Y Toe', 'Z Toe', 'Z Collar', 'Depth', 'Sub Drill', 'Azimuth', 'Dip'],
@@ -48,16 +68,18 @@ test('normalizeHoleKey strips prefixes', () => {
   assert.equal(normalizeHoleKey('E-157', ['E-', 'L-', 'L_']), '157');
 });
 
-test('deduplicateRdRows prefers L- over E-', () => {
+test('deduplicateRdRows prefers L survey prefixes over E-', () => {
   const rdRows = [
     { holeKey: '1', TIPO_RD: 'E-', ID_RD: 'E-1', Y_RD: 4, X_RD: 5, Z_RD: 6 },
     { holeKey: '1', TIPO_RD: 'L-', ID_RD: 'L-1', Y_RD: 1, X_RD: 2, Z_RD: 3 },
+    { holeKey: '2', TIPO_RD: 'E-', ID_RD: 'E-2', Y_RD: 40, X_RD: 50, Z_RD: 60 },
     { holeKey: '2', TIPO_RD: 'L_', ID_RD: 'L_2', Y_RD: 7, X_RD: 8, Z_RD: 9 },
   ];
 
   const { treatedRows, selected, dualPrefixCount } = deduplicateRdRows(rdRows, config);
-  assert.equal(dualPrefixCount, 1);
+  assert.equal(dualPrefixCount, 2);
   assert.equal(selected.get('1').ID_RD, 'L-1');
+  assert.equal(selected.get('2').ID_RD, 'L_2');
   assert.deepEqual(treatedRows.map((row) => row.ID_RD), ['L-1', 'L_2']);
 });
 
@@ -109,10 +131,10 @@ test('buildConsolidatedRows falls back to MVV values', () => {
     { ID: 2, Type: 'TypeB', Descricao: 'B', Diameter: 5, 'X Collar': 101, 'Y Collar': 201, 'X Toe': 111, 'Y Toe': 211, 'Z Toe': 51, 'Z Collar': 61, Depth: 13, 'Sub Drill': 1.5, Azimuth: 95, Dip: 16, holeKey: '2' },
   ];
   const selected = new Map([
-    ['1', { ID_RD: 'L-1', TIPO_RD: 'L-', Y_RD: 201, X_RD: 101, Z_RD: 61 }],
+    ['1', { ID_RD: 'L-1', TIPO_RD: 'L-', Y_RD: 201, X_RD: 101, Z_RD: 61, holeKey: '1' }],
   ]);
 
-  const { consolidatedRows, summary } = buildConsolidatedRows(mvvRows, selected, 2, 1);
+  const { consolidatedRows, summary } = buildConsolidatedRows(mvvRows, selected, 2, 1, config);
   assert.equal(consolidatedRows[0].ID_FINAL, 'L-1');
   assert.equal(consolidatedRows[1].ID_FINAL, 2);
   assert.equal(consolidatedRows[0].PROFUNDIDADE_FINAL, 11);
@@ -122,7 +144,7 @@ test('buildConsolidatedRows falls back to MVV values', () => {
   assert.deepEqual(summary.missingHoles, ['2']);
 });
 
-test('buildConsolidatedRows appends RD-only holes and does not duplicate planned IDs', () => {
+test('buildConsolidatedRows maps unplanned RD-only holes to importable plan IDs and collar coordinates', () => {
   const mvvRows = [
     { ID: 1, Type: 'TypeA', Descricao: 'A', Diameter: 4, 'X Collar': 100, 'Y Collar': 200, 'X Toe': 110, 'Y Toe': 210, 'Z Toe': 50, 'Z Collar': 60, Depth: 12, 'Sub Drill': 1, Azimuth: 90, Dip: 15, holeKey: '1' },
     { ID: 3, Type: 'TypeC', Descricao: 'C', Diameter: 6, 'X Collar': 102, 'Y Collar': 202, 'X Toe': 112, 'Y Toe': 212, 'Z Toe': 52, 'Z Collar': 62, Depth: 14, 'Sub Drill': 1, Azimuth: 100, Dip: 17, holeKey: '3' },
@@ -138,11 +160,15 @@ test('buildConsolidatedRows appends RD-only holes and does not duplicate planned
   const { selected, dualPrefixCount } = deduplicateRdRows(rdRows, config);
   assert.equal(selected.get('4').ID_RD, 'L-4');
 
-  const { consolidatedRows, summary } = buildConsolidatedRows(mvvRows, selected, rdRows.length, dualPrefixCount);
+  const { consolidatedRows, summary } = buildConsolidatedRows(mvvRows, selected, rdRows.length, dualPrefixCount, config);
 
   assert.deepEqual(consolidatedRows.map((row) => row.ID_FINAL), ['L-1', 'E-3', 'E-2', 'L-4']);
   assert.equal(consolidatedRows.length, mvvRows.length + 2);
-  assert.equal(consolidatedRows[2].ID, null);
+  assert.equal(consolidatedRows[2].ID, 2);
+  assert.equal(consolidatedRows[2].Descricao, 'Added');
+  assert.equal(consolidatedRows[2]['X Collar'], 102);
+  assert.equal(consolidatedRows[2]['Y Collar'], 202);
+  assert.equal(consolidatedRows[2]['Z Collar'], 62);
   assert.equal(consolidatedRows[2].Type, null);
   assert.equal(consolidatedRows[2].ID_RD, 'E-2');
   assert.equal(consolidatedRows[2].Y_FINAL, 202);
@@ -150,10 +176,27 @@ test('buildConsolidatedRows appends RD-only holes and does not duplicate planned
   assert.equal(consolidatedRows[2].Z_COLLAR_FINAL, 62);
   assert.equal(consolidatedRows[2].PROFUNDIDADE_FINAL, null);
   assert.equal(consolidatedRows[3].ID_RD, 'L-4');
+  assert.equal(consolidatedRows[3].ID, 4);
+  assert.equal(consolidatedRows[3].Descricao, 'Added');
+  assert.equal(consolidatedRows[3]['X Collar'], 24);
+  assert.equal(consolidatedRows[3]['Y Collar'], 14);
+  assert.equal(consolidatedRows[3]['Z Collar'], 34);
+  assert.equal(consolidatedRows[3]['Z Toe'], null);
+  assert.equal(consolidatedRows[3].Depth, null);
   assert.equal(consolidatedRows.some((row) => row.ID_FINAL === 'E-4'), false);
   assert.equal(consolidatedRows.filter((row) => row.ID_FINAL === 'E-3').length, 1);
   assert.equal(summary.rdOnlyIncludedCount, 2);
   assert.deepEqual(summary.rdOnlyHoles, ['2', '4']);
+  assert.deepEqual(summary.unplannedToeSuggestion, { value: 50, frequency: 1, validCount: 2, sourceColumn: 'Z Toe' });
+
+  const withDepth = buildConsolidatedRows(mvvRows, selected, rdRows.length, dualPrefixCount, config, { toeElevation: 20, subdrilling: 1 });
+  assert.equal(withDepth.consolidatedRows[2].Depth, 43);
+  assert.equal(withDepth.consolidatedRows[2]['Profundidade'], 43);
+  assert.equal(withDepth.consolidatedRows[2]['Sub Drill'], 1);
+  assert.equal(withDepth.consolidatedRows[2].PROFUNDIDADE_FINAL, 43);
+  assert.equal(withDepth.consolidatedRows[2]['Z Toe'], 20);
+  assert.equal(withDepth.consolidatedRows[3].Depth, 15);
+  assert.deepEqual(withDepth.summary.unplannedDepthOptions, { toeElevation: 20, subdrilling: 1, formula: 'Z_RD - toeElevation + subdrilling' });
 });
 
 test('profundidade final uses a dedicated 2-decimal format', () => {
@@ -164,8 +207,15 @@ test('profundidade final uses a dedicated 2-decimal format', () => {
 
 test('config exposes localized ui packs', () => {
   assert.equal(projectConfig.app.title, 'Consolidação MVV × RD');
+  assert.equal(projectConfig.matching.unplanned_import.id_field, 'ID');
+  assert.equal(projectConfig.matching.unplanned_import.description_value, 'Added');
+  assert.equal(projectConfig.matching.unplanned_import.x_collar_field, 'X Collar');
+  assert.equal(projectConfig.matching.unplanned_import.y_collar_field, 'Y Collar');
+  assert.equal(projectConfig.matching.unplanned_import.z_collar_field, 'Z Collar');
+  assert.equal(projectConfig.matching.unplanned_import.secondary_depth_field, 'Profundidade');
   assert.equal(projectConfig.ui.default_language, 'pt');
   assert.deepEqual(Object.keys(projectConfig.ui.languages), ['pt', 'en', 'zh']);
+  assert.equal(projectConfig.matching.unplanned_import.default_subdrilling, 0);
   assert.equal(projectConfig.ui.languages.pt.language_label, 'Idioma');
   assert.equal(projectConfig.ui.languages.pt.hubbar_title, 'MVV × RD');
   assert.equal(projectConfig.ui.languages.en.primary_action, 'Consolidate MVV + RD');
