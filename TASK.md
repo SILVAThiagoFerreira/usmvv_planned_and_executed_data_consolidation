@@ -11,6 +11,7 @@ Portar a consolidacao MVV x RD para uma aplicacao estaticamente hospedavel no Gi
 - No consolidado MVV × RD, preservar a ordem MVV e acrescentar furos levantados ou executados sem referência planejada; quando `L-` ou `L_` e `E-` compartilham esse número, manter somente o registro levantado, e não acrescentar outra linha para IDs já planejados. Nas linhas extras, normalizar `ID_RD` para o campo planejado `ID`, marcar `Descricao` como `Added`, espelhar as coordenadas RD em `X Collar`, `Y Collar` e `Z Collar`, e solicitar os parâmetros para cálculo de profundidade.
 - No fluxo de executado, escolha de exportação com profundidade ou somente com `ID`, `Y`, `X` e `Z`.
 - Deduplicação do executado com prioridade para os prefixos `L-` e `L_` levantados sobre o `E-` executado no mesmo número de furo.
+- Título da página e da barra superior: `Consolidação Plan./Exec. | US Vale Verde`.
 - Interface compacta: uma unica marca, ação principal clara, saídas isoladas recolhidas, resumo sob demanda, download oculto ate a geracao e log tecnico expansivel.
 - O-PitDev inicia recolhido, mas mantem upload, processamento, status, resumo e download funcionais.
 - O-PitDev permite organizar somente o levantamento, sem exigir plano planejado.

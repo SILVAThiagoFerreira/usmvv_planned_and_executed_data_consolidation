@@ -32,6 +32,7 @@ O arquivo planejado é validado pelo conjunto de abas e colunas, não apenas pel
 - Deduplicacao da RD com prioridade dos prefixos levantados `L-` e `L_` sobre `E-`.
 - Seletor de idioma para portugues, ingles e chines simplificado.
 - Interface compacta com fundo branco e uma unica marca OpenBlast na barra superior.
+- Título da página e da barra superior: `Consolidação Plan./Exec. | US Vale Verde`, definido em `config.json` (`app.title` e `hubbar_title` de cada idioma).
 - A ação principal fica visível; saídas isoladas ficam recolhidas em `Outras saídas`.
 - O resumo só ocupa espaço depois que existe uma saída; o log técnico permanece expansível.
 - O-PitDev inicia recolhido para manter o fluxo principal limpo e pode ser aberto quando necessario.

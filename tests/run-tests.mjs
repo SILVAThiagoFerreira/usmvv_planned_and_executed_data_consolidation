@@ -206,7 +206,7 @@ test('profundidade final uses a dedicated 2-decimal format', () => {
 });
 
 test('config exposes localized ui packs', () => {
-  assert.equal(projectConfig.app.title, 'Consolidação MVV × RD');
+  assert.equal(projectConfig.app.title, 'Consolidação Plan./Exec. | US Vale Verde');
   assert.equal(projectConfig.matching.unplanned_import.id_field, 'ID');
   assert.equal(projectConfig.matching.unplanned_import.description_value, 'Added');
   assert.equal(projectConfig.matching.unplanned_import.x_collar_field, 'X Collar');
@@ -217,7 +217,7 @@ test('config exposes localized ui packs', () => {
   assert.deepEqual(Object.keys(projectConfig.ui.languages), ['pt', 'en', 'zh']);
   assert.equal(projectConfig.matching.unplanned_import.default_subdrilling, 0);
   assert.equal(projectConfig.ui.languages.pt.language_label, 'Idioma');
-  assert.equal(projectConfig.ui.languages.pt.hubbar_title, 'MVV × RD');
+  assert.equal(projectConfig.ui.languages.pt.hubbar_title, 'Consolidação Plan./Exec. | US Vale Verde');
   assert.equal(projectConfig.ui.languages.en.primary_action, 'Consolidate MVV + RD');
   assert.equal(projectConfig.ui.languages.zh.primary_action, '整合 MVV + RD');
   assert.equal(projectConfig.ui.languages.pt.app_subtitle, '');

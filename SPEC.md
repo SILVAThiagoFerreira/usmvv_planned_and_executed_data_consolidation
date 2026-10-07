@@ -12,7 +12,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - A interface abre em portugues por padrao.
 - O seletor de idioma permite portugues, ingles e chines simplificado.
 - A troca de idioma altera apenas a interface da pagina, nao o workbook gerado.
-- O titulo exibido na area de trabalho e `Consolidação MVV × RD`.
+- O titulo exibido na area de trabalho e `Consolidação Plan./Exec. | US Vale Verde`.
 - A marca antiga nao aparece na interface.
 - A interface usa fundo branco, estilo minimalista e uma unica marca OpenBlast na barra superior.
 - O badge `Somente local` nao aparece na interface.
