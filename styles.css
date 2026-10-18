@@ -48,43 +48,40 @@ body {
   overflow-x: hidden;
 }
 
-.openblast-hubbar {
+.enaex-band {
   display: grid;
   width: 100vw;
-  min-height: 56px;
+  min-height: 50px;
   margin-left: calc(50% - 50vw);
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  padding: 8px 32px;
+  padding: 0 35px 0 45px;
   color: var(--white);
-  background: var(--ink);
-  border-bottom: 3px solid var(--accent);
+  background: #3a434b;
+  border-bottom: 3px solid #e20613;
 }
 
-.openblast-hubbar__brand {
-  display: inline-flex;
-  align-items: center;
+.enaex-band__logo {
+  width: 90px;
+  height: auto;
   justify-self: start;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 700;
 }
 
-.openblast-hubbar__brand img {
-  width: 30px;
-  height: 36px;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
-}
-
-.openblast-hubbar__brand strong {
-  color: #ff4b55;
-}
-
-.openblast-hubbar__title {
+.enaex-band__title {
   justify-self: center;
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.enaex-band__unit {
+  justify-self: end;
+  color: #c4c7cb;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .page {
@@ -788,18 +785,24 @@ button.secondary,
 }
 
 @media (max-width: 680px) {
-  .openblast-hubbar {
+  .enaex-band {
     grid-template-columns: auto 1fr;
-    padding: 8px 16px;
+    padding: 0 16px;
   }
 
-  .openblast-hubbar__brand span {
+  .enaex-band__logo {
+    width: 64px;
+  }
+
+  .enaex-band__title {
+    justify-self: center;
+    overflow: hidden;
+    font-size: 14px;
+    text-overflow: ellipsis;
+  }
+
+  .enaex-band__unit {
     display: none;
-  }
-
-  .openblast-hubbar__title {
-    justify-self: end;
-    font-size: 0.8rem;
   }
 
   .page {

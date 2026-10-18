@@ -570,18 +570,19 @@ test('legacy branding is removed', () => {
   assert.equal(configText.includes(legacyEyebrow), false);
 });
 
-test('brand uses the OpenBlast asset', async () => {
+test('header band uses the Enaex white logo', async () => {
   const { readFileSync } = await import('node:fs');
   const indexHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-  assert.match(indexHtml, /src="\.\/assets\/openblast-logo\.png"/);
-  assert.match(indexHtml, /alt="OpenBlast"/);
+  assert.match(indexHtml, /class="enaex-band"/);
+  assert.match(indexHtml, /src="\.\/assets\/enaex-brasil-white\.png"/);
+  assert.match(indexHtml, /alt="Enaex Brasil"/);
 });
 
 test('compact interface keeps downloads hidden until a workbook exists', () => {
   const indexHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const styles = readFileSync(new URL('../styles.css', import.meta.url), 'utf8');
 
-  assert.equal((indexHtml.match(/openblast-logo\.png/g) || []).length, 1);
+  assert.equal((indexHtml.match(/enaex-brasil-white\.png/g) || []).length, 1);
   assert.match(indexHtml, /<details id="secondaryActions" class="secondary-actions"/);
   assert.match(indexHtml, /<details class="panel pitdev-panel">/);
   assert.match(indexHtml, /<details class="log-block">/);
