@@ -1,7 +1,7 @@
-import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js?v=20261005-added-depth-3';
-import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js?v=20261005-added-depth-3';
-import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows, resolveRdOnlyExportMode, suggestPitdevToeElevation } from './processor.js?v=20261005-added-depth-3';
-import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js?v=20261005-added-depth-3';
+import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js?v=20261019-rd-warnings-1';
+import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js?v=20261019-rd-warnings-1';
+import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows, resolveRdOnlyExportMode, suggestPitdevToeElevation } from './processor.js?v=20261019-rd-warnings-1';
+import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js?v=20261019-rd-warnings-1';
 
 export async function runPipeline({ config, mvvFile, rdFile, unplannedDepthOptions = null }) {
   const rawMvv = await readMvvFile(mvvFile, config);
@@ -15,6 +15,7 @@ export async function runPipeline({ config, mvvFile, rdFile, unplannedDepthOptio
   const { treatedRows, selected, dualPrefixCount } = deduplicateRdRows(rdRows, config);
   const { consolidatedRows, summary } = buildConsolidatedRows(mvvRows, selected, rdValidation.rowCount, dualPrefixCount, config, unplannedDepthOptions);
   const enrichedSummary = {
+    rdWarnings: rdValidation.warnings,
     ...summary,
     mode: 'consolidated',
     outputColumns: config.columns.consolidated,
@@ -68,6 +69,7 @@ export async function runRdOnlyPipeline({ config, rdFile, toeElevation, subdrill
     exportMode: modeConfig.key,
     includesDepth,
     rdRawCount: rdValidation.rowCount,
+    rdWarnings: rdValidation.warnings,
     rdUniqueCount: treatedRows.length,
     dualPrefixCount,
     discardedRdCount: rdRows.length - treatedRows.length,

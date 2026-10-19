@@ -1,5 +1,5 @@
-import { loadConfig } from './config.js?v=20261005-added-depth-3';
-import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20261005-added-depth-3';
+import { loadConfig } from './config.js?v=20261019-rd-warnings-1';
+import { runMvvPlanPipeline, runPitdevFieldOnlyPipeline, runPitdevPipeline, runPipeline, runRdOnlyPipeline } from './pipeline.js?v=20261019-rd-warnings-1';
 import { runPlanMergePipeline } from './plan_merge_pipeline.js?v=20261001-csv-plan-merge-2';
 
 function qs(id) {
@@ -148,6 +148,12 @@ function renderPitdevLog(logOutput, summary, metadata, languageCode) {
     ...compactSummary,
     ...metadata,
   }, null, 2);
+}
+
+function formatWarning(warning, languagePack) {
+  const template = languagePack.warnings?.[warning.code];
+  if (!template) return `${warning.code}: RD line ${warning.line}`;
+  return template.replace(/\{(\w+)\}/g, (_, key) => (warning[key] === undefined || warning[key] === null ? '' : String(warning[key])));
 }
 
 function renderLog(logOutput, summary, config, languagePack, languageCode) {
@@ -441,6 +447,34 @@ export async function bootstrapApp() {
     updateExecutedModeUi();
   };
 
+  const rdWarningsBox = qs('rdWarningsBox');
+  const rdWarningsTitle = qs('rdWarningsTitle');
+  const rdWarningsList = qs('rdWarningsList');
+  const rdWarningsMore = qs('rdWarningsMore');
+
+  const renderRdWarnings = (ui) => {
+    const isDone = state.phase === 'done' || state.phase === 'mvv_done' || state.phase === 'rd_done';
+    const warnings = isDone && state.summary ? (state.summary.rdWarnings || []) : [];
+    if (!warnings.length) {
+      rdWarningsBox.hidden = true;
+      rdWarningsList.replaceChildren();
+      rdWarningsMore.hidden = true;
+      return;
+    }
+    const limit = Number(config.validation.warning_display_limit);
+    const shown = warnings.slice(0, limit);
+    rdWarningsTitle.textContent = interpolateTemplate(ui.warnings.warnings_title, { count: getLocalizedInteger(warnings.length) });
+    rdWarningsList.replaceChildren(...shown.map((warning) => {
+      const item = document.createElement('li');
+      item.textContent = formatWarning(warning, ui);
+      return item;
+    }));
+    const hiddenCount = warnings.length - shown.length;
+    rdWarningsMore.hidden = hiddenCount === 0;
+    rdWarningsMore.textContent = hiddenCount ? interpolateTemplate(ui.warnings.warnings_more, { count: getLocalizedInteger(hiddenCount) }) : '';
+    rdWarningsBox.hidden = false;
+  };
+
   const updateStatus = () => {
     const ui = currentUi();
     const hasMvv = Boolean(state.mvv);
@@ -476,6 +510,7 @@ export async function bootstrapApp() {
     }
 
     setStatus(statusBox, statusText, tone, text);
+    renderRdWarnings(ui);
     generateBtn.disabled = !(hasMvv && hasRd) || state.phase === 'working';
     mvvOnlyBtn.disabled = !hasMvv || state.phase === 'working';
     rdOnlyBtn.disabled = !hasRd || state.phase === 'working';

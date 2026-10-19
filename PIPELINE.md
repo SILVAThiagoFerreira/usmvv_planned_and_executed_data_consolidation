@@ -6,7 +6,7 @@
 2. `main.js` inicia a aplicacao.
 3. `src/config.js` carrega `config.json`.
 4. O usuario anexa `PLANEJADO.xlsx` e `REALIZADO.txt`.
-5. `src/reader.js` le os arquivos.
+5. `src/reader.js` le os arquivos. Na RD, aplica as tolerancias de leitura (separador `;` alternativo, espacos, virgulas finais vazias).
 6. `src/reader.js` registra as abas disponíveis; `src/validator.js` identifica perfis legados configurados antes de validar colunas e tipos.
 7. Em `Dip`, vazio ou `-` e aceito como `0`; um perfil incompatível, como `REG43` sem o contrato MVV completo, interrompe o fluxo e não permite saída parcial.
 8. `src/processor.js` normaliza e deduplica a RD, consolida as linhas da MVV na ordem original e acrescenta ao final os furos únicos da RD sem referência planejada. Nas linhas extras, grava o ID numérico sem prefixo, a descrição `Added` e as coordenadas RD em `X Collar`, `Y Collar` e `Z Collar`. Se houver linhas extras, `src/app.js` solicita cota do pé e subfuração e sugere a moda de `Z Toe` planejado; o processador usa `Z_RD - cota do pé + subfuração` para preencher os campos de profundidade e mantém vazios os dados técnicos sem fonte.
@@ -30,7 +30,7 @@
 2. `src/app.js` permite escolher entre exportar com profundidade ou sem profundidade.
 3. No modo com profundidade, `src/app.js` solicita a cota do pé e pergunta se haverá subfuração; no modo sem profundidade, esses parâmetros ficam ocultos.
 4. `src/reader.js` le a RD.
-5. `src/validator.js` valida a estrutura da RD.
+5. `src/validator.js` valida a estrutura da RD e devolve avisos nao bloqueantes (`rd_ignored_second_field`) para segundos campos nao vazios; a execucao continua.
 6. `src/processor.js` deduplica a RD, mantendo `L-` ou `L_` sobre `E-`, normaliza `ID` para numero e calcula os campos de profundidade dos furos Added com a cota do pé informada.
 7. `src/writer.js` gera `RD_EXECUTADO_ORGANIZADO.xlsx` com uma unica aba e as colunas configuradas para o modo escolhido.
 8. `src/app.js` libera o download e mostra o resumo.

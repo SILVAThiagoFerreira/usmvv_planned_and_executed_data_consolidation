@@ -468,6 +468,34 @@ button.secondary,
   line-height: 1.35;
 }
 
+.rd-warnings {
+  margin-top: 6px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--warning);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 0.73rem;
+}
+
+.rd-warnings-title {
+  margin: 0 0 4px;
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.rd-warnings ul {
+  margin: 0;
+  padding-left: 16px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.rd-warnings-more {
+  margin: 4px 0 0;
+}
+
 @keyframes pulse {
   0%,
   100% {

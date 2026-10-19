@@ -1,4 +1,4 @@
-import { asText, isBlank } from './utils.js?v=20261005-added-depth-3';
+import { asText, isBlank } from './utils.js?v=20261019-rd-warnings-1';
 
 function getExcelJS() {
   if (!globalThis.ExcelJS || !globalThis.ExcelJS.Workbook) {
@@ -41,15 +41,26 @@ export async function readMvvFile(file, config) {
   };
 }
 
+function chooseRdDelimiter(line, config) {
+  const primary = config.input.rd_delimiter;
+  if (line.includes(primary)) return primary;
+  const alternates = config.input.rd_alternate_delimiters || [];
+  return alternates.find((delimiter) => line.includes(delimiter)) || primary;
+}
+
 export async function readRdFile(file, config) {
   const text = await file.text();
   const lines = text.split(/\r?\n/);
+  const expectedFields = config.input.rd_expected_fields;
   const rows = [];
 
   lines.forEach((line, idx) => {
     const trimmed = line.trim();
     if (!trimmed) return;
-    const values = trimmed.split(config.input.rd_delimiter).map((value) => value.trim());
+    const delimiter = chooseRdDelimiter(trimmed, config);
+    const values = trimmed.split(delimiter).map((value) => value.trim());
+    // Virgulas finais geram campos vazios alem do esperado; somente esses sao descartados.
+    while (values.length > expectedFields && values[values.length - 1] === '') values.pop();
     rows.push({ sourceLine: idx + 1, values, blank: false });
   });
 

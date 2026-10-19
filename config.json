@@ -44,6 +44,7 @@
         ]
       },
       "rd_delimiter": ",",
+      "rd_alternate_delimiters": [";"],
     "rd_expected_fields": 5,
     "pitdev_field_delimiter": ",",
     "pitdev_field_allowed_field_counts": [4, 5],
@@ -242,6 +243,7 @@
   },
   "validation": {
     "allow_empty_rows": true,
+    "warning_display_limit": 20,
     "mvv_required_row_columns": [
       "ID",
       "Type",
@@ -536,6 +538,11 @@
         "status_error": "Validacao ou processamento falhou.",
         "log_waiting": "Aguardando arquivos...",
         "log_processing": "Processando...",
+        "warnings": {
+          "rd_ignored_second_field": "RD linha {line}: segundo campo '{value}' ignorado.",
+          "warnings_title": "Avisos da RD ({count})",
+          "warnings_more": "Mais {count} avisos estão no log JSON do resumo."
+        },
         "errors": {
           "unsupported_workbook_profile": "O arquivo \"{fileName}\" foi identificado como {profileLabel}. Ele não é um PLANEJADO.xlsx MVV completo e não contém as colunas necessárias: {missingColumns}. Para evitar informações incorretas, a organização foi interrompida e nenhum XLSX foi gerado. Use o plano exportado no formato MVV.",
           "missing_mvv_columns": "O arquivo não possui as colunas obrigatórias da entrada MVV: {missingColumns}. Nada foi gerado.",
@@ -701,6 +708,11 @@
         "status_error": "Validation or processing failed.",
         "log_waiting": "Waiting for files...",
         "log_processing": "Processing...",
+        "warnings": {
+          "rd_ignored_second_field": "RD line {line}: second field '{value}' ignored.",
+          "warnings_title": "RD warnings ({count})",
+          "warnings_more": "{count} more warnings are in the summary JSON log."
+        },
         "errors": {
           "unsupported_workbook_profile": "The file \"{fileName}\" was identified as {profileLabel}. It is not a complete MVV PLANEJADO.xlsx and is missing the required columns: {missingColumns}. To prevent incorrect information, processing was stopped and no XLSX was generated. Use the plan exported in the MVV format.",
           "missing_mvv_columns": "The file does not contain the required MVV input columns: {missingColumns}. Nothing was generated.",
@@ -866,6 +878,11 @@
         "status_error": "验证或处理失败。",
         "log_waiting": "等待文件...",
         "log_processing": "处理中...",
+        "warnings": {
+          "rd_ignored_second_field": "RD 第 {line} 行：第二个字段 '{value}' 已忽略。",
+          "warnings_title": "RD 警告（{count}）",
+          "warnings_more": "其余 {count} 条警告见摘要 JSON 日志。"
+        },
         "errors": {
           "unsupported_workbook_profile": "文件 \"{fileName}\" 被识别为 {profileLabel}。它不是完整的 MVV PLANEJADO.xlsx，缺少必要列：{missingColumns}。为避免生成错误信息，处理已停止，未生成 XLSX。请使用 MVV 格式导出的计划文件。",
           "missing_mvv_columns": "文件缺少 MVV 输入所需的列：{missingColumns}。未生成任何文件。",

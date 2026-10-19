@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildConsolidatedRows, buildMvvPlanRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, deduplicateRdRows, suggestPitdevToeElevation } from '../src/processor.js';
-import { detectMvvWorkbookProfile, validateMvvPlanSource, validatePitdevPlanSource } from '../src/validator.js';
+import { buildConsolidatedRows, buildMvvPlanRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows, suggestPitdevToeElevation } from '../src/processor.js';
+import { detectMvvWorkbookProfile, validateMvvPlanSource, validatePitdevPlanSource, validateRdSource } from '../src/validator.js';
+import { readRdFile } from '../src/reader.js';
 import { getNumericFormatForHeader } from '../src/writer.js';
 import { normalizeHoleKey } from '../src/utils.js';
 import { parsePlanCsvText } from '../src/plan_merge_reader.js';
@@ -690,4 +691,73 @@ test('CSV plan merge UI and configuration expose ordered multi-file import and t
   assert.match(indexHtml, /id="planMergeList"/);
   assert.match(indexHtml, /id="planMergeDownloadLink" class="secondary" hidden/);
   assert.match(indexHtml, new RegExp(cacheToken));
+});
+
+async function asyncTest(name, fn) {
+  try {
+    await fn();
+    console.log(`ok - ${name}`);
+  } catch (error) {
+    console.error(`not ok - ${name}`);
+    throw error;
+  }
+}
+
+function rdFile(text) {
+  return { name: 'RD.txt', text: async () => text };
+}
+
+await asyncTest('RD second field with text is ignored with a non-blocking warning', async () => {
+  const raw = await readRdFile(rdFile([
+    'L-165,,8930287.300,748930.100,281.100',
+    'L-166,d,8930287.328,748938.816,281.240',
+    'L-167, Piquete ,8930287.385,748944.278,281.245',
+    '',
+    'E-168 ; ; 8930287.360 ; 748949.770 ; 281.191 ;',
+    'E-169,,8930287.396,748955.283,281.316,',
+  ].join('\r\n')), projectConfig);
+
+  const validation = validateRdSource(raw, projectConfig);
+  assert.equal(validation.rowCount, 5);
+  assert.deepEqual(validation.warnings, [
+    { code: 'rd_ignored_second_field', line: 2, value: 'd' },
+    { code: 'rd_ignored_second_field', line: 3, value: 'Piquete' },
+  ]);
+
+  const rows = buildRdRows(raw, projectConfig);
+  assert.equal(rows.length, 5);
+  assert.deepEqual(
+    rows.map((row) => [row.ID_RD, row.Y_RD, row.X_RD, row.Z_RD]),
+    [
+      ['L-165', 8930287.3, 748930.1, 281.1],
+      ['L-166', 8930287.328, 748938.816, 281.24],
+      ['L-167', 8930287.385, 748944.278, 281.245],
+      ['E-168', 8930287.36, 748949.77, 281.191],
+      ['E-169', 8930287.396, 748955.283, 281.316],
+    ],
+  );
+});
+
+await asyncTest('RD structural errors remain blocking', async () => {
+  const cases = [
+    ['L-170,d,8930287.336,748960.776', /expected 5 fields, found 4/],
+    ['L-171,d,abc,748966.300,280.532', /invalid numeric value for Y_RD: abc/],
+    ['X-172,d,8930287.417,748971.767,280.370', /invalid prefix in ID_RD -> X-172/],
+    [',d,8930287.417,748971.767,280.370', /missing ID_RD/],
+    ['L-173,d,8930287.362,748977.273,', /missing required field Z_RD/],
+  ];
+  for (const [line, pattern] of cases) {
+    const raw = await readRdFile(rdFile(line), projectConfig);
+    assert.throws(() => validateRdSource(raw, projectConfig), pattern, line);
+  }
+});
+
+await asyncTest('RD warning label is configured for every UI language', () => {
+  for (const code of ['pt', 'en', 'zh']) {
+    const label = projectConfig.ui.languages[code].warnings.rd_ignored_second_field;
+    assert.match(label, /\{line\}/);
+    assert.match(label, /\{value\}/);
+  }
+  assert.equal(projectConfig.validation.warning_display_limit, 20);
+  assert.deepEqual(projectConfig.input.rd_alternate_delimiters, [';']);
 });

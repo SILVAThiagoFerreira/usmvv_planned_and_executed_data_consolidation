@@ -1,4 +1,4 @@
-import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js?v=20261005-added-depth-3';
+import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js?v=20261019-rd-warnings-1';
 
 function normalizeDescriptor(value) {
   return String(value ?? '')
@@ -162,6 +162,7 @@ export function validateRdSource(rawRd, config) {
   const allowEmptyRows = Boolean(config.validation.allow_empty_rows);
 
   let rowCount = 0;
+  const warnings = [];
   for (const row of rawRd.rows) {
     if (row.blank) {
       if (allowEmptyRows) continue;
@@ -182,7 +183,8 @@ export function validateRdSource(rawRd, config) {
       throw new Error(`${context}: missing ID_RD`);
     }
     if (!isBlank(row.values[1])) {
-      throw new Error(`${context}: expected empty second field`);
+      // Texto no segundo campo (ex.: "d", "Piquete") nao altera o registro: e ignorado e registrado como aviso.
+      warnings.push({ code: 'rd_ignored_second_field', line: row.sourceLine, value: asText(row.values[1]) });
     }
     if (!allowedPrefixes.some((prefix) => id.startsWith(prefix))) {
       throw new Error(`${context}: invalid prefix in ID_RD -> ${id}`);
@@ -194,7 +196,7 @@ export function validateRdSource(rawRd, config) {
     }
   }
 
-  return { rowCount };
+  return { rowCount, warnings };
 }
 
 function resolveConfiguredHeader(indexMap, aliases, label) {

@@ -1,4 +1,4 @@
-import { bootstrapApp } from './src/app.js?v=20261005-added-depth-3';
+import { bootstrapApp } from './src/app.js?v=20261019-rd-warnings-1';
 
 window.addEventListener('DOMContentLoaded', async () => {
   try {

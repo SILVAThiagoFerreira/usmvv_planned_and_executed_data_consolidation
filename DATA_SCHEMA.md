@@ -30,10 +30,22 @@ Quando o perfil é detectado no fluxo MVV ou MVV-only, a validação encerra o p
 | Campo | Tipo | Obrigatorio | Significado |
 | --- | --- | --- | --- |
 | ID_RD | texto | sim | `L-`, `L_` ou `E-` + numero do furo |
-| vazio | vazio | sim | Segundo campo vazio |
+| segundo campo | texto livre | nao | Normalmente vazio. Qualquer texto (ex.: `d`, `Piquete`) e ignorado e gera aviso `rd_ignored_second_field` com a linha e o valor, sem bloquear a consolidacao |
 | Y_RD | numero | sim | Coordenada Y |
 | X_RD | numero | sim | Coordenada X |
 | Z_RD | numero | sim | Coordenada Z |
+
+Tolerancias de leitura: separador `,` ou, se a linha nao contiver `,`, `;`; espacos em volta dos campos sao removidos; linhas em branco sao ignoradas; campos vazios no final da linha alem dos 5 campos esperados (virgula final) sao descartados.
+
+### Avisos da RD
+
+Avisos nao bloqueantes gerados na validacao da RD. Cada aviso tem `code`, `line` (linha de origem) e `value` (texto ignorado).
+
+| code | Significado |
+| --- | --- |
+| rd_ignored_second_field | Segundo campo nao vazio ignorado; o registro foi processado com os demais campos |
+
+Os avisos aparecem na interface (limite de exibicao em `validation.warning_display_limit`) e completos no log JSON do resumo (`rdWarnings`). Nao sao gravados como linhas no workbook.
 
 ## RD tratada
 

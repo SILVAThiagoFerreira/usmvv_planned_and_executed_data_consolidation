@@ -92,10 +92,16 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - Arquivo texto `.txt`.
 - Estrutura por linha:
   - `ID do furo`
-  - campo vazio
+  - segundo campo (normalmente vazio; ver regra de tolerância abaixo)
   - `Y`
   - `X`
   - `Z`
+- Tolerâncias de leitura (aplicadas antes da validação, em `reader.js`):
+  - o separador padrão é `,` (`input.rd_delimiter`); quando a linha não contém `,` e contém `;` (`input.rd_alternate_delimiters`), o `;` é usado;
+  - espaços em volta de cada campo são removidos;
+  - linhas em branco são ignoradas;
+  - campos vazios no final da linha, além dos 5 campos esperados (vírgula final), são descartados.
+- Segundo campo não vazio (por exemplo `d`, `Piquete` ou qualquer texto): o valor é ignorado, o registro é processado normalmente com os demais campos e um aviso não bloqueante é registrado com a linha e o valor (`rd_ignored_second_field`). Os avisos aparecem na interface e no log; não interrompem a consolidação.
 
 ### RD-only
 
@@ -135,8 +141,10 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - Um perfil incompatível interrompe o fluxo antes de `processor.js` e `writer.js`; o link de download permanece oculto.
 - MVV deve ter as colunas numericas validas para o calculo.
 - Em `Dip`, valores vazios ou exatamente `-` sao aceitos e normalizados para `0`; outros textos nao numericos continuam invalidos.
-- RD deve ter exatamente 5 campos.
-- O segundo campo da RD deve estar vazio.
+- RD deve ter exatamente 5 campos após as tolerâncias de leitura (separador `;`, espaços e vírgulas finais vazias). Qualquer outra quantidade de campos é erro.
+- Ausência de ID, ID sem prefixo válido e coordenadas X/Y/Z ausentes ou não numéricas continuam sendo erros que interrompem a execução.
+- Avisos da RD (`rd_ignored_second_field`) são listados na interface em até `validation.warning_display_limit` itens e, completos, no log JSON do resumo.
+- O segundo campo da RD pode conter qualquer texto; quando não estiver vazio, é ignorado com aviso e não gera erro.
 - IDs da RD devem iniciar com `L-`, `L_` ou `E-`.
 - Coordenadas da RD devem ser numericas.
 - Arquivos invalidos bloqueiam o processamento.
