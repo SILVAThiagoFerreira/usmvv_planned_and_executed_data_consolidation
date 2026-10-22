@@ -119,6 +119,7 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - `L_157`, `L-157` e `E-157` mapeiam para `157`.
 - `E-` so e usado quando nao houver `L-` nem `L_` para o mesmo furo.
 - Em duplicidade com o mesmo prefixo, o primeiro registro valido e mantido.
+- Sufixo de repeticao: quando o ID sem prefixo nao existe na MVV e casa com `matching.rd_repetition_suffix_pattern` (`^(.+)_(\d+)$`), o sufixo e removido para obter o numero do furo (ex.: `L_74_1` vira furo `74`). `ID_RD` preserva o texto original. A regra de duplicidade acima continua valendo: se o furo 74 ja tem `L_74` antes na RD, `L_74_1` nao e usado e gera o aviso `rd_id_suffix_ignored`. Se o ID completo existir na MVV (ex.: `74_1`), nao ha remocao.
 - A ordem final segue a MVV.
 - `PROFUNDIDADE_FINAL` usa `Z_RD - Z Toe` quando RD existir.
 - Sem RD, `PROFUNDIDADE_FINAL` usa `Depth` da MVV.
@@ -143,8 +144,9 @@ Tambem existe um fluxo RD-only para formatar apenas o executado em um workbook s
 - Em `Dip`, valores vazios ou exatamente `-` sao aceitos e normalizados para `0`; outros textos nao numericos continuam invalidos.
 - RD deve ter exatamente 5 campos após as tolerâncias de leitura (separador `;`, espaços e vírgulas finais vazias). Qualquer outra quantidade de campos é erro.
 - Ausência de ID, ID sem prefixo válido e coordenadas X/Y/Z ausentes ou não numéricas continuam sendo erros que interrompem a execução.
-- Avisos da RD (`rd_ignored_second_field`) são listados na interface em até `validation.warning_display_limit` itens e, completos, no log JSON do resumo.
+- Avisos da RD (`rd_ignored_second_field`, `rd_id_suffix_normalized`, `rd_id_suffix_ignored`, `rd_unplanned_id_skipped`) são listados na interface em até `validation.warning_display_limit` itens e, completos, no log JSON do resumo.
 - O segundo campo da RD pode conter qualquer texto; quando não estiver vazio, é ignorado com aviso e não gera erro.
+- Linha RD sem número de furo válido que não existe na MVV (ID alfanumérico, por exemplo `L_12A`) não entra na consolidação nem no executado sem profundidade. A linha é excluída com aviso `rd_unplanned_id_skipped` (linha e ID), sem interromper a execução. Coordenadas e estrutura da linha continuam bloqueando.
 - IDs da RD devem iniciar com `L-`, `L_` ou `E-`.
 - Coordenadas da RD devem ser numericas.
 - Arquivos invalidos bloqueiam o processamento.

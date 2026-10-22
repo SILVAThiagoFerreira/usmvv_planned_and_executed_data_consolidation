@@ -1,4 +1,4 @@
-import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js?v=20261019-rd-warnings-1';
+import { asText, dipNumber, getPitdevFieldPositions, headerIndexMap, isBlank, normalizeHoleKey, toNumber } from './utils.js?v=20261022-rd-id-suffix-1';
 
 function normalizeDescriptor(value) {
   return String(value ?? '')

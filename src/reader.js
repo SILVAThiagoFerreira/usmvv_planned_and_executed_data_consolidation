@@ -1,4 +1,4 @@
-import { asText, isBlank } from './utils.js?v=20261019-rd-warnings-1';
+import { asText, isBlank } from './utils.js?v=20261022-rd-id-suffix-1';
 
 function getExcelJS() {
   if (!globalThis.ExcelJS || !globalThis.ExcelJS.Workbook) {

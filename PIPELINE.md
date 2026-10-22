@@ -7,9 +7,10 @@
 3. `src/config.js` carrega `config.json`.
 4. O usuario anexa `PLANEJADO.xlsx` e `REALIZADO.txt`.
 5. `src/reader.js` le os arquivos. Na RD, aplica as tolerancias de leitura (separador `;` alternativo, espacos, virgulas finais vazias).
+5a. `src/processor.js` (`buildRdRows`) remove o sufixo de repeticao (`rd_repetition_suffix_pattern`, ex.: `_1`) do ID da RD quando o ID completo nao existe na MVV; `buildRdIdWarnings` gera os avisos `rd_id_suffix_normalized` e `rd_id_suffix_ignored`.
 6. `src/reader.js` registra as abas disponíveis; `src/validator.js` identifica perfis legados configurados antes de validar colunas e tipos.
 7. Em `Dip`, vazio ou `-` e aceito como `0`; um perfil incompatível, como `REG43` sem o contrato MVV completo, interrompe o fluxo e não permite saída parcial.
-8. `src/processor.js` normaliza e deduplica a RD, consolida as linhas da MVV na ordem original e acrescenta ao final os furos únicos da RD sem referência planejada. Nas linhas extras, grava o ID numérico sem prefixo, a descrição `Added` e as coordenadas RD em `X Collar`, `Y Collar` e `Z Collar`. Se houver linhas extras, `src/app.js` solicita cota do pé e subfuração e sugere a moda de `Z Toe` planejado; o processador usa `Z_RD - cota do pé + subfuração` para preencher os campos de profundidade e mantém vazios os dados técnicos sem fonte.
+8. `src/processor.js` normaliza e deduplica a RD, consolida as linhas da MVV na ordem original e acrescenta ao final os furos únicos da RD sem referência planejada. Nas linhas extras, grava o ID numérico sem prefixo, a descrição `Added` e as coordenadas RD em `X Collar`, `Y Collar` e `Z Collar`. Furos extras sem número válido (`partitionImportableHoleRows`) são excluídos e listados como `rd_unplanned_id_skipped`. Se houver linhas extras, `src/app.js` solicita cota do pé e subfuração e sugere a moda de `Z Toe` planejado; o processador usa `Z_RD - cota do pé + subfuração` para preencher os campos de profundidade e mantém vazios os dados técnicos sem fonte.
 9. `src/writer.js` monta o workbook final somente após a validação.
 10. `src/app.js` dispara o download, mostra o resumo somente após uma saída ou erro e controla os estados visuais dos detalhes.
 

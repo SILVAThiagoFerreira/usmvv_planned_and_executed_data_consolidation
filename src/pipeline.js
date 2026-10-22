@@ -1,7 +1,7 @@
-import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js?v=20261019-rd-warnings-1';
-import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js?v=20261019-rd-warnings-1';
-import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows, resolveRdOnlyExportMode, suggestPitdevToeElevation } from './processor.js?v=20261019-rd-warnings-1';
-import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js?v=20261019-rd-warnings-1';
+import { readMvvFile, readPitdevFieldFile, readPitdevPlanFile, readRdFile } from './reader.js?v=20261022-rd-id-suffix-1';
+import { validateMvvPlanSource, validateMvvSource, validatePitdevFieldSource, validatePitdevPlanSource, validateRdSource } from './validator.js?v=20261022-rd-id-suffix-1';
+import { buildConsolidatedRows, buildMvvPlanRows, buildMvvRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdIdWarnings, buildRdOnlyRows, buildRdRows, buildRdSkippedWarnings, deduplicateRdRows, partitionImportableHoleRows, resolveRdOnlyExportMode, suggestPitdevToeElevation } from './processor.js?v=20261022-rd-id-suffix-1';
+import { createMvvPlanWorkbookBuffer, createPitdevFieldOnlyWorkbookBuffer, createPitdevWorkbookBuffer, createRdOnlyWorkbookBuffer, createWorkbookBuffer } from './writer.js?v=20261022-rd-id-suffix-1';
 
 export async function runPipeline({ config, mvvFile, rdFile, unplannedDepthOptions = null }) {
   const rawMvv = await readMvvFile(mvvFile, config);
@@ -11,12 +11,17 @@ export async function runPipeline({ config, mvvFile, rdFile, unplannedDepthOptio
   const rdValidation = validateRdSource(rawRd, config);
 
   const mvvRows = buildMvvRows(rawMvv, config, mvvValidation);
-  const rdRows = buildRdRows(rawRd, config);
+  const mvvKeys = new Set(mvvRows.map((row) => row.holeKey));
+  const rdRows = buildRdRows(rawRd, config, mvvKeys);
   const { treatedRows, selected, dualPrefixCount } = deduplicateRdRows(rdRows, config);
   const { consolidatedRows, summary } = buildConsolidatedRows(mvvRows, selected, rdValidation.rowCount, dualPrefixCount, config, unplannedDepthOptions);
   const enrichedSummary = {
-    rdWarnings: rdValidation.warnings,
     ...summary,
+    rdWarnings: [
+      ...rdValidation.warnings,
+      ...buildRdIdWarnings(rdRows, selected),
+      ...buildRdSkippedWarnings(summary.rdSkippedRows),
+    ],
     mode: 'consolidated',
     outputColumns: config.columns.consolidated,
     sheetName: config.output.sheets.consolidated,
@@ -62,15 +67,22 @@ export async function runRdOnlyPipeline({ config, rdFile, toeElevation, subdrill
   const rawRd = await readRdFile(rdFile, config);
   const rdValidation = validateRdSource(rawRd, config);
   const rdRows = buildRdRows(rawRd, config);
-  const { treatedRows, dualPrefixCount } = deduplicateRdRows(rdRows, config);
-  const rdOnlyRows = buildRdOnlyRows(treatedRows, config, toe, sub, modeConfig.key);
+  const { treatedRows, selected, dualPrefixCount } = deduplicateRdRows(rdRows, config);
+  const { importable, skipped } = partitionImportableHoleRows(treatedRows);
+  const rdOnlyRows = buildRdOnlyRows(importable, config, toe, sub, modeConfig.key);
   const summary = {
     mode: 'rd_only',
     exportMode: modeConfig.key,
     includesDepth,
     rdRawCount: rdValidation.rowCount,
-    rdWarnings: rdValidation.warnings,
+    rdWarnings: [
+      ...rdValidation.warnings,
+      ...buildRdIdWarnings(rdRows, selected),
+      ...buildRdSkippedWarnings(skipped),
+    ],
     rdUniqueCount: treatedRows.length,
+    rdSkippedRows: skipped,
+    rdSkippedCount: skipped.length,
     dualPrefixCount,
     discardedRdCount: rdRows.length - treatedRows.length,
     ...(includesDepth ? { toeElevation: toe, subdrilling: sub } : {}),

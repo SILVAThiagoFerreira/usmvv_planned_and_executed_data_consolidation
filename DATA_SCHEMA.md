@@ -29,7 +29,7 @@ Quando o perfil é detectado no fluxo MVV ou MVV-only, a validação encerra o p
 
 | Campo | Tipo | Obrigatorio | Significado |
 | --- | --- | --- | --- |
-| ID_RD | texto | sim | `L-`, `L_` ou `E-` + numero do furo |
+| ID_RD | texto | sim | `L-`, `L_` ou `E-` + numero do furo. Pode ter sufixo de repeticao `_n` (ex.: `L_74_1`), tratado conforme `rd_repetition_suffix_pattern` |
 | segundo campo | texto livre | nao | Normalmente vazio. Qualquer texto (ex.: `d`, `Piquete`) e ignorado e gera aviso `rd_ignored_second_field` com a linha e o valor, sem bloquear a consolidacao |
 | Y_RD | numero | sim | Coordenada Y |
 | X_RD | numero | sim | Coordenada X |
@@ -44,6 +44,9 @@ Avisos nao bloqueantes gerados na validacao da RD. Cada aviso tem `code`, `line`
 | code | Significado |
 | --- | --- |
 | rd_ignored_second_field | Segundo campo nao vazio ignorado; o registro foi processado com os demais campos |
+| rd_id_suffix_normalized | ID com sufixo de repeticao (ex.: `L_74_1`) lido como o furo base (`74`) e usado na consolidacao. Campos: `key` (furo), `suffix` |
+| rd_id_suffix_ignored | ID com sufixo de repeticao lido como furo base, mas descartado pela regra de primeiro registro valido. Campos: `key`, `keptLine`, `keptId` |
+| rd_unplanned_id_skipped | Linha sem numero de furo valido e fora da MVV (ex.: `L_12A`); excluida da consolidacao e do executado sem profundidade. Campos: `key` (ID normalizado) |
 
 Os avisos aparecem na interface (limite de exibicao em `validation.warning_display_limit`) e completos no log JSON do resumo (`rdWarnings`). Nao sao gravados como linhas no workbook.
 

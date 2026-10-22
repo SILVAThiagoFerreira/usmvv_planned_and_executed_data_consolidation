@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildConsolidatedRows, buildMvvPlanRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdOnlyRows, buildRdRows, deduplicateRdRows, suggestPitdevToeElevation } from '../src/processor.js';
+import { buildConsolidatedRows, buildMvvPlanRows, buildPitdevFieldOnlyRows, buildPitdevRows, buildRdIdWarnings, buildRdOnlyRows, buildRdRows, buildRdSkippedWarnings, deduplicateRdRows, partitionImportableHoleRows, suggestPitdevToeElevation } from '../src/processor.js';
 import { detectMvvWorkbookProfile, validateMvvPlanSource, validatePitdevPlanSource, validateRdSource } from '../src/validator.js';
 import { readRdFile } from '../src/reader.js';
 import { getNumericFormatForHeader } from '../src/writer.js';
@@ -760,4 +760,65 @@ await asyncTest('RD warning label is configured for every UI language', () => {
   }
   assert.equal(projectConfig.validation.warning_display_limit, 20);
   assert.deepEqual(projectConfig.input.rd_alternate_delimiters, [';']);
+});
+
+// Fixture: linhas reais 292 a 297 do REALIZADO CRISTA_F3.txt (L_74_1 corresponde a linha 296),
+// seguidas de uma linha sintetica L_12A (ID alfanumerico fora da MVV) para o caminho de aviso.
+await asyncTest('RD repetition suffix L_74_1 is read as hole 74, keeps the first L_74 record and warns instead of failing', async () => {
+  const rdText = readFileSync(new URL('./fixtures/rd_repetition_suffix.txt', import.meta.url), 'utf8');
+  const raw = await readRdFile(rdFile(rdText), projectConfig);
+  validateRdSource(raw, projectConfig);
+
+  const mvvRows = ['73', '74', '75', '76', '77'].map((key) => ({
+    ID: Number(key), Type: 'T', Descricao: 'D', Diameter: 4, 'X Collar': 1, 'Y Collar': 2, 'X Toe': 1, 'Y Toe': 2, 'Z Toe': 250,
+    'Z Collar': 290, Depth: 20, 'Sub Drill': 1, Azimuth: 90, Dip: 15, holeKey: key,
+  }));
+  const mvvKeys = new Set(mvvRows.map((row) => row.holeKey));
+
+  const rdRows = buildRdRows(raw, projectConfig, mvvKeys);
+  const repeated = rdRows.find((row) => row.ID_RD === 'L_74_1');
+  assert.equal(repeated.holeKey, '74');
+  assert.equal(repeated.repetitionSuffix, '1');
+  assert.equal(repeated.sourceLine, 5);
+
+  const { selected, dualPrefixCount } = deduplicateRdRows(rdRows, projectConfig);
+  assert.equal(selected.get('74').ID_RD, 'L_74');
+  const { consolidatedRows, summary } = buildConsolidatedRows(mvvRows, selected, rdRows.length, dualPrefixCount, projectConfig);
+
+  assert.equal(consolidatedRows.find((row) => row.ID === 74).ID_FINAL, 'L_74');
+  assert.equal(consolidatedRows.length, mvvRows.length);
+  assert.deepEqual(summary.rdSkippedRows, [{ line: 7, id: 'L_12A', key: '12A' }]);
+
+  const warnings = [...buildRdIdWarnings(rdRows, selected), ...buildRdSkippedWarnings(summary.rdSkippedRows)];
+  assert.deepEqual(warnings, [
+    { code: 'rd_id_suffix_ignored', line: 5, value: 'L_74_1', key: '74', keptLine: 4, keptId: 'L_74' },
+    { code: 'rd_unplanned_id_skipped', line: 7, value: 'L_12A', key: '12A' },
+  ]);
+});
+
+await asyncTest('RD suffix is kept literal when the full ID exists in the MVV and RD-only export skips non-numeric IDs', async () => {
+  const rdText = readFileSync(new URL('./fixtures/rd_repetition_suffix.txt', import.meta.url), 'utf8');
+  const raw = await readRdFile(rdFile(rdText), projectConfig);
+
+  const literal = buildRdRows(raw, projectConfig, new Set(['74_1']));
+  assert.equal(literal.find((row) => row.ID_RD === 'L_74_1').holeKey, '74_1');
+
+  const rdRows = buildRdRows(raw, projectConfig);
+  const { treatedRows } = deduplicateRdRows(rdRows, projectConfig);
+  const { importable, skipped } = partitionImportableHoleRows(treatedRows);
+  assert.deepEqual(skipped.map((row) => row.id), ['L_12A']);
+  const rows = buildRdOnlyRows(importable, projectConfig, 250, 1, 'with_depth');
+  assert.equal(rows.length, importable.length);
+  assert.equal(rows.find((row) => row.ID === 74).Y, 8930030.078);
+});
+
+await asyncTest('RD repetition and skip warnings are configured for every UI language', () => {
+  for (const code of ['pt', 'en', 'zh']) {
+    const warnings = projectConfig.ui.languages[code].warnings;
+    for (const key of ['rd_id_suffix_normalized', 'rd_id_suffix_ignored', 'rd_unplanned_id_skipped']) {
+      assert.match(warnings[key], /\{line\}/, `${code}.${key}`);
+      assert.match(warnings[key], /\{value\}/, `${code}.${key}`);
+    }
+  }
+  assert.equal(projectConfig.matching.rd_repetition_suffix_pattern, '^(.+)_(\\d+)$');
 });

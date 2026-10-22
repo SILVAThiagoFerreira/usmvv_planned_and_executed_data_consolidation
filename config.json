@@ -203,6 +203,7 @@
       "E-",
       "L_"
     ],
+    "rd_repetition_suffix_pattern": "^(.+)_(\\d+)$",
     "unplanned_import": {
       "id_field": "ID",
       "description_field": "Descricao",
@@ -540,6 +541,9 @@
         "log_processing": "Processando...",
         "warnings": {
           "rd_ignored_second_field": "RD linha {line}: segundo campo '{value}' ignorado.",
+          "rd_id_suffix_normalized": "RD linha {line}: ID '{value}' interpretado como furo {key} (sufixo '{suffix}' removido).",
+          "rd_id_suffix_ignored": "RD linha {line}: ID '{value}' ignorado; o furo {key} já tem registro válido na linha {keptLine} ({keptId}).",
+          "rd_unplanned_id_skipped": "RD linha {line}: ID '{value}' sem número de furo válido e fora da MVV; linha não incluída na consolidação.",
           "warnings_title": "Avisos da RD ({count})",
           "warnings_more": "Mais {count} avisos estão no log JSON do resumo."
         },
@@ -710,6 +714,9 @@
         "log_processing": "Processing...",
         "warnings": {
           "rd_ignored_second_field": "RD line {line}: second field '{value}' ignored.",
+          "rd_id_suffix_normalized": "RD line {line}: ID '{value}' read as hole {key} (suffix '{suffix}' removed).",
+          "rd_id_suffix_ignored": "RD line {line}: ID '{value}' ignored; hole {key} already has a valid record on line {keptLine} ({keptId}).",
+          "rd_unplanned_id_skipped": "RD line {line}: ID '{value}' has no valid numeric hole number and is not in the MVV; row not included in the consolidation.",
           "warnings_title": "RD warnings ({count})",
           "warnings_more": "{count} more warnings are in the summary JSON log."
         },
@@ -880,6 +887,9 @@
         "log_processing": "处理中...",
         "warnings": {
           "rd_ignored_second_field": "RD 第 {line} 行：第二个字段 '{value}' 已忽略。",
+          "rd_id_suffix_normalized": "RD 第 {line} 行：ID '{value}' 按孔 {key} 解析（已去除后缀 '{suffix}'）。",
+          "rd_id_suffix_ignored": "RD 第 {line} 行：ID '{value}' 已忽略；孔 {key} 在第 {keptLine} 行（{keptId}）已有有效记录。",
+          "rd_unplanned_id_skipped": "RD 第 {line} 行：ID '{value}' 没有有效的数字孔号，且不在 MVV 中；该行未纳入合并。",
           "warnings_title": "RD 警告（{count}）",
           "warnings_more": "其余 {count} 条警告见摘要 JSON 日志。"
         },

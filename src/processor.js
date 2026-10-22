@@ -1,4 +1,4 @@
-import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js?v=20261019-rd-warnings-1';
+import { asText, compareHoleKeys, dipNumber, firstNonBlank, getPitdevFieldPositions, normalizeHoleKey, normalizeIdValue, optionalNumber, prefixFromId, toNumber } from './utils.js?v=20261022-rd-id-suffix-1';
 
 export function buildMvvRows(rawMvv, config, validation) {
   const indexMap = validation.indexMap;
@@ -57,14 +57,25 @@ export function buildMvvPlanRows(rawMvv, config, validation) {
   return rows;
 }
 
-export function buildRdRows(rawRd, config) {
+// Sufixo de repeticao (ex.: L_74_1) so e removido quando o ID completo nao existe na MVV.
+// Sem mvvKeys (fluxo somente executado), o sufixo e sempre avaliado.
+function resolveRdHoleKey(rawId, stripPrefixes, suffixPattern, mvvKeys) {
+  const fullKey = normalizeHoleKey(rawId, stripPrefixes);
+  const match = suffixPattern && !(mvvKeys && mvvKeys.has(fullKey)) ? suffixPattern.exec(fullKey) : null;
+  if (!match) return { holeKey: fullKey, repetitionSuffix: null };
+  return { holeKey: normalizeHoleKey(match[1], []), repetitionSuffix: match[2] };
+}
+
+export function buildRdRows(rawRd, config, mvvKeys = null) {
   const stripPrefixes = config.matching.strip_prefixes;
+  const suffixPattern = config.matching.rd_repetition_suffix_pattern ? new RegExp(config.matching.rd_repetition_suffix_pattern) : null;
   const rows = [];
 
   for (const rawRow of rawRd.rows) {
     if (rawRow.blank) continue;
     if (rawRow.values.length !== config.input.rd_expected_fields) continue;
     const rawId = asText(rawRow.values[0]);
+    const { holeKey, repetitionSuffix } = resolveRdHoleKey(rawId, stripPrefixes, suffixPattern, mvvKeys);
     rows.push({
       sourceLine: rawRow.sourceLine,
       ID_RD: rawId,
@@ -72,11 +83,51 @@ export function buildRdRows(rawRd, config) {
       Y_RD: toNumber(rawRow.values[2], `RD line ${rawRow.sourceLine}`, 'Y_RD'),
       X_RD: toNumber(rawRow.values[3], `RD line ${rawRow.sourceLine}`, 'X_RD'),
       Z_RD: toNumber(rawRow.values[4], `RD line ${rawRow.sourceLine}`, 'Z_RD'),
-      holeKey: normalizeHoleKey(rawId, stripPrefixes),
+      holeKey,
+      repetitionSuffix,
     });
   }
 
   return rows;
+}
+
+// Avisos para linhas RD cujo ID teve sufixo de repeticao removido.
+export function buildRdIdWarnings(rdRows, selected) {
+  return rdRows
+    .filter((row) => row.repetitionSuffix)
+    .map((row) => {
+      const kept = selected.get(row.holeKey);
+      if (kept === row) {
+        return { code: 'rd_id_suffix_normalized', line: row.sourceLine, value: row.ID_RD, key: row.holeKey, suffix: row.repetitionSuffix };
+      }
+      return {
+        code: 'rd_id_suffix_ignored',
+        line: row.sourceLine,
+        value: row.ID_RD,
+        key: row.holeKey,
+        keptLine: kept?.sourceLine ?? '?',
+        keptId: kept?.ID_RD ?? '',
+      };
+    });
+}
+
+// Linhas RD sem numero de furo valido (ex.: ID alfanumerico fora da MVV) nao entram no consolidado.
+export function partitionImportableHoleRows(rows) {
+  const importable = [];
+  const skipped = [];
+  for (const row of rows) {
+    const holeId = normalizeIdValue(row.holeKey);
+    if (typeof holeId === 'number' && Number.isFinite(holeId)) {
+      importable.push(row);
+    } else {
+      skipped.push({ line: row.sourceLine ?? '?', id: row.ID_RD, key: row.holeKey });
+    }
+  }
+  return { importable, skipped };
+}
+
+export function buildRdSkippedWarnings(skippedRows) {
+  return skippedRows.map((row) => ({ code: 'rd_unplanned_id_skipped', line: row.line, value: row.id, key: row.key }));
 }
 
 export function deduplicateRdRows(rdRows, config) {
@@ -228,15 +279,12 @@ export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefi
     });
   }
 
-  const rdOnlyRows = [...rdSelected.values()]
+  const { importable: rdOnlyRows, skipped: rdSkippedRows } = partitionImportableHoleRows([...rdSelected.values()]
     .filter((rdRow) => !mvvKeys.has(rdRow.holeKey))
-    .sort((a, b) => compareHoleKeys(a.holeKey, b.holeKey));
+    .sort((a, b) => compareHoleKeys(a.holeKey, b.holeKey)));
 
   for (const rdRow of rdOnlyRows) {
     const plannedId = normalizeIdValue(rdRow.holeKey);
-    if (typeof plannedId !== 'number' || !Number.isFinite(plannedId)) {
-      throw new Error(`RD line ${rdRow.sourceLine ?? '?'}: invalid numeric hole ID for unplanned row`);
-    }
     const calculatedDepth = unplannedDepthOptions
       ? Number(rdRow[importFields.source_elevation_field]) - toeElevation + subdrilling
       : null;
@@ -293,6 +341,8 @@ export function buildConsolidatedRows(mvvRows, rdSelected, rdRawCount, dualPrefi
     rdMatchedCount: mvvRows.length - missingHoles.length,
     rdMissingCount: missingHoles.length,
     rdOnlyIncludedCount: rdOnlyRows.length,
+    rdSkippedRows: rdSkippedRows,
+    rdSkippedCount: rdSkippedRows.length,
     dualPrefixCount,
     missingHoles,
     rdOnlyHoles: rdOnlyRows.map((row) => row.holeKey),
